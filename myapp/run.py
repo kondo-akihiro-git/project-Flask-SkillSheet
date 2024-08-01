@@ -73,5 +73,32 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        new_username = request.form['username']
+        new_password = request.form['password']
+        if new_username:
+            current_user.username = new_username
+        if new_password:
+            hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
+            current_user.password = hashed_password
+            db.session.commit()
+            flash('Profile updated successfully.', 'success')
+        return redirect(url_for('profile'))
+    return render_template('profile.html', user=current_user)
+
+@app.route('/delete_user', methods=['POST'])
+@login_required
+def delete_user():
+    user = User.query.get(current_user.id)
+    if user:
+        logout_user()
+        db.session.delete(user)
+        db.session.commit()
+        flash('Your account has been deleted.', 'info')
+    return redirect(url_for('index'))
+
 if __name__ == "__main__":
     app.run(debug=True)
