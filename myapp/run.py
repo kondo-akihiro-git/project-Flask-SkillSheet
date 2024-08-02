@@ -100,5 +100,12 @@ def delete_user():
         flash('Your account has been deleted.', 'info')
     return redirect(url_for('index'))
 
+@app.route('/list', methods=['GET', 'POST'])
+@login_required
+def list():
+    return render_template('list.html', user=current_user)
+
 if __name__ == "__main__":
     app.run(debug=True)
+
+

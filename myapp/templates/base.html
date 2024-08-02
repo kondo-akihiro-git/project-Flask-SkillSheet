@@ -14,3 +14,19 @@
     {% endblock %}
 </body>
 </html>
+
+<script>
+function addField(field) {
+    var fieldsContainer = document.getElementById(field + '-fields');
+    var newFieldCount = fieldsContainer.children.length + 1; // Number to ensure unique ID
+    
+    var newField = document.createElement('div');
+    newField.innerHTML = `
+        <label for="${field}_${newFieldCount}">${field.replace('_', ' ')} ${newFieldCount}</label>
+        <input type="text" id="${field}_${newFieldCount}" name="${field}_${newFieldCount}">
+        <br>
+    `;
+    
+    fieldsContainer.appendChild(newField);
+}
+    </script>

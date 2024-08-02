@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>List</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class="flashes">
+    {% for category, message in messages %}
+    <li class="{{ category }}">{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<form method="POST">
+    <label for="start_month">プロジェクトに参加した月</label>
+    <input type="text" id="start_month" name="start_month" required>
+    <br>
+    <label for="end_month">プロジェクトを退場した月</label>
+    <input type="text" id="end_month" name="end_month" required>
+    <br>
+    <label for="industry">クライアントの業種</label>
+    <input type="text" id="industry" name="industry" required>
+    <br>
+    <label for="project_name">プロジェクト名</label>
+    <input type="text" id="project_name" name="project_name" required>
+    <br>
+    <label for="project_summary">プロジェクト概要</label>
+    <input type="text" id="project_summary" name="project_summary" required>
+    <br>
+    <label for="responsibilities">担当業務</label>
+    <input type="text" id="responsibilities" name="responsibilities" required>
+    <br>
+
+    <label for="os">OS</label>
+    <input type="text" id="os" name="os" required>
+    <div id="os-fields"></div>
+    <button type="button" id="add-os" class="button is-primary">＋</button>
+    <br>
+    
+    <label for="language">言語</label>
+    <input type="text" id="language" name="language" required>
+    <div id="language-fields"></div>
+    <button type="button" id="add-language" class="button is-primary">＋</button>
+    <br>
+
+    <label for="framework">フレームワーク</label>
+    <input type="text" id="framework" name="framework" required>
+    <div id="framework-fields"></div>
+    <button type="button" id="add-framework" class="button is-primary">＋</button>
+    <br>
+
+    <label for="database">データベース</label>
+    <input type="text" id="database" name="database" required>
+    <div id="database-fields"></div>
+    <button type="button" id="add-database" class="button is-primary">＋</button>
+    <br>
+
+    <label for="containertech">コンテナ技術</label>
+    <input type="text" id="containertech" name="containertech" required>
+    <div id="containertech-fields"></div>
+    <button type="button" id="add-containertech" class="button is-primary">＋</button>
+    <br>
+
+    <label for="cicd">CI/CD</label>
+    <input type="text" id="cicd" name="cicd" required>
+    <div id="cicd-fields"></div>
+    <button type="button" id="add-cicd" class="button is-primary">＋</button>
+    <br>
+
+    <label for="logging">ログ収集・可視化</label>
+    <input type="text" id="logging" name="logging" required>
+    <div id="logging-fields"></div>
+    <button type="button" id="add-logging" class="button is-primary">＋</button>
+    <br>
+
+    <label for="tools">ツール類</label>
+    <input type="text" id="tools" name="tools" required>
+    <div id="tools-fields"></div>
+    <button type="button" id="add-tools" class="button is-primary">＋</button>
+    <br>
+
+    <label for="process">担当した工程</label>
+    <input type="text" id="process" name="process" required>
+    <br>
+    <button type="submit">送信</button>
+</form>
+
+<script>
+document.getElementById('add-os').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('os');
+});
+
+document.getElementById('add-language').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('language');
+});
+
+document.getElementById('add-framework').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('framework');
+});
+
+document.getElementById('add-database').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('database');
+});
+
+document.getElementById('add-containertech').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('containertech');
+});
+
+document.getElementById('add-cicd').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('cicd');
+});
+
+document.getElementById('add-logging').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('logging');
+});
+
+document.getElementById('add-tools').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('tools');
+});
+
+
+</script>
+
+{% endblock %}
