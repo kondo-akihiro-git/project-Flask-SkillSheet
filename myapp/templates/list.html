@@ -15,10 +15,10 @@
 
 <form method="POST">
     <label for="start_month">プロジェクトに参加した月</label>
-    <input type="text" id="start_month" name="start_month" required>
+    <input type="month" id="start_month" name="start_month" required>
     <br>
     <label for="end_month">プロジェクトを退場した月</label>
-    <input type="text" id="end_month" name="end_month" required>
+    <input type="month" id="end_month" name="end_month" required>
     <br>
     <label for="industry">クライアントの業種</label>
     <input type="text" id="industry" name="industry" required>
@@ -27,62 +27,109 @@
     <input type="text" id="project_name" name="project_name" required>
     <br>
     <label for="project_summary">プロジェクト概要</label>
-    <input type="text" id="project_summary" name="project_summary" required>
+    <textarea id="project_summary" name="project_summary" required></textarea>
     <br>
+
+    <label for="process">担当した工程</label>
+    <div>
+        <input type="checkbox" id="requirement_definition" name="process" required>
+        <label for="requirement_definition">要件定義</label>
+    </div>
+    <div>
+        <input type="checkbox" id="basic_design" name="process">
+        <label for="basic_design">基本設計</label>
+    </div>
+    <div>
+        <input type="checkbox" id="detailed_design" name="process">
+        <label for="detailed_design">詳細設計</label>
+    </div>
+    <div>
+        <input type="checkbox" id="implementation" name="process">
+        <label for="implementation">実装</label>
+    </div>
+    <div>
+        <input type="checkbox" id="unit_test" name="process">
+        <label for="unit_test">単体テスト</label>
+    </div>
+    <div>
+        <input type="checkbox" id="integration_test" name="process">
+        <label for="integration_test">結合テスト</label>
+    </div>
+    <div>
+        <input type="checkbox" id="acceptance_test" name="process">
+        <label for="acceptance_test">受入テスト</label>
+    </div>
+    <div>
+        <input type="checkbox" id="operation_maintenance" name="process">
+        <label for="operation_maintenance">運用・保守</label>
+    </div>
+    
+
     <label for="responsibilities">担当業務</label>
-    <input type="text" id="responsibilities" name="responsibilities" required>
+    <textarea type="text" id="responsibilities" name="responsibilities" required></textarea>
     <br>
+
+
 
     <label for="os">OS</label>
     <input type="text" id="os" name="os" required>
+    <input type="number" id="os-num" name="os-num" required><span>ヶ月</span>
     <div id="os-fields"></div>
     <button type="button" id="add-os" class="button is-primary">＋</button>
     <br>
     
     <label for="language">言語</label>
     <input type="text" id="language" name="language" required>
+    <input type="number" id="language-num" name="language-num" required><span>ヶ月</span>
     <div id="language-fields"></div>
     <button type="button" id="add-language" class="button is-primary">＋</button>
     <br>
 
     <label for="framework">フレームワーク</label>
     <input type="text" id="framework" name="framework" required>
+    <input type="number" id="framework-num" name="framework-num" required><span>ヶ月</span>
     <div id="framework-fields"></div>
     <button type="button" id="add-framework" class="button is-primary">＋</button>
     <br>
 
     <label for="database">データベース</label>
     <input type="text" id="database" name="database" required>
+    <input type="number" id="database-num" name="database-num" required><span>ヶ月</span>
     <div id="database-fields"></div>
     <button type="button" id="add-database" class="button is-primary">＋</button>
     <br>
 
     <label for="containertech">コンテナ技術</label>
     <input type="text" id="containertech" name="containertech" required>
+    <input type="number" id="containertech-num" name="containertech-num" required><span>ヶ月</span>
     <div id="containertech-fields"></div>
     <button type="button" id="add-containertech" class="button is-primary">＋</button>
     <br>
 
     <label for="cicd">CI/CD</label>
     <input type="text" id="cicd" name="cicd" required>
+    <input type="number" id="cicd-num" name="cicd-num" required><span>ヶ月</span>
     <div id="cicd-fields"></div>
     <button type="button" id="add-cicd" class="button is-primary">＋</button>
     <br>
 
     <label for="logging">ログ収集・可視化</label>
     <input type="text" id="logging" name="logging" required>
+    <input type="number" id="logging-num" name="logging-num" required><span>ヶ月</span>
     <div id="logging-fields"></div>
     <button type="button" id="add-logging" class="button is-primary">＋</button>
     <br>
 
     <label for="tools">ツール類</label>
     <input type="text" id="tools" name="tools" required>
+    <input type="number" id="tools-num" name="tools-num" required><span>ヶ月</span>
     <div id="tools-fields"></div>
     <button type="button" id="add-tools" class="button is-primary">＋</button>
     <br>
 
-    <label for="process">担当した工程</label>
-    <input type="text" id="process" name="process" required>
+
+
+
     <br>
     <button type="submit">送信</button>
 </form>

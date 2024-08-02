@@ -24,6 +24,7 @@ function addField(field) {
     newField.innerHTML = `
         <label for="${field}_${newFieldCount}">${field.replace('_', ' ')} ${newFieldCount}</label>
         <input type="text" id="${field}_${newFieldCount}" name="${field}_${newFieldCount}">
+        <input type="number" id="${field}_${newFieldCount}_num" name="${field}_${newFieldCount}_num"><span>ヶ月</span>
         <br>
     `;
     
