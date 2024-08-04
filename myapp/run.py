@@ -25,6 +25,12 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 # モデルの定義
+# 中間テーブル定義
+user_project = db.Table('user_project',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
+)
+
 class User(db.Model, UserMixin):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
@@ -32,6 +38,28 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(120), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
+    projects = db.relationship('Project', backref='user', lazy=True)
+
+class Project(db.Model):
+    __tablename__ = "project"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    start_month = db.Column(db.String(7), nullable=False)  # YYYY-MM形式の文字列
+    end_month = db.Column(db.String(7), nullable=False)    # YYYY-MM形式の文字列
+    industry = db.Column(db.String(120), nullable=False)
+    project_name = db.Column(db.String(120), nullable=False)
+    project_summary = db.Column(db.Text, nullable=False)
+    responsibilities = db.Column(db.Text, nullable=False)
+    technologies = db.relationship('Technology', backref='project', lazy=True)
+
+
+class Technology(db.Model):
+    __tablename__ = "technology"
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    type = db.Column(db.String(120), nullable=False)  # e.g., 'OS', 'language', 'process', etc.
+    name = db.Column(db.String(120), nullable=False)
+    duration_months = db.Column(db.Integer, nullable=True)  # Nullable for process entries
 
 
 @login_manager.user_loader
@@ -103,6 +131,62 @@ def delete_user():
 @app.route('/list', methods=['GET', 'POST'])
 @login_required
 def list():
+    if request.method == 'POST':
+        start_month_str = request.form['start_month']
+        end_month_str = request.form['end_month']
+        start_month = datetime.strptime(start_month_str, '%Y-%m').date().replace(day=1)
+        end_month = datetime.strptime(end_month_str, '%Y-%m').date().replace(day=1)
+        
+        industry = request.form['industry']
+        project_name = request.form['project_name']
+        project_summary = request.form['project_summary']
+        responsibilities = request.form['responsibilities']
+
+        new_project = Project(
+            user_id=current_user.id,
+            start_month=start_month,
+            end_month=end_month,
+            industry=industry,
+            project_name=project_name,
+            project_summary=project_summary,
+            responsibilities=responsibilities
+        )
+
+        db.session.add(new_project)
+        db.session.commit()
+
+        # Technologies
+        tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
+        for tech_type in tech_types:
+            tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(0, len(request.form) + 1) if f'{tech_type}_{i}' in request.form]
+            tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(0, len(request.form) + 1) if f'{tech_type}_{i}_num' in request.form]
+            for name, duration in zip(tech_names, tech_durations):
+                if name:
+                    new_technology = Technology(
+                        project_id=new_project.id,
+                        type=tech_type,
+                        name=name,
+                        duration_months=int(duration)
+                    )
+                    db.session.add(new_technology)
+
+        # Processes
+        processes = request.form.getlist('process')
+        for process in processes:
+            new_process = Technology(
+                project_id=new_project.id,
+                type='process',
+                name=process,
+                duration_months=None
+            )
+            db.session.add(new_process)
+
+
+        db.session.commit()
+
+        flash('Project and related information successfully added!', 'success')
+        return redirect(url_for('index'))
+
     return render_template('list.html', user=current_user)
 
 if __name__ == "__main__":
