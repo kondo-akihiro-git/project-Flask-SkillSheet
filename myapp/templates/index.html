@@ -14,14 +14,14 @@
 
     {% if user.is_authenticated %}
         <p>Logged in as {{ user.username }}</p>
-        <a href="{{ url_for('logout') }}">Logout</a>
-        <a href="{{ url_for('profile') }}">ユーザー情報の更新</a>
-        <a href="{{ url_for('input') }}">プロジェクト入力</a>
-        <a href="{{ url_for('sheet') }}">スキルシート</a>
+        <div><a href="{{ url_for('userinfo') }}">ユーザー情報の更新</a></div>
+        <div><a href="{{ url_for('input') }}">プロジェクト入力</a></div>
+        <div><a href="{{ url_for('sheet') }}">スキルシート</a></div>
+        <div><a href="{{ url_for('logout') }}">ログアウト</a></div>
     {% else %}
         <p>You are not logged in.</p>
-        <a href="{{ url_for('login') }}">Login</a> | 
-        <a href="{{ url_for('register') }}">Register</a>
+        <div><a href="{{ url_for('login') }}">ログイン</a></div> 
+        <div><a href="{{ url_for('register') }}">新規登録</a></div>
         
     {% endif %}
 {% endblock %}

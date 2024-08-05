@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>プロジェクトを編集</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+    <ul class="flashes">
+        {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endwith %}
+
+<form method="POST">
+    <label for="start_month">プロジェクトに参加した月</label>
+    <input type="month" id="start_month" name="start_month" value="{{ project.start_month }}" required>
+    <br>
+    <label for="end_month">プロジェクトを退場した月</label>
+    <input type="month" id="end_month" name="end_month" value="{{ project.end_month }}" required>
+    <br>
+    <label for="industry">クライアントの業種</label>
+    <input type="text" id="industry" name="industry" value="{{ project.industry }}" required>
+    <br>
+    <label for="project_name">プロジェクト名</label>
+    <input type="text" id="project_name" name="project_name" value="{{ project.project_name }}" required>
+    <br>
+    <label for="project_summary">プロジェクト概要</label>
+    <textarea id="project_summary" name="project_summary" required>{{ project.project_summary }}</textarea>
+    <br>
+
+    <label for="process">担当した工程</label>
+    <div>
+        {% for process in ['要件定義', '基本設計', '詳細設計', '実装', '単体テスト', '結合テスト', '受入テスト', '運用・保守'] %}
+            <div>
+                <input type="checkbox" id="{{ process }}" name="process" value="{{ process }}"
+                {% if process in processes %} checked {% endif %}>
+                <label for="{{ process }}">{{ process }}</label>
+            </div>
+        {% endfor %}
+    </div>
+    <br>
+
+    <label for="responsibilities">担当業務</label>
+    <textarea type="text" id="responsibilities" name="responsibilities" required>{{ project.responsibilities }}</textarea>
+    <br>
+
+    <label for="skill">使用技術</label>
+    {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'] %}
+        <label for="{{ tech_type }}">{{ tech_type | capitalize }}</label>
+        <div id="{{ tech_type }}-fields">
+            {% for tech in technologies[tech_type] %}
+                <div>
+                    <input type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}">
+                    <input type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}">
+                    <span>ヶ月</span>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="add-{{ tech_type }}" class="button is-primary">＋</button>
+        <br>
+    {% endfor %}
+
+    <br>
+    <button type="submit">送信</button>
+</form>
+
+<script>
+function addField(field) {
+    var fieldsContainer = document.getElementById(field + '-fields');
+    var newFieldCount = fieldsContainer.children.length + 1; // Number to ensure unique ID
+
+    var newFieldHtml = `
+        <div>
+            <input type="text" name="${field}_${newFieldCount - 1}">
+            <input type="number" name="${field}_${newFieldCount - 1}_num">
+            <span>ヶ月</span>
+        </div>
+    `;
+    fieldsContainer.innerHTML += newFieldHtml;
+}
+
+document.getElementById('add-os').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('os');
+});
+
+document.getElementById('add-language').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('language');
+});
+
+document.getElementById('add-framework').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('framework');
+});
+
+document.getElementById('add-database').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('database');
+});
+
+document.getElementById('add-containertech').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('containertech');
+});
+
+document.getElementById('add-cicd').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('cicd');
+});
+
+document.getElementById('add-logging').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('logging');
+});
+
+document.getElementById('add-tools').addEventListener('click', function(e) {
+    e.preventDefault();
+    addField('tools');
+});
+</script>
+
+{% endblock %}

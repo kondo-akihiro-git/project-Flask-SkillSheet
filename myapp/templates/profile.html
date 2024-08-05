@@ -14,17 +14,25 @@
     {% endwith %}
 
     <form method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" value="{{ user.username }}" required>
+        <label for="display_name">Display Name:</label>
+        <input type="text" id="display_name" name="display_name" value="{{ user.display_name }}">
         <br>
-        <label for="password">Password:</label>
-        <input type="text" id="password" name="password" value="" required>
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" value="{{ user.age }}">
+        <br>
+        <label for="gender">Gender:</label>
+        <input type="text" id="gender" name="gender" value="{{ user.gender }}">
+        <br>
+        <label for="nearest_station">Nearest Station:</label>
+        <input type="text" id="nearest_station" name="nearest_station" value="{{ user.nearest_station }}">
+        <br>
+        <label for="experience_years">Experience Years:</label>
+        <input type="number" id="experience_years" name="experience_years" value="{{ user.experience_years }}">
+        <br>
+        <label for="education">Education:</label>
+        <input type="text" id="education" name="education" value="{{ user.education }}">
         <br>
         <button type="submit">Update Profile</button>
     </form>
 
-    <form method="POST" action="{{ url_for('delete_user') }}">
-        <button type="submit" onclick="return confirm('Are you sure you want to delete your account?');">Delete Account</button>
-    </form>
-    
     {% endblock %}

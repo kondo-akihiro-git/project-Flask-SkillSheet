@@ -39,6 +39,13 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     projects = db.relationship('Project', backref='user', lazy=True)
+    # 新しいフィールド
+    display_name = db.Column(db.String(120), nullable=True)
+    age = db.Column(db.Integer, nullable=True)
+    gender = db.Column(db.String(10), nullable=True)
+    nearest_station = db.Column(db.String(120), nullable=True)
+    experience_years = db.Column(db.Integer, nullable=True)
+    education = db.Column(db.String(120), nullable=True)
 
 class Project(db.Model):
     __tablename__ = "project"
@@ -106,9 +113,14 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route('/profile', methods=['GET', 'POST'])
+@app.route('/userinfo', methods=['GET', 'POST'])
 @login_required
-def profile():
+def userinfo():
+    return render_template('userinfo.html', user=current_user)
+
+@app.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
     if request.method == 'POST':
         new_username = request.form['username']
         new_password = request.form['password']
@@ -119,6 +131,30 @@ def profile():
             current_user.password = hashed_password
             db.session.commit()
             flash('Profile updated successfully.', 'success')
+        return redirect(url_for('account'))
+    return render_template('account.html', user=current_user)
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        new_display_name = request.form['display_name']
+        new_age = request.form['age']
+        new_gender = request.form['gender']
+        new_nearest_station = request.form['nearest_station']
+        new_experience_years = request.form['experience_years']
+        new_education = request.form['education']
+
+        current_user.display_name = new_display_name
+        current_user.age = new_age
+        current_user.gender = new_gender
+        current_user.nearest_station = new_nearest_station
+        current_user.experience_years = new_experience_years
+        current_user.education = new_education
+
+        db.session.commit()
+        flash('アカウント情報の更新を完了しました。', 'success')
+
         return redirect(url_for('profile'))
     return render_template('profile.html', user=current_user)
 
@@ -209,6 +245,87 @@ def sheet():
         })
     
     return render_template('sheet.html', user=current_user, projects=project_data)
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if request.method == 'POST':
+        current_user.display_name = request.form['display_name']
+        current_user.age = request.form['age']
+        current_user.gender = request.form['gender']
+        current_user.nearest_station = request.form['nearest_station']
+        current_user.experience_years = request.form['experience_years']
+        current_user.education = request.form['education']
+        db.session.commit()
+        flash('プロフィール情報が更新されました。', 'success')
+        return redirect(url_for('sheet'))
+    return render_template('edit_profile.html', user=current_user)
+
+@app.route('/edit_project/<int:project_id>', methods=['GET', 'POST'])
+@login_required
+def edit_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    if request.method == 'POST':
+        # プロジェクトの基本情報を更新
+        project.project_name = request.form['project_name']
+        project.industry = request.form['industry']
+        project.start_month = request.form['start_month']
+        project.end_month = request.form['end_month']
+        project.project_summary = request.form['project_summary']
+        project.responsibilities = request.form['responsibilities']
+
+        # 技術の処理
+        tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
+        for tech_type in tech_types:
+            tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(0, len(request.form)) if f'{tech_type}_{i}' in request.form]
+            tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(0, len(request.form)) if f'{tech_type}_{i}_num' in request.form]
+            existing_techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
+            existing_names = {tech.name for tech in existing_techs}
+            for name, duration in zip(tech_names, tech_durations):
+                if name:
+                    if name in existing_names:
+                        tech = next(tech for tech in existing_techs if tech.name == name)
+                        tech.duration_months = int(duration)
+                    else:
+                        new_technology = Technology(
+                            project_id=project.id,
+                            type=tech_type,
+                            name=name,
+                            duration_months=int(duration)
+                        )
+                        db.session.add(new_technology)
+
+        # 担当工程の処理
+        selected_processes = request.form.getlist('process')
+        existing_processes = Process.query.filter_by(project_id=project.id).all()
+        existing_names = {process.name for process in existing_processes}
+        for process in selected_processes:
+            if process not in existing_names:
+                new_process = Process(
+                    project_id=project.id,
+                    name=process
+                )
+                db.session.add(new_process)
+        
+        # 既存のプロセスを削除
+        for process in existing_processes:
+            if process.name not in selected_processes:
+                db.session.delete(process)
+
+        db.session.commit()
+        flash('Project updated successfully!', 'success')
+        return redirect(url_for('sheet'))
+
+    # プロジェクトの技術と担当工程を取得
+    technologies = {tech_type: [] for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']}
+    for tech in Technology.query.filter_by(project_id=project_id).all():
+        technologies[tech.type].append(tech)
+
+    processes = [process.name for process in Process.query.filter_by(project_id=project_id).all()]
+
+    return render_template('edit_project.html', project=project, technologies=technologies, processes=processes)
+
+
 
 
 if __name__ == "__main__":
