@@ -61,6 +61,11 @@ class Technology(db.Model):
     name = db.Column(db.String(120), nullable=False)
     duration_months = db.Column(db.Integer, nullable=True)  # Nullable for process entries
 
+class Process(db.Model):
+    __tablename__ = "process"
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -134,8 +139,8 @@ def input():
     if request.method == 'POST':
         start_month_str = request.form['start_month']
         end_month_str = request.form['end_month']
-        start_month = datetime.strptime(start_month_str, '%Y-%m').date().replace(day=1)
-        end_month = datetime.strptime(end_month_str, '%Y-%m').date().replace(day=1)
+        start_month = start_month_str[:7]  # YYYY-MM形式の文字列に変換
+        end_month = end_month_str[:7]      # YYYY-MM形式の文字列に変換
         
         industry = request.form['industry']
         project_name = request.form['project_name']
@@ -173,11 +178,9 @@ def input():
         # 担当した工程のDB登録
         processes = request.form.getlist('process')
         for process in processes:
-            new_process = Technology(
+            new_process = Process(
                 project_id=new_project.id,
-                type='process',
-                name=process,
-                duration_months=None
+                name=process
             )
             db.session.add(new_process)
 
@@ -198,12 +201,15 @@ def sheet():
     
     for project in projects:
         technologies = Technology.query.filter_by(project_id=project.id).all()
+        processes = Process.query.filter_by(project_id=project.id).all()
         project_data.append({
             'project': project,
-            'technologies': technologies
+            'technologies': technologies,
+            'processes': processes
         })
     
     return render_template('sheet.html', user=current_user, projects=project_data)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -27,9 +27,16 @@
                 <li>{{ tech.type }}: {{ tech.name }} ({{ tech.duration_months }} ヶ月)</li>
             {% endfor %}
         </ul>
+
+        <h3>担当工程</h3>
+        <ul>
+            {% for process in item.processes %}
+                <li>{{ process.name }}</li>
+            {% endfor %}
+        </ul>
     </div>
     <hr>
-    
+
 {% endfor %}
 
     {% endblock %}
