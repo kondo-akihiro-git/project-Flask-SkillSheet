@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>スキルシート</h1>
+
+<h1>Profile</h1>
+<div class="profile">
+    <p>名前: {{ user.display_name }}</p>
+    <p>年齢: {{ user.age }}</p>
+    <p>性別: {{ user.gender }}</p>
+    <p>最寄駅: {{ user.nearest_station }}</p>
+    <p>経験年数: {{ user.experience_years }}</p>
+    <p>学歴: {{ user.education }}</p>
+</div>
+
+<hr>
+
+<h1>Projects</h1>
+{% for item in projects %}
+<div class="project">
+    <h2>{{ item.project.project_name }}</h2>
+    <p>業界: {{ item.project.industry }}</p>
+    <p>プロジェクト期間: {{ item.project.start_month }} から {{ item.project.end_month }}</p>
+    <p>プロジェクト概要: {{ item.project.project_summary }}</p>
+    <p>担当業務: {{ item.project.responsibilities }}</p>
+
+    <h3>使用技術</h3>
+    <ul>
+        {% for tech in item.technologies %}
+        <li>{{ tech.type }}: {{ tech.name }} ({{ tech.duration_months }} ヶ月)</li>
+        {% endfor %}
+    </ul>
+
+    <h3>担当工程</h3>
+    <ul>
+        {% for process in item.processes %}
+        <li>{{ process.name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+<hr>
+{% endfor %}
+{% endblock %}

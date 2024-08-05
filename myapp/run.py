@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_migrate import Migrate
+from flask import jsonify
+import uuid
 
 # Flaskアプリのインスタンス
 app = Flask(__name__)
@@ -73,6 +75,14 @@ class Process(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     name = db.Column(db.String(120), nullable=False)
+
+class Link(db.Model):
+    __tablename__ = 'link'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    link_code = db.Column(db.String(36), unique=True, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    user = db.relationship('User', backref='links', lazy=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -281,19 +291,29 @@ def edit_project(project_id):
             tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(0, len(request.form)) if f'{tech_type}_{i}_num' in request.form]
             existing_techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
             existing_names = {tech.name for tech in existing_techs}
+
             for name, duration in zip(tech_names, tech_durations):
                 if name:
-                    if name in existing_names:
+                    if duration.isdigit() and int(duration) > 0:
+                        if name in existing_names:
+                            tech = next(tech for tech in existing_techs if tech.name == name)
+                            tech.duration_months = int(duration)
+                        else:
+                            new_technology = Technology(
+                                project_id=project.id,
+                                type=tech_type,
+                                name=name,
+                                duration_months=int(duration)
+                            )
+                            db.session.add(new_technology)
+                    elif name in existing_names:
                         tech = next(tech for tech in existing_techs if tech.name == name)
-                        tech.duration_months = int(duration)
-                    else:
-                        new_technology = Technology(
-                            project_id=project.id,
-                            type=tech_type,
-                            name=name,
-                            duration_months=int(duration)
-                        )
-                        db.session.add(new_technology)
+                        db.session.delete(tech)
+
+            # 空白にされた技術を削除する処理
+            for tech in existing_techs:
+                if tech.name not in tech_names or not tech.name:
+                    db.session.delete(tech)
 
         # 担当工程の処理
         selected_processes = request.form.getlist('process')
@@ -306,7 +326,7 @@ def edit_project(project_id):
                     name=process
                 )
                 db.session.add(new_process)
-        
+
         # 既存のプロセスを削除
         for process in existing_processes:
             if process.name not in selected_processes:
@@ -325,7 +345,60 @@ def edit_project(project_id):
 
     return render_template('edit_project.html', project=project, technologies=technologies, processes=processes)
 
+@app.route('/create_link', methods=['POST'])
+@login_required
+def create_link():
+    # 現在のユーザーの既存のアクティブリンクをすべて無効化
+    Link.query.filter_by(user_id=current_user.id, is_active=True).update({'is_active': False})
+    db.session.commit()
 
+    new_link = Link(
+        user_id=current_user.id,
+        link_code=str(uuid.uuid4()),
+        is_active=True
+    )
+    db.session.add(new_link)
+    db.session.commit()
+
+    # 新しいリンクをフラッシュメッセージとともに返す
+    flash('新しいリンクが作成されました。', 'success')
+    return jsonify({'link': url_for('view_sheet', link_code=new_link.link_code)})
+
+
+@app.route('/view_sheet/<link_code>', methods=['GET'])
+def view_sheet(link_code):
+    # リンクコードに対応するリンクを取得
+    link = Link.query.filter_by(link_code=link_code, is_active=True).first()
+    if link is None:
+        flash('無効なリンクです。', 'error')
+        return redirect(url_for('index'))
+
+    # リンクが有効な場合、スキルシートを表示
+    user_id = link.user_id
+    user = User.query.get_or_404(user_id)
+    projects = Project.query.filter_by(user_id=user_id).all()
+    project_data = []
+
+    for project in projects:
+        technologies = Technology.query.filter_by(project_id=project.id).all()
+        processes = Process.query.filter_by(project_id=project.id).all()
+        project_data.append({
+            'project': project,
+            'technologies': technologies,
+            'processes': processes
+        })
+
+    return render_template('sheet_view.html', user=user, projects=project_data)
+
+@app.route('/invalidate_link', methods=['POST'])
+@login_required
+def invalidate_link():
+    # 現在のユーザーのアクティブなリンクをすべて無効化
+    Link.query.filter_by(user_id=current_user.id, is_active=True).update({'is_active': False})
+    db.session.commit()
+
+    flash('リンクが無効化されました。', 'success')
+    return redirect(url_for('sheet'))
 
 
 if __name__ == "__main__":
