@@ -128,9 +128,9 @@ def delete_user():
         flash('Your account has been deleted.', 'info')
     return redirect(url_for('index'))
 
-@app.route('/list', methods=['GET', 'POST'])
+@app.route('/input', methods=['GET', 'POST'])
 @login_required
-def list():
+def input():
     if request.method == 'POST':
         start_month_str = request.form['start_month']
         end_month_str = request.form['end_month']
@@ -155,7 +155,7 @@ def list():
         db.session.add(new_project)
         db.session.commit()
 
-        # Technologies
+        # 経験した技術のDB登録
         tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
         for tech_type in tech_types:
             tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(0, len(request.form) + 1) if f'{tech_type}_{i}' in request.form]
@@ -170,7 +170,7 @@ def list():
                     )
                     db.session.add(new_technology)
 
-        # Processes
+        # 担当した工程のDB登録
         processes = request.form.getlist('process')
         for process in processes:
             new_process = Technology(
@@ -187,7 +187,23 @@ def list():
         flash('Project and related information successfully added!', 'success')
         return redirect(url_for('index'))
 
-    return render_template('list.html', user=current_user)
+    return render_template('input.html', user=current_user)
+
+@app.route('/sheet', methods=['GET', 'POST'])
+@login_required
+def sheet():
+    user_id = current_user.id
+    projects = Project.query.filter_by(user_id=user_id).all()
+    project_data = []
+    
+    for project in projects:
+        technologies = Technology.query.filter_by(project_id=project.id).all()
+        project_data.append({
+            'project': project,
+            'technologies': technologies
+        })
+    
+    return render_template('sheet.html', user=current_user, projects=project_data)
 
 if __name__ == "__main__":
     app.run(debug=True)
