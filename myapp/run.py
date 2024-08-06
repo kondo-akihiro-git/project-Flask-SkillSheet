@@ -26,28 +26,47 @@ migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# モデルの定義
-# 中間テーブル定義
+####################################################################################################
+# 
+# 変数：中間テーブル
+# 詳細：ユーザーIDとプロジェクトIDを紐付けています。
+# 
+####################################################################################################
 user_project = db.Table('user_project',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
     db.Column('project_id', db.Integer, db.ForeignKey('project.id'), primary_key=True)
 )
 
+####################################################################################################
+# 
+# モデル：User
+# 詳細：ユーザーの認証関連データとスキルシートに表示するデータを扱います。
+# 
+####################################################################################################
+
 class User(db.Model, UserMixin):
     __tablename__ = "user"
+    # 認証関連のデータ
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     projects = db.relationship('Project', backref='user', lazy=True)
-    # 新しいフィールド
+    # スキルシートに表示するデータ
     display_name = db.Column(db.String(120), nullable=True)
     age = db.Column(db.Integer, nullable=True)
     gender = db.Column(db.String(10), nullable=True)
     nearest_station = db.Column(db.String(120), nullable=True)
     experience_years = db.Column(db.Integer, nullable=True)
     education = db.Column(db.String(120), nullable=True)
+
+####################################################################################################
+# 
+# モデル：Project
+# 詳細：参画した案件情報を扱います。
+# 
+####################################################################################################
 
 class Project(db.Model):
     __tablename__ = "project"
@@ -61,6 +80,12 @@ class Project(db.Model):
     responsibilities = db.Column(db.Text, nullable=False)
     technologies = db.relationship('Technology', backref='project', lazy=True)
 
+####################################################################################################
+# 
+# モデル：Technology
+# 詳細：参画した案件で使用した技術スキルを扱います。
+# 
+####################################################################################################
 
 class Technology(db.Model):
     __tablename__ = "technology"
@@ -70,12 +95,26 @@ class Technology(db.Model):
     name = db.Column(db.String(120), nullable=False)
     duration_months = db.Column(db.Integer, nullable=True)  # Nullable for process entries
 
+
+####################################################################################################
+# 
+# モデル：Process
+# 詳細：参画した案件における担当した開発工程を扱います。
+# 
+####################################################################################################
+
 class Process(db.Model):
     __tablename__ = "process"
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     name = db.Column(db.String(120), nullable=False)
 
+####################################################################################################
+# 
+# モデル：Link
+# 詳細：案件面談の際に共有するリンク情報を扱います。
+# 
+####################################################################################################
 class Link(db.Model):
     __tablename__ = 'link'
     id = db.Column(db.Integer, primary_key=True)
@@ -84,14 +123,39 @@ class Link(db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     user = db.relationship('User', backref='links', lazy=True)
 
+####################################################################################################
+# 
+# 関数名：load_user
+# 引数：user_id（ユーザーID）
+# 返却値：User オブジェクト
+# 詳細：ユーザーIDに基づいてユーザーをロードする
+# 
+####################################################################################################
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+####################################################################################################
+# 
+# 関数名：index
+# 引数：なし
+# 返却値：index.html テンプレート
+# 詳細：ホームページを表示する
+# 
+####################################################################################################
 
 @app.route('/')
 def index():
     return render_template('index.html', user=current_user)
 
+####################################################################################################
+# 
+# 関数名：login
+# 引数：なし
+# 返却値：login.html テンプレートまたはリダイレクト
+# 詳細：ユーザーのログイン処理を行う
+# 
+####################################################################################################
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -104,6 +168,15 @@ def login():
         flash('Invalid username or password')
     return render_template('login.html')
 
+
+####################################################################################################
+# 
+# 関数名：register
+# 引数：なし
+# 返却値：register.html テンプレートまたはリダイレクト
+# 詳細：新規ユーザーの登録処理を行う
+# 
+####################################################################################################
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -117,17 +190,42 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
+
+####################################################################################################
+# 
+# 関数名：logout
+# 引数：なし
+# 返却値：リダイレクト
+# 詳細：ユーザーのログアウト処理を行う
+# 
+####################################################################################################
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
 
+####################################################################################################
+# 
+# 関数名：userinfo
+# 引数：なし
+# 返却値：userinfo.html テンプレート
+# 詳細：ユーザー情報を表示する
+# 
+####################################################################################################
 @app.route('/userinfo', methods=['GET', 'POST'])
 @login_required
 def userinfo():
     return render_template('userinfo.html', user=current_user)
 
+####################################################################################################
+# 
+# 関数名：account
+# 引数：なし
+# 返却値：account.html テンプレートまたはリダイレクト
+# 詳細：ユーザーのアカウント情報を表示および更新する
+# 
+####################################################################################################
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
@@ -142,8 +240,14 @@ def account():
             db.session.commit()
             flash('Profile updated successfully.', 'success')
         return redirect(url_for('account'))
-    return render_template('account.html', user=current_user)
-
+    return render_template('account.html', user=current_user)####################################################################################################
+# 
+# 関数名：profile
+# 引数：なし
+# 返却値：profile.html テンプレートまたはリダイレクト
+# 詳細：スキルシートに表示するユーザーのプロフィール情報を更新する
+# 
+####################################################################################################
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -168,6 +272,14 @@ def profile():
         return redirect(url_for('profile'))
     return render_template('profile.html', user=current_user)
 
+####################################################################################################
+# 
+# 関数名：delete_user
+# 引数：なし
+# 返却値：リダイレクト
+# 詳細：ユーザーのアカウントを削除する
+# 
+####################################################################################################
 @app.route('/delete_user', methods=['POST'])
 @login_required
 def delete_user():
@@ -179,6 +291,14 @@ def delete_user():
         flash('Your account has been deleted.', 'info')
     return redirect(url_for('index'))
 
+####################################################################################################
+# 
+# 関数名：input
+# 引数：なし
+# 返却値：input.html テンプレートまたはリダイレクト
+# 詳細：新しいプロジェクトを入力し、データベースに追加する
+# 
+####################################################################################################
 @app.route('/input', methods=['GET', 'POST'])
 @login_required
 def input():
@@ -238,6 +358,14 @@ def input():
 
     return render_template('input.html', user=current_user)
 
+####################################################################################################
+# 
+# 関数名：sheet
+# 引数：なし
+# 返却値：sheet.html テンプレート
+# 詳細：ユーザーのプロジェクトと関連情報を表示する
+# 
+####################################################################################################
 @app.route('/sheet', methods=['GET', 'POST'])
 @login_required
 def sheet():
@@ -256,6 +384,14 @@ def sheet():
     
     return render_template('sheet.html', user=current_user, projects=project_data)
 
+####################################################################################################
+# 
+# 関数名：edit_profile
+# 引数：なし
+# 返却値：edit_profile.html テンプレートまたはリダイレクト
+# 詳細：スキルシート上からユーザーのプロフィール情報を編集する
+# 
+####################################################################################################
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
@@ -271,6 +407,14 @@ def edit_profile():
         return redirect(url_for('sheet'))
     return render_template('edit_profile.html', user=current_user)
 
+####################################################################################################
+# 
+# 関数名：edit_project
+# 引数：project_id（プロジェクトID）
+# 返却値：edit_project.html テンプレートまたはリダイレクト
+# 詳細：指定したプロジェクトの情報を編集する
+# 
+####################################################################################################
 @app.route('/edit_project/<int:project_id>', methods=['GET', 'POST'])
 @login_required
 def edit_project(project_id):
@@ -345,6 +489,14 @@ def edit_project(project_id):
 
     return render_template('edit_project.html', project=project, technologies=technologies, processes=processes)
 
+####################################################################################################
+# 
+# 関数名：create_link
+# 引数：なし
+# 返却値：JSON（リンクURLを含む）
+# 詳細：新しいリンクを作成し、現在のアクティブなリンクを無効化する
+# 
+####################################################################################################
 @app.route('/create_link', methods=['POST'])
 @login_required
 def create_link():
@@ -364,6 +516,14 @@ def create_link():
     flash('新しいリンクが作成されました。', 'success')
     return jsonify({'link': url_for('view_sheet', link_code=new_link.link_code)})
 
+####################################################################################################
+# 
+# 関数名：view_sheet
+# 引数：link_code
+# 返却値：view_sheet.html　（リンクが無効な場合は invalid.html）  
+# 詳細：特定のリンクを知っている人だけが閲覧のみの画面を表示でき仕様
+# 
+####################################################################################################
 
 @app.route('/view_sheet/<link_code>', methods=['GET'])
 def view_sheet(link_code):
@@ -371,9 +531,10 @@ def view_sheet(link_code):
     link = Link.query.filter_by(link_code=link_code, is_active=True).first()
     if link is None:
         flash('無効なリンクです。', 'error')
-        return redirect(url_for('index'))
+        current_url=request.url
+        return render_template('invalid.html', current_url=current_url)
 
-    # リンクが有効な場合、スキルシートを表示
+    # リンクが有効な場合、スキルシートを表示するためデータを受け渡し
     user_id = link.user_id
     user = User.query.get_or_404(user_id)
     projects = Project.query.filter_by(user_id=user_id).all()
@@ -388,7 +549,16 @@ def view_sheet(link_code):
             'processes': processes
         })
 
-    return render_template('sheet_view.html', user=user, projects=project_data)
+    return render_template('view_sheet.html', user=user, projects=project_data)
+
+####################################################################################################
+# 
+# 関数名：invalidate_link
+# 引数：なし
+# 返却値：sheetにリダイレクト
+# 詳細：全てのリンクを無効化する仕様
+# 
+####################################################################################################
 
 @app.route('/invalidate_link', methods=['POST'])
 @login_required
@@ -400,8 +570,5 @@ def invalidate_link():
     flash('リンクが無効化されました。', 'success')
     return redirect(url_for('sheet'))
 
-
 if __name__ == "__main__":
     app.run(debug=True)
-
-
