@@ -240,7 +240,9 @@ def account():
             db.session.commit()
             flash('Profile updated successfully.', 'success')
         return redirect(url_for('account'))
-    return render_template('account.html', user=current_user)####################################################################################################
+    return render_template('account.html', user=current_user)
+
+####################################################################################################
 # 
 # 関数名：profile
 # 引数：なし
@@ -512,9 +514,12 @@ def create_link():
     db.session.add(new_link)
     db.session.commit()
 
+    # リンクURLを生成
+    link_url = url_for('view_sheet', link_code=new_link.link_code, _external=True)
+
     # 新しいリンクをフラッシュメッセージとともに返す
     flash('新しいリンクが作成されました。', 'success')
-    return jsonify({'link': url_for('view_sheet', link_code=new_link.link_code)})
+    return jsonify({'link': link_url})
 
 ####################################################################################################
 # 
