@@ -1,184 +1,255 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>List</h1>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-    <ul class="flashes">
+<section class="section">
+    <div class="container">
+        <h1 class="title">プロジェクト入力</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
         {% set category, message = messages[messages|length-1] %}
-        <li class="{{ category }}">{{ message }}</li>
-    </ul>
-{% endif %}
-{% endwith %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endwith %}
 
-<form method="POST">
-    <label for="start_month">プロジェクトに参加した月</label>
-    <input type="month" id="start_month" name="start_month" required>
-    <br>
-    <label for="end_month">プロジェクトを退場した月</label>
-    <input type="month" id="end_month" name="end_month" required>
-    <br>
-    <label for="industry">クライアントの業種</label>
-    <input type="text" id="industry" name="industry" required>
-    <br>
-    <label for="project_name">プロジェクト名</label>
-    <input type="text" id="project_name" name="project_name" required>
-    <br>
-    <label for="project_summary">プロジェクト概要</label>
-    <textarea id="project_summary" name="project_summary" required></textarea>
-    <br>
+        <form method="POST" class="box">
+            <div class="field">
+                <label class="label" for="start_month">プロジェクトに参加した月</label>
+                <div class="control">
+                    <input class="input" type="month" id="start_month" name="start_month" required>
+                </div>
+            </div>
 
-    <label for="process">担当した工程</label>
-    <div>
-        <input type="checkbox" id="requirement_definition" name="process" value="要件定義">
-        <label for="requirement_definition">要件定義</label>
+            <div class="field">
+                <label class="label" for="end_month">プロジェクトを退場した月</label>
+                <div class="control">
+                    <input class="input" type="month" id="end_month" name="end_month" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="industry">クライアントの業種</label>
+                <div class="control">
+                    <input class="input" type="text" id="industry" name="industry" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="project_name">プロジェクト名</label>
+                <div class="control">
+                    <input class="input" type="text" id="project_name" name="project_name" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="project_summary">プロジェクト概要</label>
+                <div class="control">
+                    <textarea class="textarea" id="project_summary" name="project_summary" required></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="process">担当した工程</label>
+                <div class="control">
+                    <label class="checkbox">
+                        <input type="checkbox" id="requirement_definition" name="process" value="要件定義"> 要件定義
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="basic_design" name="process" value="基本設計"> 基本設計
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="detailed_design" name="process" value="詳細設計"> 詳細設計
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="implementation" name="process" value="実装"> 実装
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="unit_test" name="process" value="単体テスト"> 単体テスト
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="integration_test" name="process" value="結合テスト"> 結合テスト
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="acceptance_test" name="process" value="受入テスト"> 受入テスト
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="operation_maintenance" name="process" value="運用・保守"> 運用・保守
+                    </label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="responsibilities">担当業務</label>
+                <div class="control">
+                    <textarea class="textarea" id="responsibilities" name="responsibilities" required></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="skill">使用技術</label>
+                <div class="field">
+                    <label class="label" for="os">OS</label>
+                    <div class="control">
+                        <div class="input-group">
+                            <input class="input input-name" type="text" id="os_0" name="os_0" placeholder="技術名">
+                            <input class="input input-duration" type="number" id="os_0_num" name="os_0_num" placeholder="期間">
+                            <span>ヶ月</span>
+                        </div>
+                        <div id="os-fields" class="input-group"></div>
+                        <button type="button" id="add-os" class="button is-primary has-text-light">＋</button>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label" for="language">言語</label>
+                    <div class="control">
+                        <div class="input-group">
+                            <input class="input input-name" type="text" id="language_0" name="language_0" placeholder="技術名">
+                            <input class="input input-duration" type="number" id="language_0_num" name="language_0_num" placeholder="期間">
+                            <span>ヶ月</span>
+                        </div>
+                        <div id="language-fields" class="input-group"></div>
+                        <button type="button" id="add-language" class="button is-primary has-text-light">＋</button>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label" for="framework">フレームワーク</label>
+                    <div class="control">
+                        <div class="input-group">
+                            <input class="input input-name" type="text" id="framework_0" name="framework_0" placeholder="技術名">
+                            <input class="input input-duration" type="number" id="framework_0_num" name="framework_0_num" placeholder="期間">
+                            <span>ヶ月</span>
+                        </div>
+                        <div id="framework-fields" class="input-group"></div>
+                        <button type="button" id="add-framework" class="button is-primary has-text-light">＋</button>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label" for="database">データベース</label>
+                    <div class="control">
+                        <div class="input-group">
+                            <input class="input input-name" type="text" id="database_0" name="database_0" placeholder="技術名">
+                            <input class="input input-duration" type="number" id="database_0_num" name="database_0_num" placeholder="期間">
+                            <span>ヶ月</span>
+                        </div>
+                        <div id="database-fields" class="input-group"></div>
+                        <button type="button" id="add-database" class="button is-primary has-text-light">＋</button>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label" for="containertech">仮想化/コンテナ</label>
+                    <div class="control">
+                        <div class="input-group">
+                            <input class="input input-name" type="text" id="containertech_0" name="containertech_0" placeholder="技術名">
+                            <input class="input input-duration" type="number" id="containertech_0_num" name="containertech_0_num" placeholder="期間">
+                            <span>ヶ月</span>
+                        </div>
+                        <div id="containertech-fields" class="input-group"></div>
+                        <button type="button" id="add-containertech" class="button is-primary has-text-light">＋</button>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label" for="cicd">CI/CD</label>
+                    <div class="control">
+                        <div class="input-group">
+                            <input class="input input-name" type="text" id="cicd_0" name="cicd_0" placeholder="技術名">
+                            <input class="input input-duration" type="number" id="cicd_0_num" name="cicd_0_num" placeholder="期間">
+                            <span>ヶ月</span>
+                        </div>
+                        <div id="cicd-fields" class="input-group"></div>
+                        <button type="button" id="add-cicd" class="button is-primary has-text-light">＋</button>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label" for="logging">ログ収集・可視化</label>
+                    <div class="control">
+                        <div class="input-group">
+                            <input class="input input-name" type="text" id="logging_0" name="logging_0" placeholder="技術名">
+                            <input class="input input-duration" type="number" id="logging_0_num" name="logging_0_num" placeholder="期間">
+                            <span>ヶ月</span>
+                        </div>
+                        <div id="logging-fields" class="input-group"></div>
+                        <button type="button" id="add-logging" class="button is-primary has-text-light">＋</button>
+                    </div>
+                </div>
+                
+                <div class="field">
+                    <label class="label" for="tools">その他ツール類</label>
+                    <div class="control">
+                        <div class="input-group">
+                            <input class="input input-name" type="text" id="tools_0" name="tools_0" placeholder="技術名">
+                            <input class="input input-duration" type="number" id="tools_0_num" name="tools_0_num" placeholder="期間">
+                            <span>ヶ月</span>
+                        </div>
+                        <div id="tools-fields" class="input-group"></div>
+                        <button type="button" id="add-tools" class="button is-primary has-text-light">＋</button>
+                    </div>
+                </div>
+                
+
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link">送信</button>
+                </div>
+            </div>
+        </form>
     </div>
-    <div>
-        <input type="checkbox" id="basic_design" name="process" value="基本設計">
-        <label for="basic_design">基本設計</label>
-    </div>
-    <div>
-        <input type="checkbox" id="detailed_design" name="process" value="詳細設計">
-        <label for="detailed_design">詳細設計</label>
-    </div>
-    <div>
-        <input type="checkbox" id="implementation" name="process" value="実装">
-        <label for="implementation">実装</label>
-    </div>
-    <div>
-        <input type="checkbox" id="unit_test" name="process" value="単体テスト">
-        <label for="unit_test">単体テスト</label>
-    </div>
-    <div>
-        <input type="checkbox" id="integration_test" name="process" value="結合テスト">
-        <label for="integration_test">結合テスト</label>
-    </div>
-    <div>
-        <input type="checkbox" id="acceptance_test" name="process" value="受入テスト">
-        <label for="acceptance_test">受入テスト</label>
-    </div>
-    <div>
-        <input type="checkbox" id="operation_maintenance" name="process" value="運用・保守">
-        <label for="operation_maintenance">運用・保守</label>
-    </div>
-    
-
-    <label for="responsibilities">担当業務</label>
-    <textarea type="text" id="responsibilities" name="responsibilities" required></textarea>
-    <br>
-
-
-    <label for="skill">使用技術</label>
-    <label for="os">OS</label>
-    <input type="text" id="os_0" name="os_0">
-    <input type="number" id="os_0_num" name="os_0_num"><span>ヶ月</span>
-    <div id="os-fields"></div>
-    <button type="button" id="add-os" class="button is-primary">＋</button>
-    <br>
-
-    <label for="language">言語</label>
-    <input type="text" id="language_0" name="language_0">
-    <input type="number" id="language_0_num" name="language_0_num"><span>ヶ月</span>
-    <div id="language-fields"></div>
-    <button type="button" id="add-language" class="button is-primary">＋</button>
-    <br>
-
-    <label for="framework">フレームワーク</label>
-    <input type="text" id="framework_0" name="framework_0">
-    <input type="number" id="framework_0_num" name="framework_0_num"><span>ヶ月</span>
-    <div id="framework-fields"></div>
-    <button type="button" id="add-framework" class="button is-primary">＋</button>
-    <br>
-
-    <label for="database">データベース</label>
-    <input type="text" id="database_0" name="database_0">
-    <input type="number" id="database_0_num" name="database_0_num"><span>ヶ月</span>
-    <div id="database-fields"></div>
-    <button type="button" id="add-database" class="button is-primary">＋</button>
-    <br>
-
-    <label for="containertech">仮想化/コンテナ</label>
-    <input type="text" id="containertech_0" name="containertech_0">
-    <input type="number" id="containertech_0_num" name="containertech_0_num"><span>ヶ月</span>
-    <div id="containertech-fields"></div>
-    <button type="button" id="add-containertech" class="button is-primary">＋</button>
-    <br>
-
-    <label for="cicd">CI/CD</label>
-    <input type="text" id="cicd_0" name="cicd_0">
-    <input type="number" id="cicd_0_num" name="cicd_0_num"><span>ヶ月</span>
-    <div id="cicd-fields"></div>
-    <button type="button" id="add-cicd" class="button is-primary">＋</button>
-    <br>
-
-    <label for="logging">ログ収集・可視化</label>
-    <input type="text" id="logging_0" name="logging_0">
-    <input type="number" id="logging_0_num" name="logging_0_num"><span>ヶ月</span>
-    <div id="logging-fields"></div>
-    <button type="button" id="add-logging" class="button is-primary">＋</button>
-    <br>
-
-    <label for="tools">その他ツール類</label>
-    <input type="text" id="tools_0" name="tools_0">
-    <input type="number" id="tools_0_num" name="tools_0_num"><span>ヶ月</span>
-    <div id="tools-fields"></div>
-    <button type="button" id="add-tools" class="button is-primary">＋</button>
-    <br>
-
-
-
-
-    <br>
-    <button type="submit">送信</button>
-</form>
+</section>
 
 <script>
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-// イベント：addField関数への仲介
-// 詳細：input画面やedit_project画面において、どの＋ボタンがクリックされているのか確認する
-// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-document.getElementById('add-os').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('os');
-});
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    // 
+    // イベント：addField関数への仲介
+    // 詳細：input画面やedit_project画面において、どの＋ボタンがクリックされているのか確認する
+    // 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    document.getElementById('add-os').addEventListener('click', function (e) {
+        e.preventDefault();
+        addField('os');
+    });
 
-document.getElementById('add-language').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('language');
-});
+    document.getElementById('add-language').addEventListener('click', function (e) {
+        e.preventDefault();
+        addField('language');
+    });
 
-document.getElementById('add-framework').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('framework');
-});
+    document.getElementById('add-framework').addEventListener('click', function (e) {
+        e.preventDefault();
+        addField('framework');
+    });
 
-document.getElementById('add-database').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('database');
-});
+    document.getElementById('add-database').addEventListener('click', function (e) {
+        e.preventDefault();
+        addField('database');
+    });
 
-document.getElementById('add-containertech').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('containertech');
-});
+    document.getElementById('add-containertech').addEventListener('click', function (e) {
+        e.preventDefault();
+        addField('containertech');
+    });
 
-document.getElementById('add-cicd').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('cicd');
-});
+    document.getElementById('add-cicd').addEventListener('click', function (e) {
+        e.preventDefault();
+        addField('cicd');
+    });
 
-document.getElementById('add-logging').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('logging');
-});
+    document.getElementById('add-logging').addEventListener('click', function (e) {
+        e.preventDefault();
+        addField('logging');
+    });
 
-document.getElementById('add-tools').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('tools');
-});
+    document.getElementById('add-tools').addEventListener('click', function (e) {
+        e.preventDefault();
+        addField('tools');
+    });
 </script>
 
 {% endblock %}
