@@ -65,41 +65,43 @@
 <input type="text" id="link-field" readonly style="display: none;">
 
 <script>
-    document.getElementById('create-link-form').addEventListener('submit', function(event) {
-        event.preventDefault();  // フォームの通常の送信を防ぐ
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// イベント：リンク作成
+// 詳細：create_link関数からリンクを取得し、フィールドへのリンク設定、クリップボードへのコピーを行う
+// 修正：jsファイルに処理を移動した場合に、プリティプリントでのコピーになってしまうバグがある
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        fetch('{{ url_for("create_link") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include'  // 認証情報を送信
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.link) {
-                // リンクフィールドにリンクを設定
-                var linkField = document.getElementById('link-field');
-                linkField.value = data.link;
-                linkField.style.display = 'block';
+document.getElementById('create-link-form').addEventListener('submit', function(event) {
+    event.preventDefault();  // フォームの通常の送信を防ぐ
 
-                // リンクをクリップボードにコピー
-                linkField.select();
-                document.execCommand('copy');
+    // サーバーにPOSTでリクエスト
+    fetch('{{ url_for("create_link") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'  // 認証情報を送信
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.link) {
+            // リンクフィールドにリンクを設定
+            var linkField = document.getElementById('link-field');
+            linkField.value = data.link;
+            linkField.style.display = 'block';
 
-                alert('リンクがクリップボードにコピーされました: ' + data.link);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
-
-    // リンク無効化時の処理
-    document.getElementById('invalidate-link-form').addEventListener('submit', function(event) {
-        if (!confirm('本当にリンクを無効にしますか？')) {
-            event.preventDefault();  // ユーザーがキャンセルした場合、フォームの送信を防ぐ
+            // Clipboard APIを使用してリンクをクリップボードにコピー
+            navigator.clipboard.writeText(data.link)
+                .then(() => {
+                    alert('リンクがクリップボードにコピーされました: ' + data.link);
+                })
+                .catch(error => console.error('Error copying text: ', error));
         }
-    });
-
+    })
+    .catch(error => console.error('Error:', error));
+});
 </script>
 
 {% endblock %}
