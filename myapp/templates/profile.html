@@ -1,38 +1,67 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Profile</h1>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Profile</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
+        {% set category, message = messages[messages|length-1] %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
         {% endif %}
-    {% endwith %}
+        {% endwith %}
 
-    <form method="POST">
-        <label for="display_name">Display Name:</label>
-        <input type="text" id="display_name" name="display_name" value="{{ user.display_name }}">
-        <br>
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age" value="{{ user.age }}">
-        <br>
-        <label for="gender">Gender:</label>
-        <input type="text" id="gender" name="gender" value="{{ user.gender }}">
-        <br>
-        <label for="nearest_station">Nearest Station:</label>
-        <input type="text" id="nearest_station" name="nearest_station" value="{{ user.nearest_station }}">
-        <br>
-        <label for="experience_years">Experience Years:</label>
-        <input type="number" id="experience_years" name="experience_years" value="{{ user.experience_years }}">
-        <br>
-        <label for="education">Education:</label>
-        <input type="text" id="education" name="education" value="{{ user.education }}">
-        <br>
-        <button type="submit">Update Profile</button>
-    </form>
+        <form method="POST" class="box">
+            <div class="field">
+                <label class="label" for="display_name">Display Name</label>
+                <div class="control">
+                    <input class="input" type="text" id="display_name" name="display_name" value="{{ user.display_name }}">
+                </div>
+            </div>
 
-    {% endblock %}
+            <div class="field">
+                <label class="label" for="age">Age</label>
+                <div class="control">
+                    <input class="input" type="number" id="age" name="age" value="{{ user.age }}">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="gender">Gender</label>
+                <div class="control">
+                    <input class="input" type="text" id="gender" name="gender" value="{{ user.gender }}">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="nearest_station">Nearest Station</label>
+                <div class="control">
+                    <input class="input" type="text" id="nearest_station" name="nearest_station" value="{{ user.nearest_station }}">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="experience_years">Experience Years</label>
+                <div class="control">
+                    <input class="input" type="number" id="experience_years" name="experience_years" value="{{ user.experience_years }}">
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="education">Education</label>
+                <div class="control">
+                    <input class="input" type="text" id="education" name="education" value="{{ user.education }}">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link">Update Profile</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

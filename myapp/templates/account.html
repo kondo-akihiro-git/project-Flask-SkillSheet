@@ -1,29 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Account</h1>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Account</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
+        {% set category, message = messages[messages|length-1] %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
         {% endif %}
-    {% endwith %}
+        {% endwith %}
 
-    <form method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" value="{{ user.username }}" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" value="">
-        <br>
-        <button type="submit">Update Profile</button>
-    </form>
+        <form method="POST" class="box">
+            <div class="field">
+                <label class="label" for="username">Username</label>
+                <div class="control">
+                    <input class="input" type="text" id="username" name="username" value="{{ user.username }}" required>
+                </div>
+            </div>
 
-    <form method="POST" action="{{ url_for('delete_user') }}">
-        <button type="submit" onclick="return confirm('Are you sure you want to delete your account?');">Delete Account</button>
-    </form>
-    {% endblock %}
+            <div class="field">
+                <label class="label" for="password">Password</label>
+                <div class="control">
+                    <input class="input" type="password" id="password" name="password">
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link">Update Profile</button>
+                </div>
+            </div>
+        </form>
+
+        <form method="POST" action="{{ url_for('delete_user') }}" class="box">
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link" onclick="return confirm('Are you sure you want to delete your account?');">Delete Account</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

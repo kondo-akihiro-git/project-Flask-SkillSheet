@@ -1,25 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Register</h1>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Register</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <ul class="flashes">
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
+        {% set category, message = messages[messages|length-1] %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
         {% endif %}
-    {% endwith %}
-    
-    <form method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <button type="submit">Register</button>
-    </form>
-    {% endblock %}
+        {% endwith %}
+
+        <form method="POST" class="box">
+            <div class="field">
+                <label class="label" for="username">Username</label>
+                <div class="control">
+                    <input class="input" type="text" id="username" name="username" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="password">Password</label>
+                <div class="control">
+                    <input class="input" type="password" id="password" name="password" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link">Register</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
