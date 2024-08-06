@@ -102,6 +102,19 @@ document.getElementById('create-link-form').addEventListener('submit', function(
     })
     .catch(error => console.error('Error:', error));
 });
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+// イベント：リンク無効化メッセージ
+// 詳細：リンク無効化メッセージを表示し、フォームの送信も防ぐ
+// 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// リンク無効化時の処理
+document.getElementById('invalidate-link-form').addEventListener('submit', function(event) {
+    if (!confirm('本当にリンクを無効にしますか？')) {
+        event.preventDefault();  // ユーザーがキャンセルした場合、フォームの送信を防ぐ
+    }
+});
 </script>
 
 {% endblock %}

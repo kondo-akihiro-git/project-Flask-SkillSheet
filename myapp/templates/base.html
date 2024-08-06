@@ -1,22 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
     <title>Flask App</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .navbar {
+            background-color: #363636; /* is-darkに似た濃いグレー */
+            color: #f5f5f5; /* テキスト色を白に近い色にする */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar.is-fixed-top {
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .navbar.is-fixed-top.scrolled {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 軽いシャドウ */
+        }
+
+        .navbar-brand .navbar-item {
+            font-weight: bold;
+        }
+
+        .navbar-item {
+            color: #f5f5f5; /* ナビゲーションアイテムのテキスト色 */
+        }
+
+        .navbar-item:hover,
+        .navbar-item.is-active {
+            background-color: rgba(245, 245, 245, 0.3); /* ホバー時の背景色 */
+            color: rgba(255, 255, 255, 0.7); /* テキスト色 */
+        }
+
+        .navbar-menu {
+            margin-top: 0.5rem;
+        }
+
+        .navbar-burger {
+            display: none;
+            color: #f5f5f5;
+            background-color: #363636; /* 背景色を濃いグレーに */
+            border: none;
+            padding: 0.5rem; /* パディングを追加 */
+        }
+
+        .navbar-burger:hover {
+            background-color: #4a4a4a; /* ホバリング時の背景色を少し明るく */
+        }
+
+        @media (max-width: 1023px) {
+            .navbar-burger {
+                display: block;
+            }
+
+            .navbar-menu {
+                display: none;
+            }
+
+            .navbar-menu.is-active {
+                display: block;
+                background-color: #363636; /* 背景色をナビゲーションバーと統一 */
+                padding: 0.5rem; /* パディングを追加 */
+            }
+
+            .navbar-menu.is-active .navbar-item {
+                color: #f5f5f5; /* メニューアイテムのテキスト色を白に */
+            }
+
+            .navbar-menu.is-active .navbar-item:hover {
+                background-color: rgba(245, 245, 245, 0.3); /* ホバー時の背景色 */
+                color: rgba(255, 255, 255, 0.7); /* テキスト色 */
+            }
+        }
+
+        .section {
+            padding: 4rem 1.5rem;
+        }
+
+        .hero.custom-hero {
+            background-color: lightgray;
+        }
+        .spacer {
+            height: 1rem; /* 任意の高さを設定 */
+        }
+
+        /* .hero-button で Bulma のデフォルトスタイルを上書き */
+        .hero-button {
+            background-color: #6c757d; /* グレー系のデフォルトの背景色 */
+            color: #fff; /* ボタンのテキスト色は白 */
+            font-size: 1.25rem; /* フォントサイズ */
+            padding: 1rem; /* パディング */
+            border-radius: 5px; /* 角丸 */
+            text-align: center; /* テキストを中央に配置 */
+            display: flex; /* フレックスボックスで中央配置 */
+            align-items: center; /* 縦方向の中央配置 */
+            justify-content: center; /* 横方向の中央配置 */
+            height: 100%; /* 高さを100%に */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* シャドウ */
+            border: none; /* ボーダーを削除 */
+            transition: background-color 0.3s; /* 背景色の変化にスムーズなトランジションを追加 */
+        }
+
+        .hero-button:hover {
+            background-color: #5a6268; /* ホバリング時の背景色を少し濃いグレーに変更 */
+        }
+
+        /* Bulma のデフォルトのボタンスタイルが適用されないように、.button クラスのデフォルトスタイルをオーバーライド */
+        .button {
+            background-color: #363636; /* 背景色を統一 */
+            border: none; /* ボーダーを削除 */
+        }
+    </style>
 </head>
+
 <body>
     <header>
-        <h1><a href="{{ url_for('index') }}">Flask App</a></h1>
+        <nav id="navbar" class="navbar is-fixed-top">
+            <div class="container">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="{{ url_for('index') }}">
+                        <h1 class="title has-text-light">SkillCanvas</h1>
+                    </a>
+                    <span class="navbar-burger burger" data-target="navbarMenu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </div>
+                <div id="navbarMenu" class="navbar-menu">
+                    <div class="navbar-end">
+                        <a class="navbar-item has-text-light" href="{{ url_for('index') }}">Home</a>
+                        <a class="navbar-item has-text-light" href="#">Features</a>
+                        <a class="navbar-item has-text-light" href="#">Contact</a>
+                        <a class="navbar-item has-text-light" href="#">About</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
     </header>
-    {% block content %}
-    {% endblock %}
+    <main class="section">
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var navbar = document.getElementById('navbar');
+            var burger = document.querySelector('.navbar-burger');
+            var menu = document.getElementById(burger.dataset.target);
+
+            burger.addEventListener('click', function () {
+                burger.classList.toggle('is-active');
+                menu.classList.toggle('is-active');
+            });
+
+            window.addEventListener('scroll', function () {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        });
+    </script>
 </body>
 
-<script>
-
-
-</script>
 </html>
