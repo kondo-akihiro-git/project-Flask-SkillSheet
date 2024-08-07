@@ -78,10 +78,9 @@
 
         <hr>
 
-        <div class="box">
-            <h1 class="title is-4">プロジェクト</h1>
+        <h1 class="title is-4">プロジェクト</h1>
             {% for item in projects %}
-            <div class="card" style="margin-bottom: 1rem;">
+            <div class="card" style="margin-bottom: 2rem;">
                 <div class="card-content">
                     <h2 class="subtitle">{{ item.project.project_name }}</h2>
                     <div class="columns">
@@ -135,9 +134,7 @@
                     </form>
                 </footer>
             </div>
-
-            {% endfor %}
-        </div>
+        {% endfor %}
 
         <div class="box">
             <div class="buttons is-centered">

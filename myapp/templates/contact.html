@@ -2,9 +2,18 @@
 
 {% block content %}
 
-
 <main class="section">
     <div class="container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% set category, message = messages[messages|length-1] %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endwith %}
+        
         <h1 class="title">Contact Us</h1>
         <p class="subtitle">Get in touch with us.</p>
         <!-- Add your contact content here -->

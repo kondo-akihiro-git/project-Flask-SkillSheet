@@ -125,6 +125,21 @@ class Link(db.Model):
 
 ####################################################################################################
 # 
+# モデル：Contact
+# 詳細：問い合わせ情報を扱います。
+# 
+####################################################################################################
+# Contactモデル
+class Contact(db.Model):
+    __tablename__ = 'contact'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+
+####################################################################################################
+# 
 # 関数名：load_user
 # 引数：user_id（ユーザーID）
 # 返却値：User オブジェクト
@@ -652,9 +667,12 @@ def contact():
         message = request.form['message']
         # Here you could save the message to the database or send an email
 
+        # Contactオブジェクトの作成と保存
+        new_contact = Contact(name=name, email=email, message=message)
+        db.session.add(new_contact)
+        db.session.commit()
 
-
-        flash('Thank you for contacting us! We will get back to you soon.')
+        flash('Thank you for contacting us! We will get back to you soon.', 'success')
         return redirect(url_for('contact'))
     return render_template('contact.html')
 

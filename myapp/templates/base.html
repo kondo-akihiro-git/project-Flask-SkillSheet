@@ -13,13 +13,14 @@
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: #f5f5f5;
             color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100%;
         }
 
         .navbar {
             background-color: #363636;
-            /* is-darkに似た濃いグレー */
             color: #f5f5f5;
-            /* テキスト色を白に近い色にする */
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -30,7 +31,6 @@
         .navbar.is-fixed-top.scrolled {
             background-color: #ffffff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            /* 軽いシャドウ */
         }
 
         .navbar-brand .navbar-item {
@@ -39,22 +39,18 @@
 
         .navbar-item {
             color: #f5f5f5;
-            /* ナビゲーションアイテムのテキスト色 */
         }
 
         .navbar-item:hover,
         .navbar-item.is-active {
             background-color: rgba(245, 245, 245, 0.3);
-            /* ホバー時の背景色 */
             color: rgba(255, 255, 255, 0.7);
-            /* テキスト色 */
         }
 
         .navbar-brand .navbar-item:hover,
         .navbar-brand .navbar-item.is-active {
             background-color: transparent !important;
             color: #f5f5f5 !important;
-            /* ホバー時でも色を変えない */
         }
 
         .navbar-menu {
@@ -65,15 +61,12 @@
             display: none;
             color: #f5f5f5;
             background-color: #363636;
-            /* 背景色を濃いグレーに */
             border: none;
             padding: 0.5rem;
-            /* パディングを追加 */
         }
 
         .navbar-burger:hover {
             background-color: #4a4a4a;
-            /* ホバリング時の背景色を少し明るく */
         }
 
         @media (max-width: 1023px) {
@@ -88,26 +81,23 @@
             .navbar-menu.is-active {
                 display: block;
                 background-color: #363636;
-                /* 背景色をナビゲーションバーと統一 */
                 padding: 0.5rem;
-                /* パディングを追加 */
             }
 
             .navbar-menu.is-active .navbar-item {
                 color: #f5f5f5;
-                /* メニューアイテムのテキスト色を白に */
             }
 
             .navbar-menu.is-active .navbar-item:hover {
                 background-color: rgba(245, 245, 245, 0.3);
-                /* ホバー時の背景色 */
                 color: rgba(255, 255, 255, 0.7);
-                /* テキスト色 */
             }
         }
 
         .section {
             padding: 4rem 1.5rem;
+            min-height: calc(100vh - 3rem);
+            /* 修正部分 */
         }
 
         .hero.custom-hero {
@@ -116,55 +106,37 @@
 
         .spacer {
             height: 1rem;
-            /* 任意の高さを設定 */
         }
 
         .hero-button {
             background-color: #6c757d;
-            /* グレー系のデフォルトの背景色 */
             color: #fff;
-            /* ボタンのテキスト色は白 */
             font-size: 1.25rem;
-            /* フォントサイズ */
             padding: 1rem;
-            /* パディング */
             border-radius: 5px;
-            /* 角丸 */
             text-align: center;
-            /* テキストを中央に配置 */
             display: flex;
-            /* フレックスボックスで中央配置 */
             align-items: center;
-            /* 縦方向の中央配置 */
             justify-content: center;
-            /* 横方向の中央配置 */
             height: 100%;
-            /* 高さを100%に */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            /* シャドウ */
             border: none;
-            /* ボーダーを削除 */
             transition: background-color 0.3s;
-            /* 背景色の変化にスムーズなトランジションを追加 */
         }
 
         .hero-button:hover {
             background-color: #5a6268;
-            /* ホバリング時の背景色を少し濃いグレーに変更 */
         }
 
         .button {
             background-color: #363636;
-            /* 背景色を統一 */
             border: none;
-            /* ボーダーを削除 */
             color: #fff;
         }
 
         .input-group {
             display: flex;
             flex-wrap: wrap;
-            /* フィールドが折り返すように */
             margin-bottom: 1rem;
             width: 100%;
             align-items: center;
@@ -172,21 +144,16 @@
 
         .input-group .input-name {
             flex: 2;
-            /* 名前入力フィールドが幅の2/3 */
             margin-right: 1rem;
-            /* 右側にスペースを確保 */
         }
 
         .input-group .input-duration {
             flex: 1;
-            /* 期間入力フィールドが幅の1/3 */
             margin-right: 0.5rem;
-            /* 右側にスペースを確保 */
         }
 
         .input-group span {
             margin-left: 0.5rem;
-            /* テキストと入力フィールドの間にスペースを確保 */
         }
 
         /* 表のスタイル統一 */
@@ -194,7 +161,6 @@
             border-collapse: collapse;
             width: 100%;
             table-layout: fixed;
-            /* テーブルのカラム幅を固定 */
         }
 
         .table th,
@@ -202,18 +168,15 @@
             border: 1px solid #ddd;
             padding: 8px;
             word-wrap: break-word;
-            /* 長い単語がある場合に折り返す */
         }
 
         .table th {
             background-color: #f4f4f4;
-            /* ヘッダーの背景色 */
             text-align: left;
         }
 
         .table td {
             background-color: #fff;
-            /* 通常の行の背景色 */
         }
 
         .table-container {
@@ -225,9 +188,7 @@
         .card {
             margin-bottom: 1rem;
             border-radius: 8px;
-            /* カードの角を丸くする */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            /* カードの影を追加 */
         }
 
         .card-content {
@@ -236,7 +197,6 @@
 
         .card-footer {
             background-color: #f4f4f4;
-            /* フッターの背景色 */
         }
 
         .card-footer-item {
@@ -245,29 +205,23 @@
 
         .table-container table {
             width: 100%;
-            /* テーブルの幅を親要素に合わせる */
         }
 
         .table-container th:nth-child(1),
         .table-container td:nth-child(1) {
             width: 40%;
-            /* 技術タイプ列の幅 */
         }
 
         .table-container th:nth-child(2),
         .table-container td:nth-child(2) {
             width: 30%;
-            /* 技術名列の幅 */
         }
 
         .table-container th:nth-child(3),
         .table-container td:nth-child(3) {
             width: 30%;
-            /* 使用期間列の幅 */
         }
 
-        /* 横方向に2つのカラムを並べる */
-        /* 横方向に3つのカラムを並べる */
         .columns {
             display: flex;
             flex-wrap: wrap;
@@ -277,7 +231,6 @@
             flex: 1 1 33%;
         }
 
-        /* Flexboxを使用してカラムの高さを揃える */
         .columns.is-multiline {
             display: flex;
             flex-wrap: wrap;
@@ -292,13 +245,11 @@
             flex: 1;
         }
 
-        /* カラムの高さを揃えるためのスタイル */
         .table-container {
             display: flex;
             flex-direction: column;
         }
 
-        /* テーブルのスタイルを調整 */
         .skill-table th,
         .skill-table td {
             white-space: nowrap;
@@ -306,7 +257,6 @@
             text-overflow: ellipsis;
         }
 
-        /* テーブルのセルが改行せずにテキストを表示するようにする */
         .skill-table th {
             font-size: smaller;
         }
@@ -326,9 +276,7 @@
 
         .box .buttons.is-centered {
             margin-top: 1rem;
-            /* 必要に応じて調整 */
             margin-bottom: 1rem;
-            /* 上部と同じ余白に設定 */
         }
 
         .button-form {
@@ -337,8 +285,28 @@
 
         #link-field {
             margin-top: 1rem;
-            /* 必要に応じて調整 */
         }
+
+        .project-box {
+            background-color: #f5f5f5;
+            /* 画面全体の背景色と同じ色 */
+            box-shadow: none;
+            border: none;
+        }
+
+
+.container.is-fluid {
+    background-color: #f5f5f5; /* 背景色を全体と一致させる */
+    padding: 2rem; /* パディング調整 */
+    border-radius: 8px; /* 角を丸める */
+}
+
+.section {
+    padding: 4rem 1.5rem;
+    min-height: calc(100vh - 3rem); /* セクションの高さ調整 */
+    background-color: #f5f5f5; /* 背景色を全体と一致させる */
+}
+        
     </style>
 </head>
 
