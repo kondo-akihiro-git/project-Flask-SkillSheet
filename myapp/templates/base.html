@@ -193,14 +193,16 @@
         .table {
             border-collapse: collapse;
             width: 100%;
-            table-layout: fixed; /* テーブルのカラム幅を固定 */
+            table-layout: fixed;
+            /* テーブルのカラム幅を固定 */
         }
 
         .table th,
         .table td {
             border: 1px solid #ddd;
             padding: 8px;
-            word-wrap: break-word; /* 長い単語がある場合に折り返す */
+            word-wrap: break-word;
+            /* 長い単語がある場合に折り返す */
         }
 
         .table th {
@@ -242,22 +244,26 @@
         }
 
         .table-container table {
-            width: 100%; /* テーブルの幅を親要素に合わせる */
+            width: 100%;
+            /* テーブルの幅を親要素に合わせる */
         }
 
         .table-container th:nth-child(1),
         .table-container td:nth-child(1) {
-            width: 40%; /* 技術タイプ列の幅 */
+            width: 40%;
+            /* 技術タイプ列の幅 */
         }
 
         .table-container th:nth-child(2),
         .table-container td:nth-child(2) {
-            width: 30%; /* 技術名列の幅 */
+            width: 30%;
+            /* 技術名列の幅 */
         }
 
         .table-container th:nth-child(3),
         .table-container td:nth-child(3) {
-            width: 30%; /* 使用期間列の幅 */
+            width: 30%;
+            /* 使用期間列の幅 */
         }
 
         /* 横方向に2つのカラムを並べる */
@@ -291,42 +297,48 @@
             display: flex;
             flex-direction: column;
         }
+
         /* テーブルのスタイルを調整 */
-.skill-table th, .skill-table td {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+        .skill-table th,
+        .skill-table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-/* テーブルのセルが改行せずにテキストを表示するようにする */
-.skill-table th {
-    font-size: smaller;
-}
+        /* テーブルのセルが改行せずにテキストを表示するようにする */
+        .skill-table th {
+            font-size: smaller;
+        }
 
-.skill-table td {
-    font-size: smaller;
-}
-.button-form {
-    width: 100%;
-    margin-bottom: 1rem;
-}
+        .skill-table td {
+            font-size: smaller;
+        }
 
-.button.is-fullwidth {
-    width: 100%;
-}
-    
-    .box .buttons.is-centered {
-        margin-top: 1rem;  /* 必要に応じて調整 */
-        margin-bottom: 1rem; /* 上部と同じ余白に設定 */
-    }
+        .button-form {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
 
-    .button-form {
-        margin: 0;
-    }
+        .button.is-fullwidth {
+            width: 100%;
+        }
 
-    #link-field {
-        margin-top: 1rem;  /* 必要に応じて調整 */
-    }
+        .box .buttons.is-centered {
+            margin-top: 1rem;
+            /* 必要に応じて調整 */
+            margin-bottom: 1rem;
+            /* 上部と同じ余白に設定 */
+        }
+
+        .button-form {
+            margin: 0;
+        }
+
+        #link-field {
+            margin-top: 1rem;
+            /* 必要に応じて調整 */
+        }
     </style>
 </head>
 
@@ -347,9 +359,8 @@
                 <div id="navbarMenu" class="navbar-menu">
                     <div class="navbar-end">
                         <a class="navbar-item has-text-light" href="{{ url_for('index') }}">Home</a>
-                        <a class="navbar-item has-text-light" href="#">Features</a>
-                        <a class="navbar-item has-text-light" href="#">Contact</a>
-                        <a class="navbar-item has-text-light" href="#">About</a>
+                        <a class="navbar-item has-text-light" href="{{ url_for('features') }}">Features</a>
+                        <a class="navbar-item has-text-light" href="{{ url_for('contact') }}">Contact</a>
                     </div>
                 </div>
             </div>

@@ -623,5 +623,42 @@ def delete_project(project_id):
         flash('削除できるのは自身のプロジェクトのみです。', 'danger')
     return redirect(url_for('sheet'))
 
+####################################################################################################
+# 
+# 関数名：delete_project
+# 引数：project_id（プロジェクトID）
+# 返却値：リダイレクト
+# 詳細：指定したプロジェクトを削除する
+# 
+####################################################################################################
+@app.route('/features')
+def features():
+    return render_template('features.html')
+
+####################################################################################################
+# 
+# 関数名：delete_project
+# 引数：project_id（プロジェクトID）
+# 返却値：リダイレクト
+# 詳細：指定したプロジェクトを削除する
+# 
+####################################################################################################
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        # Process the contact form data
+        name = request.form['name']
+        email = request.form['email']
+        message = request.form['message']
+        # Here you could save the message to the database or send an email
+
+
+
+        flash('Thank you for contacting us! We will get back to you soon.')
+        return redirect(url_for('contact'))
+    return render_template('contact.html')
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)
