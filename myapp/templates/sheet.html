@@ -1,98 +1,179 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>スキルシート</h1>
+<section class="section">
+    <div class="container">
+        <h1 class="title">スキルシート</h1>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-    <ul class="flashes">
-        {% set category, message = messages[messages|length-1] %}
-        <li class="{{ category }}">{{ message }}</li>
-    </ul>
-{% endif %}
-{% endwith %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="notification is-info">
+                {% set category, message = messages[messages|length-1] %}
+                {{ message }}
+            </div>
+        {% endif %}
+        {% endwith %}
 
-<h1>Profile</h1>
+        <div class="box">
+            <h1 class="title is-4">プロフィール</h1>
+            <div class="columns is-multiline">
+                <div class="column is-one-third">
+                    <p><strong>名前:</strong> {{ user.display_name }}</p>
+                </div>
+                <div class="column is-one-third">
+                    <p><strong>年齢:</strong> {{ user.age }}</p>
+                </div>
+                <div class="column is-one-third">
+                    <p><strong>性別:</strong> {{ user.gender }}</p>
+                </div>
+                <div class="column is-one-third">
+                    <p><strong>最寄駅:</strong> {{ user.nearest_station }}</p>
+                </div>
+                <div class="column is-one-third">
+                    <p><strong>経験年数:</strong> {{ user.experience_years // 12 }} 年 {{ user.experience_years % 12 }} ヶ月</p>
+                </div>
+                <div class="column is-one-third">
+                    <p><strong>学歴:</strong> {{ user.education }}</p>
+                </div>
+            </div>
+            <a href="{{ url_for('edit_profile') }}" class="button is-primary is-light">プロフィールを編集</a>
+        </div>
 
-<div class="profile">
-    <p>名前: {{ user.display_name }}</p>
-    <p>年齢: {{ user.age }}</p>
-    <p>性別: {{ user.gender }}</p>
-    <p>最寄駅: {{ user.nearest_station }}</p>
-    <p>経験年数: {{ user.experience_years }}</p>
-    <p>学歴: {{ user.education }}</p>
-    <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">プロフィールを編集</a>
-</div>
+        <hr>
 
-<hr>
 
-<h1>Projects</h1>
-{% for item in projects %}
-<div class="project">
-    <h2>{{ item.project.project_name }}</h2>
-    <p>業界: {{ item.project.industry }}</p>
-    <p>プロジェクト期間: {{ item.project.start_month }} から {{ item.project.end_month }}</p>
-    <p>プロジェクト概要: {{ item.project.project_summary }}</p>
-    <p>担当業務: {{ item.project.responsibilities }}</p>
+        <div class="box">
+            <h1 class="title is-4">スキル歴</h1>
+            <div class="columns is-multiline">
+                {% for category, skills in skills_by_category.items() %}
+                    <div class="column is-one-third">
+                        <div class="table-container">
+                            <table class="table is-bordered is-fullwidth skill-table">
+                                <thead>
+                                    <tr>
+                                        <th>{{ category }}</th>
+                                        <th>期間</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for skill in skills %}
+                                    <tr>
+                                        <td>{{ skill.name }}</td>
+                                        <td>
+                                            {% if skill.duration_months >= 12 %}
+                                                {{ skill.duration_months // 12 }} 年 {{ skill.duration_months % 12 }} ヶ月
+                                            {% else %}
+                                                {{ skill.duration_months }} ヶ月
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
 
-    <h3>使用技術</h3>
-    <ul>
-        {% for tech in item.technologies %}
-        <li>{{ tech.type }}: {{ tech.name }} ({{ tech.duration_months }} ヶ月)</li>
-        {% endfor %}
-    </ul>
+        <hr>
 
-    <h3>担当工程</h3>
-    <ul>
-        {% for process in item.processes %}
-        <li>{{ process.name }}</li>
-        {% endfor %}
-    </ul>
-    <a href="{{ url_for('edit_project', project_id=item.project.id) }}" class="btn btn-primary">プロジェクトを編集</a>
-</div>
-<hr>
+        <div class="box">
+            <h1 class="title is-4">プロジェクト</h1>
+            {% for item in projects %}
+            <div class="card" style="margin-bottom: 1rem;">
+                <div class="card-content">
+                    <h2 class="subtitle">{{ item.project.project_name }}</h2>
+                    <div class="columns">
+                        <div class="column is-half">
+                            <p><strong>業界 : </strong> {{ item.project.industry }}</p>
+                            <p><strong>プロジェクト期間 : </strong> {{ item.project.start_month }}〜{{ item.project.end_month }}</p>
+                            <p><strong>プロジェクト概要</strong><br> {{ item.project.project_summary }}</p>
+                        </div>
+                        <div class="column is-half">
+                            <strong>担当工程</strong>
+                            <ul>
+                                {% for process in item.processes %}
+                                <li>{{ process.name }}</li>
+                                {% endfor %}
+                            </ul>
+                            <p><strong>担当業務</strong><br> {{ item.project.responsibilities }}</p>
+                        </div>
+                    </div>
+                    <div class="content">
+                        <h3 class="title is-5">使用技術</h3>
+                        <table class="table is-striped is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th>技術タイプ</th>
+                                    <th>技術名</th>
+                                    <th>使用期間</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tech in item.technologies %}
+                                <tr>
+                                    <td>{{ tech_type_mapping[tech.type] }}</td>
+                                    <td>{{ tech.name }}</td>
+                                    <td>
+                                        {% if tech.duration_months >= 12 %}
+                                            {{ tech.duration_months // 12 }} 年 {{ tech.duration_months % 12 }} ヶ月
+                                        {% else %}
+                                            {{ tech.duration_months }} ヶ月
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <footer class="card-footer">
+                    <a href="{{ url_for('edit_project', project_id=item.project.id) }}" class="card-footer-item button is-primary is-light">プロジェクトを編集</a>
+                    <form action="{{ url_for('delete_project', project_id=item.project.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="button is-danger is-light card-footer-item">プロジェクトを削除</button>
+                    </form>
+                </footer>
+            </div>
 
-{% endfor %}
+            {% endfor %}
+        </div>
 
-<form id="create-link-form" action="{{ url_for('create_link') }}" method="post">
-    <button type="submit" class="btn btn-secondary">リンクを作成</button>
-</form>
-
-<form id="invalidate-link-form" action="{{ url_for('invalidate_link') }}" method="post">
-    <button type="submit" class="btn btn-danger">リンクを無効にする</button>
-</form>
-
-<input type="text" id="link-field" readonly style="display: none;">
+        <div class="box">
+            <div class="buttons is-centered">
+                <form id="create-link-form" action="{{ url_for('create_link') }}" method="post" class="button-form">
+                    <button type="submit" class="button is-info is-light is-fullwidth">リンクを作成</button>
+                </form>
+        
+                <form id="invalidate-link-form" action="{{ url_for('invalidate_link') }}" method="post" class="button-form">
+                    <button type="submit" class="button is-danger is-light is-fullwidth">リンクを無効にする</button>
+                </form>
+            </div>
+            <input type="text" id="link-field" readonly class="input" style="display: none;">
+        </div>
+        
+        
+    </div>
+</section>
 
 <script>
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-// イベント：リンク作成
-// 詳細：create_link関数からリンクを取得し、フィールドへのリンク設定、クリップボードへのコピーを行う
-// 修正：jsファイルに処理を移動した場合に、プリティプリントでのコピーになってしまうバグがある
-// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 document.getElementById('create-link-form').addEventListener('submit', function(event) {
-    event.preventDefault();  // フォームの通常の送信を防ぐ
+    event.preventDefault();
 
-    // サーバーにPOSTでリクエスト
     fetch('{{ url_for("create_link") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        credentials: 'include'  // 認証情報を送信
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {
         if (data.link) {
-            // リンクフィールドにリンクを設定
             var linkField = document.getElementById('link-field');
             linkField.value = data.link;
             linkField.style.display = 'block';
 
-            // Clipboard APIを使用してリンクをクリップボードにコピー
             navigator.clipboard.writeText(data.link)
                 .then(() => {
                     alert('リンクがクリップボードにコピーされました: ' + data.link);
@@ -103,18 +184,10 @@ document.getElementById('create-link-form').addEventListener('submit', function(
     .catch(error => console.error('Error:', error));
 });
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-// イベント：リンク無効化メッセージ
-// 詳細：リンク無効化メッセージを表示し、フォームの送信も防ぐ
-// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// リンク無効化時の処理
 document.getElementById('invalidate-link-form').addEventListener('submit', function(event) {
     if (!confirm('本当にリンクを無効にしますか？')) {
-        event.preventDefault();  // ユーザーがキャンセルした場合、フォームの送信を防ぐ
+        event.preventDefault();
     }
 });
 </script>
-
 {% endblock %}

@@ -119,7 +119,6 @@
             /* 任意の高さを設定 */
         }
 
-        /* .hero-button で Bulma のデフォルトスタイルを上書き */
         .hero-button {
             background-color: #6c757d;
             /* グレー系のデフォルトの背景色 */
@@ -154,36 +153,180 @@
             /* ホバリング時の背景色を少し濃いグレーに変更 */
         }
 
-        /* Bulma のデフォルトのボタンスタイルが適用されないように、.button クラスのデフォルトスタイルをオーバーライド */
         .button {
             background-color: #363636;
             /* 背景色を統一 */
             border: none;
             /* ボーダーを削除 */
+            color: #fff;
         }
+
         .input-group {
-    display: flex;
-    flex-wrap: wrap; /* フィールドが折り返すように */
-    margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            /* フィールドが折り返すように */
+            margin-bottom: 1rem;
+            width: 100%;
+            align-items: center;
+        }
+
+        .input-group .input-name {
+            flex: 2;
+            /* 名前入力フィールドが幅の2/3 */
+            margin-right: 1rem;
+            /* 右側にスペースを確保 */
+        }
+
+        .input-group .input-duration {
+            flex: 1;
+            /* 期間入力フィールドが幅の1/3 */
+            margin-right: 0.5rem;
+            /* 右側にスペースを確保 */
+        }
+
+        .input-group span {
+            margin-left: 0.5rem;
+            /* テキストと入力フィールドの間にスペースを確保 */
+        }
+
+        /* 表のスタイル統一 */
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed; /* テーブルのカラム幅を固定 */
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            word-wrap: break-word; /* 長い単語がある場合に折り返す */
+        }
+
+        .table th {
+            background-color: #f4f4f4;
+            /* ヘッダーの背景色 */
+            text-align: left;
+        }
+
+        .table td {
+            background-color: #fff;
+            /* 通常の行の背景色 */
+        }
+
+        .table-container {
+            overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            /* カードの角を丸くする */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* カードの影を追加 */
+        }
+
+        .card-content {
+            padding: 1rem;
+        }
+
+        .card-footer {
+            background-color: #f4f4f4;
+            /* フッターの背景色 */
+        }
+
+        .card-footer-item {
+            padding: 0.75rem 1.25rem;
+        }
+
+        .table-container table {
+            width: 100%; /* テーブルの幅を親要素に合わせる */
+        }
+
+        .table-container th:nth-child(1),
+        .table-container td:nth-child(1) {
+            width: 40%; /* 技術タイプ列の幅 */
+        }
+
+        .table-container th:nth-child(2),
+        .table-container td:nth-child(2) {
+            width: 30%; /* 技術名列の幅 */
+        }
+
+        .table-container th:nth-child(3),
+        .table-container td:nth-child(3) {
+            width: 30%; /* 使用期間列の幅 */
+        }
+
+        /* 横方向に2つのカラムを並べる */
+        /* 横方向に3つのカラムを並べる */
+        .columns {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .column.is-one-third {
+            flex: 1 1 33%;
+        }
+
+        /* Flexboxを使用してカラムの高さを揃える */
+        .columns.is-multiline {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .column.is-one-third {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-container {
+            flex: 1;
+        }
+
+        /* カラムの高さを揃えるためのスタイル */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+        }
+        /* テーブルのスタイルを調整 */
+.skill-table th, .skill-table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* テーブルのセルが改行せずにテキストを表示するようにする */
+.skill-table th {
+    font-size: smaller;
+}
+
+.skill-table td {
+    font-size: smaller;
+}
+.button-form {
     width: 100%;
-    align-items: center;
+    margin-bottom: 1rem;
 }
 
-.input-group .input-name {
-    flex: 2; /* 名前入力フィールドが幅の2/3 */
-    margin-right: 1rem; /* 右側にスペースを確保 */
+.button.is-fullwidth {
+    width: 100%;
 }
+    
+    .box .buttons.is-centered {
+        margin-top: 1rem;  /* 必要に応じて調整 */
+        margin-bottom: 1rem; /* 上部と同じ余白に設定 */
+    }
 
-.input-group .input-duration {
-    flex: 1; /* 期間入力フィールドが幅の1/3 */
-    margin-right: 0.5rem; /* 右側にスペースを確保 */
-}
+    .button-form {
+        margin: 0;
+    }
 
-.input-group span {
-    margin-left: 0.5rem; /* テキストと入力フィールドの間にスペースを確保 */
-}
-
-
+    #link-field {
+        margin-top: 1rem;  /* 必要に応じて調整 */
+    }
     </style>
 </head>
 

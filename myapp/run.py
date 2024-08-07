@@ -374,17 +374,45 @@ def sheet():
     user_id = current_user.id
     projects = Project.query.filter_by(user_id=user_id).all()
     project_data = []
-    
+    skills_by_category = {}
+
+    tech_type_mapping = {
+        'os': 'OS',
+        'language': '言語',
+        'framework': 'フレームワーク',
+        'database': 'データベース',
+        'containertech': 'コンテナ技術',
+        'cicd': 'CI/CD',
+        'logging': 'ログ',
+        'tools': 'その他ツール'
+    }
+
     for project in projects:
-        technologies = Technology.query.filter_by(project_id=project.id).all()
         processes = Process.query.filter_by(project_id=project.id).all()
+        technologies = Technology.query.filter_by(project_id=project.id).all()
+        
+        for tech in technologies:
+            tech_type = tech_type_mapping[tech.type]
+            if tech_type not in skills_by_category:
+                skills_by_category[tech_type] = {}
+            
+            if tech.name not in skills_by_category[tech_type]:
+                skills_by_category[tech_type][tech.name] = tech.duration_months
+            else:
+                skills_by_category[tech_type][tech.name] += tech.duration_months
+        
         project_data.append({
             'project': project,
-            'technologies': technologies,
-            'processes': processes
+            'processes': processes,
+            'technologies': technologies
         })
-    
-    return render_template('sheet.html', user=current_user, projects=project_data)
+
+    skills_by_category_formatted = {}
+    for category, skills in skills_by_category.items():
+        skills_list = [{'name': name, 'duration_months': duration} for name, duration in skills.items()]
+        skills_by_category_formatted[category] = skills_list
+
+    return render_template('sheet.html', user=current_user, projects=project_data, skills_by_category=skills_by_category_formatted, tech_type_mapping=tech_type_mapping)
 
 ####################################################################################################
 # 
@@ -573,6 +601,26 @@ def invalidate_link():
     db.session.commit()
 
     flash('リンクが無効化されました。', 'success')
+    return redirect(url_for('sheet'))
+
+####################################################################################################
+# 
+# 関数名：delete_project
+# 引数：project_id（プロジェクトID）
+# 返却値：リダイレクト
+# 詳細：指定したプロジェクトを削除する
+# 
+####################################################################################################
+@app.route('/delete_project/<int:project_id>', methods=['POST'])
+@login_required
+def delete_project(project_id):
+    project = Project.query.get_or_404(project_id)
+    if project.user_id == current_user.id:
+        db.session.delete(project)
+        db.session.commit()
+        flash('プロジェクトが削除されました。', 'success')
+    else:
+        flash('削除できるのは自身のプロジェクトのみです。', 'danger')
     return redirect(url_for('sheet'))
 
 if __name__ == "__main__":
