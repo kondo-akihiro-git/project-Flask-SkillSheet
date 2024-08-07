@@ -9,6 +9,10 @@ function addField(field) {
     var fieldsContainer = document.getElementById(field + '-fields');
     var newFieldCount = fieldsContainer.children.length + 1; // Number to ensure unique ID
 
+    if (fieldsContainer.style.display === 'none') {
+        fieldsContainer.style.display = 'block';
+    }
+
     var newFieldHtml = `
         <div class="input-group">
             <input class="input input-name" type="text" name="${field}_${newFieldCount - 1}" placeholder="技術名">
