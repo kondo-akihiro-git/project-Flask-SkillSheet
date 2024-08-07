@@ -88,6 +88,7 @@
 
             <div class="field">
                 <label class="label" for="skill">使用技術</label>
+            
                 <div class="field">
                     <label class="label" for="os">OS</label>
                     <div class="control">
@@ -98,10 +99,11 @@
                         </div>
                         <div id="os-fields" class="input-group" style="display: none;"></div>
                         <button type="button" id="add-os" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-os" class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
                 <div class="spacer"></div>
-                
+            
                 <div class="field">
                     <label class="label" for="language">言語</label>
                     <div class="control">
@@ -112,10 +114,11 @@
                         </div>
                         <div id="language-fields" class="input-group"style="display: none;"></div>
                         <button type="button" id="add-language" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-language" class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
                 <div class="spacer"></div>
-                
+            
                 <div class="field">
                     <label class="label" for="framework">フレームワーク</label>
                     <div class="control">
@@ -126,10 +129,11 @@
                         </div>
                         <div id="framework-fields" class="input-group"style="display: none;"></div>
                         <button type="button" id="add-framework" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-framework" class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
                 <div class="spacer"></div>
-                
+            
                 <div class="field">
                     <label class="label" for="database">データベース</label>
                     <div class="control">
@@ -140,10 +144,11 @@
                         </div>
                         <div id="database-fields" class="input-group"style="display: none;"></div>
                         <button type="button" id="add-database" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-database" class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
                 <div class="spacer"></div>
-                
+            
                 <div class="field">
                     <label class="label" for="containertech">仮想化/コンテナ</label>
                     <div class="control">
@@ -154,10 +159,11 @@
                         </div>
                         <div id="containertech-fields" class="input-group"style="display: none;"></div>
                         <button type="button" id="add-containertech" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-containertech" class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
                 <div class="spacer"></div>
-                
+            
                 <div class="field">
                     <label class="label" for="cicd">CI/CD</label>
                     <div class="control">
@@ -168,10 +174,11 @@
                         </div>
                         <div id="cicd-fields" class="input-group"style="display: none;"></div>
                         <button type="button" id="add-cicd" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-cicd" class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
                 <div class="spacer"></div>
-                
+            
                 <div class="field">
                     <label class="label" for="logging">ログ収集・可視化</label>
                     <div class="control">
@@ -182,10 +189,11 @@
                         </div>
                         <div id="logging-fields" class="input-group"style="display: none;"></div>
                         <button type="button" id="add-logging" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-logging" class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
                 <div class="spacer"></div>
-                
+            
                 <div class="field">
                     <label class="label" for="tools">その他ツール類</label>
                     <div class="control">
@@ -195,10 +203,12 @@
                             <span>ヶ月</span>
                         </div>
                         <div id="tools-fields" class="input-group"style="display: none;"></div>
-                        <button type="button" id="add-tools" class="button is-primary has-text-light">＋</button>                       
+                        <button type="button" id="add-tools" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-tools" class="button is-danger has-text-light">ー</button>                       
                     </div>
                 </div>
             </div>
+            
 
             <div class="spacer"></div>
 
@@ -218,45 +228,56 @@
     // 詳細：input画面やedit_project画面において、どの＋ボタンがクリックされているのか確認する
     // 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    document.getElementById('add-os').addEventListener('click', function (e) {
-        e.preventDefault();
-        addField('os');
-    });
+    document.addEventListener('DOMContentLoaded', () => {
+    function addField(buttonId, containerId, namePrefix) {
+        const button = document.getElementById(buttonId);
+        button.addEventListener('click', () => {
+            const container = document.getElementById(containerId);
+            const count = container.childElementCount;
+            const inputGroup = document.createElement('div');
+            inputGroup.classList.add('input-group');
+            inputGroup.innerHTML = `
+                <input class="input input-name" type="text" id="${namePrefix}_${count}" name="${namePrefix}_${count}" placeholder="技術名">
+                <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間">
+                <span>ヶ月</span>
+            `;
+            container.appendChild(inputGroup);
+            container.style.display = 'block';
+        });
+    }
 
-    document.getElementById('add-language').addEventListener('click', function (e) {
-        e.preventDefault();
-        addField('language');
-    });
+    function removeField(buttonId, containerId) {
+        const button = document.getElementById(buttonId);
+        button.addEventListener('click', () => {
+            const container = document.getElementById(containerId);
+            if (container.childElementCount > 0) {
+                container.removeChild(container.lastElementChild);
+                if (container.childElementCount === 0) {
+                    container.style.display = 'none';
+                }
+            }
+        });
+    }
 
-    document.getElementById('add-framework').addEventListener('click', function (e) {
-        e.preventDefault();
-        addField('framework');
-    });
+    addField('add-os', 'os-fields', 'os');
+    removeField('remove-os', 'os-fields');
 
-    document.getElementById('add-database').addEventListener('click', function (e) {
-        e.preventDefault();
-        addField('database');
-    });
+    addField('add-language', 'language-fields', 'language');
+    removeField('remove-language', 'language-fields');
 
-    document.getElementById('add-containertech').addEventListener('click', function (e) {
-        e.preventDefault();
-        addField('containertech');
-    });
+    addField('add-framework', 'framework-fields', 'framework');
+    removeField('remove-framework', 'framework-fields');
 
-    document.getElementById('add-cicd').addEventListener('click', function (e) {
-        e.preventDefault();
-        addField('cicd');
-    });
+    addField('add-database', 'database-fields', 'database');
+    removeField('remove-database', 'database-fields');
 
-    document.getElementById('add-logging').addEventListener('click', function (e) {
-        e.preventDefault();
-        addField('logging');
-    });
+    addField('add-containertech', 'containertech-fields', 'containertech');
+    removeField('remove-containertech', 'containertech-fields');
 
-    document.getElementById('add-tools').addEventListener('click', function (e) {
-        e.preventDefault();
-        addField('tools');
-    });
+    addField('add-cicd', 'cicd-fields', 'cicd');
+    removeField('remove-cicd', 'cicd-fields');
+});
+
 </script>
 
 {% endblock %}
