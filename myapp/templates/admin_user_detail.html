@@ -15,6 +15,7 @@
     <p>最寄り駅: <input type="text" name="nearest_station" value="{{ user.nearest_station or '' }}"></p>
     <p>経験年数: <input type="number" name="experience_years" value="{{ user.experience_years or '' }}"></p>
     <p>学歴: <input type="text" name="education" value="{{ user.education or '' }}"></p>
+    <p>管理者: <input type="checkbox" name="is_admin" value="true" {% if user.is_admin %}checked{% endif %}></p>
     <button type="submit">保存</button>
 </form>
 
@@ -23,7 +24,6 @@
 {% else %}
     <p>有効なスキルシートのリンクはありません。</p>
 {% endif %}
-
 
 <a href="{{ url_for('admin_users') }}">戻る</a>
 {% endblock %}

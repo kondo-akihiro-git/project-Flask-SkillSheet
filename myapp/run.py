@@ -33,8 +33,8 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 # YAMLファイルの読み込み
-with open('config.yml', 'r') as file:
-    config = yaml.safe_load(file)
+# with open('config.yml', 'r') as file:
+#     config = yaml.safe_load(file)
 
 ####################################################################################################
 # 
@@ -176,25 +176,25 @@ class AdminLoginForm(FlaskForm):
 @login_manager.user_loader
 def load_user(user_id):
 
-    admin_user = config['admin']['username']
-    admin_password = config['admin']['password']
+    # admin_user = config['admin']['username']
+    # admin_password = config['admin']['password']
 
-    # すでに存在する管理者ユーザーを削除
-    existing_admin = User.query.filter_by(username=admin_user).first()
-    if existing_admin:
-        db.session.delete(existing_admin)
-        db.session.commit()
+    # # すでに存在する管理者ユーザーを削除
+    # existing_admin = User.query.filter_by(username=admin_user).first()
+    # if existing_admin:
+    #     db.session.delete(existing_admin)
+    #     db.session.commit()
 
-    # 管理者ユーザーを追加
-    admin = User(
-    username=admin_user,
-    password=generate_password_hash(admin_password),  # 管理者パスワードを設定
-    is_admin=True
-    )
-    db.session.add(admin)
-    db.session.commit()
+    # # 管理者ユーザーを追加
+    # admin = User(
+    # username=admin_user,
+    # password=generate_password_hash(admin_password),  # 管理者パスワードを設定
+    # is_admin=True
+    # )
+    # db.session.add(admin)
+    # db.session.commit()
 
-    print("管理者ユーザーが追加されました。")
+    # print("管理者ユーザーが追加されました。")
     return User.query.get(int(user_id))
 
 ####################################################################################################
@@ -789,6 +789,7 @@ def admin_user_detail(user_id):
         user.nearest_station = request.form['nearest_station']
         user.experience_years = request.form['experience_years']
         user.education = request.form['education']
+        user.is_admin = 'is_admin' in request.form 
         db.session.commit()
         flash('ユーザー情報が更新されました。', 'success')
         return redirect(url_for('admin_user_detail', user_id=user.id))
@@ -841,6 +842,41 @@ def admin_project_delete(project_id):
     db.session.commit()
     flash('プロジェクトが削除されました。', 'success')
     return redirect(url_for('admin_projects'))
+
+# 新規ユーザー登録画面
+@app.route('/admin/user/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_user_create():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+        display_name = request.form.get('display_name')
+        age = request.form.get('age')
+        gender = request.form.get('gender')
+        nearest_station = request.form.get('nearest_station')
+        experience_years = request.form.get('experience_years')
+        education = request.form.get('education')
+        is_admin = 'is_admin' in request.form  # チェックボックスの処理
+
+        new_user = User(
+            username=username,
+            password=password,
+            display_name=display_name,
+            age=age,
+            gender=gender,
+            nearest_station=nearest_station,
+            experience_years=experience_years,
+            education=education,
+            is_admin=is_admin
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        flash('新規ユーザーが登録されました。', 'success')
+        return redirect(url_for('admin_users'))
+    
+    return render_template('admin_user_create.html')
+
 
 ####################################################################################################
 # 

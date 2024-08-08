@@ -4,6 +4,7 @@
 <h1>ユーザー一覧</h1>
 <a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
 <a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
+<a href="{{ url_for('admin_user_create') }}">新規ユーザー登録</a>
 <table>
     <thead>
         <tr>
@@ -15,6 +16,8 @@
             <th>最寄り駅</th>
             <th>経験年数</th>
             <th>学歴</th>
+            <th>最新スキルシート</th>
+            <th>管理者</th>
             <th>アクション</th>
         </tr>
     </thead>
@@ -29,6 +32,15 @@
             <td>{{ user.nearest_station or '' }}</td>
             <td>{{ user.experience_years or '' }}</td>
             <td>{{ user.education or '' }}</td>
+            <td>
+                {% set latest_active_link = user.links | selectattr('is_active', 'eq', True) | sort(attribute='created_at', reverse=True) | first %}
+                {% if latest_active_link %}
+                    <a href="{{ url_for('view_sheet', link_code=latest_active_link.link_code, _external=True) }}">リンク</a>
+                {% else %}
+                    なし
+                {% endif %}
+            </td>
+            <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
             <td>
                 <a href="{{ url_for('admin_user_detail', user_id=user.id) }}">詳細</a>
                 <form action="{{ url_for('admin_user_delete', user_id=user.id) }}" method="post" style="display:inline;">
