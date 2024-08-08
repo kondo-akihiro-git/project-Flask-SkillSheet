@@ -5,6 +5,7 @@
 <a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
 <a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
 <a href="{{ url_for('admin_user_create') }}">新規ユーザー登録</a>
+
 <table>
     <thead>
         <tr>
@@ -21,34 +22,66 @@
             <th>アクション</th>
         </tr>
     </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.username or '' }}</td>
-            <td>{{ user.display_name or '' }}</td>
-            <td>{{ user.age or '' }}</td>
-            <td>{{ user.gender or '' }}</td>
-            <td>{{ user.nearest_station or '' }}</td>
-            <td>{{ user.experience_years or '' }}</td>
-            <td>{{ user.education or '' }}</td>
-            <td>
-                {% set latest_active_link = user.links | selectattr('is_active', 'eq', True) | sort(attribute='created_at', reverse=True) | first %}
-                {% if latest_active_link %}
-                    <a href="{{ url_for('view_sheet', link_code=latest_active_link.link_code, _external=True) }}">リンク</a>
-                {% else %}
-                    なし
-                {% endif %}
-            </td>
-            <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
-            <td>
-                <a href="{{ url_for('admin_user_detail', user_id=user.id) }}">詳細</a>
-                <form action="{{ url_for('admin_user_delete', user_id=user.id) }}" method="post" style="display:inline;">
-                    <button type="submit">削除</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
+    <tbody id="userTableBody">
+        <!-- ユーザーデータがここに表示される -->
     </tbody>
 </table>
+<div id="pagination">
+    <!-- ページネーションがここに表示される -->
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUsers(1);
+    });
+
+    function loadUsers(page) {
+        fetch(`/admin/users_pagination?page=${page}`)
+            .then(response => response.json())
+            .then(data => {
+                const userTableBody = document.getElementById('userTableBody');
+                userTableBody.innerHTML = '';
+
+                data.users.forEach(user => {
+                    const row = document.createElement('tr');
+
+                    const adminStatus = user.is_admin === null ? '登録なし' : (user.is_admin ? '管理者' : '一般ユーザー');
+
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.username || ''}</td>
+                        <td>${user.display_name || ''}</td>
+                        <td>${user.age || ''}</td>
+                        <td>${user.gender || ''}</td>
+                        <td>${user.nearest_station || ''}</td>
+                        <td>${user.experience_years || ''}</td>
+                        <td>${user.education || ''}</td>
+                        <td>${user.latest_active_link_url ? `<a href="${user.latest_active_link_url}">${user.latest_active_link_url}</a>` : 'なし'}</td>
+                        <td>${adminStatus}</td>
+                        <td>
+                            <a href="/admin/user/${user.id}">詳細</a>
+                            <form action="/admin/user/delete/${user.id}" method="post" style="display:inline;">
+                                <button type="submit">削除</button>
+                            </form>
+                        </td>
+                    `;
+
+                    userTableBody.appendChild(row);
+                });
+
+                const pagination = document.getElementById('pagination');
+                pagination.innerHTML = '';
+
+                for (let i = 1; i <= data.pages; i++) {
+                    const pageLink = document.createElement('a');
+                    pageLink.href = "#";
+                    pageLink.innerText = i;
+                    pageLink.onclick = function() {
+                        loadUsers(i);
+                    };
+                    pagination.appendChild(pageLink);
+                }
+            });
+    }
+</script>
 {% endblock %}

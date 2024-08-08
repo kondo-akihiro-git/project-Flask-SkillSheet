@@ -2,6 +2,7 @@ from functools import wraps
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import asc, desc
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_migrate import Migrate
@@ -876,6 +877,45 @@ def admin_user_create():
         return redirect(url_for('admin_users'))
     
     return render_template('admin_user_create.html')
+
+
+@app.route('/admin/users_pagination', methods=['GET'])
+@login_required
+@admin_required
+def admin_users_pagination():
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
+    users_paginated = User.query.paginate(page=page, per_page=per_page, error_out=False)
+
+    users = users_paginated.items
+    total = users_paginated.total
+    pages = users_paginated.pages
+
+    users_data = []
+    for user in users:
+        latest_active_link = db.session.query(Link).filter_by(user_id=user.id, is_active=True).order_by(Link.created_at.desc()).first()
+        latest_active_link_url = url_for('view_sheet', link_code=latest_active_link.link_code, _external=True) if latest_active_link else None
+
+        users_data.append({
+            'id': user.id,
+            'username': user.username,
+            'display_name': user.display_name,
+            'age': user.age,
+            'gender': user.gender,
+            'nearest_station': user.nearest_station,
+            'experience_years': user.experience_years,
+            'education': user.education,
+            'latest_active_link_url': latest_active_link_url,
+            'is_admin': user.is_admin,
+        })
+
+    return jsonify({
+        'users': users_data,
+        'total': total,
+        'pages': pages,
+        'current_page': page
+    })
 
 
 ####################################################################################################
