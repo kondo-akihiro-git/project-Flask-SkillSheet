@@ -1,117 +1,143 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>プロジェクトを編集</h1>
+<section class="section">
+    <div class="container">
+        <h1 class="title">プロジェクトを編集</h1>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-    <ul class="flashes">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
         {% set category, message = messages[messages|length-1] %}
-        <li class="{{ category }}">{{ message }}</li>
-    </ul>
-{% endif %}
-{% endwith %}
-
-<form method="POST">
-    <label for="start_month">プロジェクトに参加した月</label>
-    <input type="month" id="start_month" name="start_month" value="{{ project.start_month }}" required>
-    <br>
-    <label for="end_month">プロジェクトを退場した月</label>
-    <input type="month" id="end_month" name="end_month" value="{{ project.end_month }}" required>
-    <br>
-    <label for="industry">クライアントの業種</label>
-    <input type="text" id="industry" name="industry" value="{{ project.industry }}" required>
-    <br>
-    <label for="project_name">プロジェクト名</label>
-    <input type="text" id="project_name" name="project_name" value="{{ project.project_name }}" required>
-    <br>
-    <label for="project_summary">プロジェクト概要</label>
-    <textarea id="project_summary" name="project_summary" required>{{ project.project_summary }}</textarea>
-    <br>
-
-    <label for="process">担当した工程</label>
-    <div>
-        {% for process in ['要件定義', '基本設計', '詳細設計', '実装', '単体テスト', '結合テスト', '受入テスト', '運用・保守'] %}
-            <div>
-                <input type="checkbox" id="{{ process }}" name="process" value="{{ process }}"
-                {% if process in processes %} checked {% endif %}>
-                <label for="{{ process }}">{{ process }}</label>
-            </div>
-        {% endfor %}
-    </div>
-    <br>
-
-    <label for="responsibilities">担当業務</label>
-    <textarea type="text" id="responsibilities" name="responsibilities" required>{{ project.responsibilities }}</textarea>
-    <br>
-
-    <label for="skill">使用技術</label>
-    {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'] %}
-        <label for="{{ tech_type }}">{{ tech_type | capitalize }}</label>
-        <div id="{{ tech_type }}-fields">
-            {% for tech in technologies[tech_type] %}
-                <div>
-                    <input type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}">
-                    <input type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}">
-                    <span>ヶ月</span>
-                </div>
-            {% endfor %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
         </div>
-        <button type="button" id="add-{{ tech_type }}" class="button is-primary">＋</button>
-        <br>
-    {% endfor %}
+        {% endif %}
+        {% endwith %}
 
-    <br>
-    <button type="submit">送信</button>
-</form>
+        <form method="POST" class="box">
+            <div class="field">
+                <label class="label" for="start_month">プロジェクトに参加した月</label>
+                <div class="control">
+                    <input class="input" type="month" id="start_month" name="start_month" value="{{ project.start_month }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="end_month">プロジェクトを退場した月</label>
+                <div class="control">
+                    <input class="input" type="month" id="end_month" name="end_month" value="{{ project.end_month }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="industry">クライアントの業種</label>
+                <div class="control">
+                    <input class="input" type="text" id="industry" name="industry" value="{{ project.industry }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="project_name">プロジェクト名</label>
+                <div class="control">
+                    <input class="input" type="text" id="project_name" name="project_name" value="{{ project.project_name }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="project_summary">プロジェクト概要</label>
+                <div class="control">
+                    <textarea class="textarea" id="project_summary" name="project_summary" required>{{ project.project_summary }}</textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">担当した工程</label>
+                <div class="control">
+                    {% for process in ['要件定義', '基本設計', '詳細設計', '実装', '単体テスト', '結合テスト', '受入テスト', '運用・保守'] %}
+                    <label class="checkbox">
+                        <input type="checkbox" id="{{ process }}" name="process" value="{{ process }}"
+                        {% if process in processes %} checked {% endif %}>
+                        {{ process }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="responsibilities">担当業務</label>
+                <div class="control">
+                    <textarea class="textarea" id="responsibilities" name="responsibilities" required>{{ project.responsibilities }}</textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">使用技術</label>
+                {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'] %}
+                <div class="field">
+                    <label class="label" for="{{ tech_type }}">{{ tech_type | capitalize }}</label>
+                    <div class="control">
+                        <div id="{{ tech_type }}-fields">
+                            {% for tech in technologies[tech_type] %}
+                            <div class="input-group">
+                                <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
+                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間">
+                                <span>ヶ月</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" id="add-{{ tech_type }}" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-{{ tech_type }}" class="button is-danger has-text-light">ー</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link">送信</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
 
 <script>
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-// イベント：addField関数への仲介
-// 詳細：input画面やedit_project画面において、どの＋ボタンがクリックされているのか確認する
-// 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-document.getElementById('add-os').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('os');
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        function addField(buttonId, containerId, namePrefix) {
+            const button = document.getElementById(buttonId);
+            button.addEventListener('click', () => {
+                const container = document.getElementById(containerId);
+                const count = container.childElementCount;
+                const inputGroup = document.createElement('div');
+                inputGroup.classList.add('input-group');
+                inputGroup.innerHTML = `
+                    <input class="input input-name" type="text" id="${namePrefix}_${count}" name="${namePrefix}_${count}" placeholder="技術名">
+                    <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間">
+                    <span>ヶ月</span>
+                `;
+                container.appendChild(inputGroup);
+                container.style.display = 'block';
+            });
+        }
 
-document.getElementById('add-language').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('language');
-});
+        function removeField(buttonId, containerId) {
+            const button = document.getElementById(buttonId);
+            button.addEventListener('click', () => {
+                const container = document.getElementById(containerId);
+                if (container.childElementCount > 0) {
+                    container.removeChild(container.lastElementChild);
+                    if (container.childElementCount === 0) {
+                        container.style.display = 'none';
+                    }
+                }
+            });
+        }
 
-document.getElementById('add-framework').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('framework');
-});
-
-document.getElementById('add-database').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('database');
-});
-
-document.getElementById('add-containertech').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('containertech');
-});
-
-document.getElementById('add-cicd').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('cicd');
-});
-
-document.getElementById('add-logging').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('logging');
-});
-
-document.getElementById('add-tools').addEventListener('click', function(e) {
-    e.preventDefault();
-    addField('tools');
-});
-
+        ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'].forEach(techType => {
+            addField(`add-${techType}`, `${techType}-fields`, techType);
+            removeField(`remove-${techType}`, `${techType}-fields`);
+        });
+    });
 </script>
 
 {% endblock %}

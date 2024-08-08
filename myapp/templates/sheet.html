@@ -128,9 +128,9 @@
                     </div>
                 </div>
                 <footer class="card-footer">
-                    <a href="{{ url_for('edit_project', project_id=item.project.id) }}" class="card-footer-item button is-primary is-light">プロジェクトを編集</a>
+                    <a href="{{ url_for('edit_project', project_id=item.project.id) }}" class="card-footer-item button is-primary is-light is-small">プロジェクトを編集</a>
                     <form action="{{ url_for('delete_project', project_id=item.project.id) }}" method="post" style="display:inline;">
-                        <button type="submit" class="button is-danger is-light card-footer-item">プロジェクトを削除</button>
+                        <button type="submit" class="button is-danger is-light is-small card-footer-item">プロジェクトを削除</button>
                     </form>
                 </footer>
             </div>

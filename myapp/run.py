@@ -560,8 +560,6 @@ def create_link():
     # リンクURLを生成
     link_url = url_for('view_sheet', link_code=new_link.link_code, _external=True)
 
-    # 新しいリンクをフラッシュメッセージとともに返す
-    flash('新しいリンクが作成されました。', 'success')
     return jsonify({'link': link_url})
 
 ####################################################################################################
