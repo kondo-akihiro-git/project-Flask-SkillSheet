@@ -1,3 +1,4 @@
+from functools import wraps
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_sqlalchemy import SQLAlchemy
@@ -6,6 +7,11 @@ from datetime import datetime
 from flask_migrate import Migrate
 from flask import jsonify
 import uuid
+from flask import abort
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired
+import yaml
 
 # Flaskアプリのインスタンス
 app = Flask(__name__)
@@ -25,6 +31,10 @@ migrate = Migrate(app, db)
 # ログイン管理のための変数
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+# YAMLファイルの読み込み
+with open('config.yml', 'r') as file:
+    config = yaml.safe_load(file)
 
 ####################################################################################################
 # 
@@ -52,6 +62,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(120), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
+    is_admin = db.Column(db.Boolean, default=False)  # 管理者フラグ
     projects = db.relationship('Project', backref='user', lazy=True)
     # スキルシートに表示するデータ
     display_name = db.Column(db.String(120), nullable=True)
@@ -60,6 +71,9 @@ class User(db.Model, UserMixin):
     nearest_station = db.Column(db.String(120), nullable=True)
     experience_years = db.Column(db.Integer, nullable=True)
     education = db.Column(db.String(120), nullable=True)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 ####################################################################################################
 # 
@@ -139,6 +153,18 @@ class Contact(db.Model):
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
+
+
+class AdminLoginForm(FlaskForm):
+    username = StringField('ユーザー名', validators=[DataRequired()])
+    password = PasswordField('パスワード', validators=[DataRequired()])
+    submit = SubmitField('ログイン')
+
+
+
+
+
+
 ####################################################################################################
 # 
 # 関数名：load_user
@@ -149,6 +175,26 @@ class Contact(db.Model):
 ####################################################################################################
 @login_manager.user_loader
 def load_user(user_id):
+
+    admin_user = config['admin']['username']
+    admin_password = config['admin']['password']
+
+    # すでに存在する管理者ユーザーを削除
+    existing_admin = User.query.filter_by(username=admin_user).first()
+    if existing_admin:
+        db.session.delete(existing_admin)
+        db.session.commit()
+
+    # 管理者ユーザーを追加
+    admin = User(
+    username=admin_user,
+    password=generate_password_hash(admin_password),  # 管理者パスワードを設定
+    is_admin=True
+    )
+    db.session.add(admin)
+    db.session.commit()
+
+    print("管理者ユーザーが追加されました。")
     return User.query.get(int(user_id))
 
 ####################################################################################################
@@ -682,6 +728,98 @@ def contact():
         flash('お問い合わせありがとうございます。こちらからの返信をお待ちください。', 'success')
         return redirect(url_for('contact'))
     return render_template('contact.html')
+
+
+
+# 管理者確認のためのデコレーター
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin:
+            abort(403)  # アクセス禁止
+        return f(*args, **kwargs)
+    return decorated_function
+
+# 管理者ログイン
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_login():
+    form = AdminLoginForm()  # フォームクラスを定義してください
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and user.check_password(form.password.data) and user.is_admin:
+            login_user(user)
+            return redirect(url_for('admin_dashboard'))
+        flash('ログイン情報が無効です。', 'danger')
+    return render_template('admin_login.html', form=form)
+
+# 管理者ダッシュボード
+@app.route('/admin/dashboard')
+@login_required
+@admin_required
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+# ログアウト処理
+@app.route('/admin/logout')
+@login_required
+@admin_required
+def admin_logout():
+    logout_user()
+    return redirect(url_for('admin_login'))
+
+# 管理者画面のユーザー一覧表示
+@app.route('/admin/users')
+@login_required
+@admin_required
+def admin_users():
+    users = User.query.all()
+    return render_template('admin_users.html', users=users)
+
+# ユーザーの詳細表示
+@app.route('/admin/user/<int:user_id>')
+@login_required
+@admin_required
+def admin_user_detail(user_id):
+    user = User.query.get_or_404(user_id)
+    return render_template('admin_user_detail.html', user=user)
+
+# ユーザーの削除
+@app.route('/admin/user/delete/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def admin_user_delete(user_id):
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash('ユーザーが削除されました。', 'success')
+    return redirect(url_for('admin_users'))
+
+# 管理者画面のプロジェクト一覧表示
+@app.route('/admin/projects')
+@login_required
+@admin_required
+def admin_projects():
+    projects = Project.query.all()
+    return render_template('admin_projects.html', projects=projects)
+
+# プロジェクトの詳細表示
+@app.route('/admin/project/<int:project_id>')
+@login_required
+@admin_required
+def admin_project_detail(project_id):
+    project = Project.query.get_or_404(project_id)
+    return render_template('admin_project_detail.html', project=project)
+
+# プロジェクトの削除
+@app.route('/admin/project/delete/<int:project_id>', methods=['POST'])
+@login_required
+@admin_required
+def admin_project_delete(project_id):
+    project = Project.query.get_or_404(project_id)
+    db.session.delete(project)
+    db.session.commit()
+    flash('プロジェクトが削除されました。', 'success')
+    return redirect(url_for('admin_projects'))
 
 ####################################################################################################
 # 

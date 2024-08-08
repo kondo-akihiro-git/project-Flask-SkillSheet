@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>ユーザー一覧</h1>
+<a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
+<a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
+<table>
+    <thead>
+        <tr>
+            <th>ユーザーID</th>
+            <th>ユーザー名</th>
+            <th>表示名</th>
+            <th>アクション</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.display_name }}</td>
+            <td>
+                <a href="{{ url_for('admin_user_detail', user_id=user.id) }}">詳細</a>
+                <form action="{{ url_for('admin_user_delete', user_id=user.id) }}" method="post" style="display:inline;">
+                    <button type="submit">削除</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

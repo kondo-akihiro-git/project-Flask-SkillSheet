@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>プロジェクト一覧</h1>
+<a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
+<a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
+<table>
+    <thead>
+        <tr>
+            <th>プロジェクトID</th>
+            <th>プロジェクト名</th>
+            <th>ユーザーID</th>
+            <th>アクション</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for project in projects %}
+        <tr>
+            <td>{{ project.id }}</td>
+            <td>{{ project.project_name }}</td>
+            <td>{{ project.user_id }}</td>
+            <td>
+                <a href="{{ url_for('admin_project_detail', project_id=project.id) }}">詳細</a>
+                <form action="{{ url_for('admin_project_delete', project_id=project.id) }}" method="post" style="display:inline;">
+                    <button type="submit">削除</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
