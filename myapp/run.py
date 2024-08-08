@@ -1046,6 +1046,60 @@ def create_admin():
     flash('Failed to create admin user. Please check the form and try again.')
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/project/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_project_create():
+    if request.method == 'POST':
+        # ログインユーザーのIDを取得
+        user_id = current_user.id
+        
+        # 新規プロジェクトの作成
+        project = Project(
+            user_id=user_id,  # user_id を追加
+            project_name=request.form['project_name'],
+            industry=request.form['industry'],
+            start_month=request.form['start_month'],
+            end_month=request.form['end_month'],
+            project_summary=request.form['project_summary'],
+            responsibilities=request.form['responsibilities']
+        )
+        db.session.add(project)
+        db.session.commit()
+
+        # 技術の処理
+        tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
+        for tech_type in tech_types:
+            tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(0, len(request.form)) if f'{tech_type}_{i}' in request.form]
+            tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(0, len(request.form)) if f'{tech_type}_{i}_num' in request.form]
+
+            for name, duration in zip(tech_names, tech_durations):
+                if name:
+                    if duration.isdigit() and int(duration) > 0:
+                        new_technology = Technology(
+                            project_id=project.id,
+                            type=tech_type,
+                            name=name,
+                            duration_months=int(duration)
+                        )
+                        db.session.add(new_technology)
+
+        # 工程の処理
+        processes = request.form.getlist('process')
+        for process_name in ['要件定義', '基本設計', '詳細設計', '実装', '単体テスト', '結合テスト', '受入テスト', '運用・保守']:
+            if process_name in processes:
+                new_process = Process(
+                    project_id=project.id,
+                    name=process_name
+                )
+                db.session.add(new_process)
+
+        db.session.commit()
+
+        flash('プロジェクトが正常に作成されました', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('admin_project_create.html')
 
 
 ####################################################################################################

@@ -5,7 +5,7 @@
 
 <a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
 <a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
-
+<a href="{{ url_for('admin_project_create') }}">新規ユーザー登録</a>
 <table>
     <thead>
         <tr>
@@ -34,7 +34,7 @@
             <td>
                 <ul>
                     {% for tech in project.technologies %}
-                    <li>{{ tech.type }}: {{ tech.name }} ({{ tech.duration_months }}ヶ月)</li>
+                    <li>{{ tech.name }} ({{ tech.duration_months }}ヶ月)</li>
                     {% endfor %}
                 </ul>
             </td>
