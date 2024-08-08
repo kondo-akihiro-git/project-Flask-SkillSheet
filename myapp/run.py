@@ -792,7 +792,16 @@ def admin_user_detail(user_id):
         db.session.commit()
         flash('ユーザー情報が更新されました。', 'success')
         return redirect(url_for('admin_user_detail', user_id=user.id))
-    return render_template('admin_user_detail.html', user=user)
+
+    # 最新の有効なスキルシートのリンクを取得
+    latest_active_link = Link.query.filter_by(user_id=user.id, is_active=True).order_by(Link.created_at.desc()).first()
+    # リンクコードをフルURLに変換
+    if latest_active_link:
+        latest_active_link_url = url_for('view_sheet', link_code=latest_active_link.link_code, _external=True)
+    else:
+        latest_active_link_url = None
+
+    return render_template('admin_user_detail.html', user=user, latest_active_url=latest_active_link_url)
 
 
 # ユーザーの削除

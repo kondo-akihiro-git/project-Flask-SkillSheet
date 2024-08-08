@@ -18,5 +18,12 @@
     <button type="submit">保存</button>
 </form>
 
+{% if latest_active_url %}
+    <p>最新の有効なスキルシートのリンク: <a href="{{ latest_active_url }}">{{ latest_active_url }}</a></p>
+{% else %}
+    <p>有効なスキルシートのリンクはありません。</p>
+{% endif %}
+
+
 <a href="{{ url_for('admin_users') }}">戻る</a>
 {% endblock %}
