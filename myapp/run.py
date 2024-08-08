@@ -805,13 +805,30 @@ def admin_user_delete(user_id):
     flash('ユーザーが削除されました。', 'success')
     return redirect(url_for('admin_users'))
 
-# 管理者画面のプロジェクト一覧表示
 @app.route('/admin/projects')
 @login_required
 @admin_required
 def admin_projects():
+    # プロジェクトとその関連テクノロジーを取得
     projects = Project.query.all()
-    return render_template('admin_projects.html', projects=projects)
+
+    # プロジェクトIDを取得
+    project_ids = [project.id for project in projects]
+
+    # プロジェクトに関連するプロセスを取得
+    processes = Process.query.filter(Process.project_id.in_(project_ids)).all()
+
+    # プロジェクトIDごとにプロセスをマッピング
+    project_processes = {}
+    for process in processes:
+        if process.project_id not in project_processes:
+            project_processes[process.project_id] = []
+        project_processes[process.project_id].append(process)
+
+    return render_template('admin_projects.html', projects=projects, project_processes=project_processes)
+
+
+
 
 @app.route('/admin/project/<int:project_id>', methods=['GET', 'POST'])
 @login_required
