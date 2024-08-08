@@ -775,13 +775,25 @@ def admin_users():
     users = User.query.all()
     return render_template('admin_users.html', users=users)
 
-# ユーザーの詳細表示
-@app.route('/admin/user/<int:user_id>')
+# ユーザーの詳細表示および編集
+@app.route('/admin/user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_user_detail(user_id):
     user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        user.username = request.form['username']
+        user.display_name = request.form['display_name']
+        user.age = request.form['age']
+        user.gender = request.form['gender']
+        user.nearest_station = request.form['nearest_station']
+        user.experience_years = request.form['experience_years']
+        user.education = request.form['education']
+        db.session.commit()
+        flash('ユーザー情報が更新されました。', 'success')
+        return redirect(url_for('admin_user_detail', user_id=user.id))
     return render_template('admin_user_detail.html', user=user)
+
 
 # ユーザーの削除
 @app.route('/admin/user/delete/<int:user_id>', methods=['POST'])
