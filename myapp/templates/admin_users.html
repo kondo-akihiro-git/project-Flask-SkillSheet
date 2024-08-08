@@ -22,13 +22,13 @@
         {% for user in users %}
         <tr>
             <td>{{ user.id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.display_name }}</td>
-            <td>{{ user.age }}</td>
-            <td>{{ user.gender }}</td>
-            <td>{{ user.nearest_station }}</td>
-            <td>{{ user.experience_years }}</td>
-            <td>{{ user.education }}</td>
+            <td>{{ user.username or '' }}</td>
+            <td>{{ user.display_name or '' }}</td>
+            <td>{{ user.age or '' }}</td>
+            <td>{{ user.gender or '' }}</td>
+            <td>{{ user.nearest_station or '' }}</td>
+            <td>{{ user.experience_years or '' }}</td>
+            <td>{{ user.education or '' }}</td>
             <td>
                 <a href="{{ url_for('admin_user_detail', user_id=user.id) }}">詳細</a>
                 <form action="{{ url_for('admin_user_delete', user_id=user.id) }}" method="post" style="display:inline;">
