@@ -254,7 +254,7 @@ def account():
             hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
             current_user.password = hashed_password
             db.session.commit()
-            flash('Profile updated successfully.', 'success')
+            flash('ユーザーID/パスワードを更新しました.', 'success')
         return redirect(url_for('account'))
     return render_template('account.html', user=current_user)
 
@@ -371,7 +371,7 @@ def input():
 
         db.session.commit()
 
-        flash('Project and related information successfully added!', 'success')
+        flash('プロジェクトを追加しました。', 'success')
         return redirect(url_for('index'))
 
     return render_template('input.html', user=current_user)
@@ -529,7 +529,7 @@ def edit_project(project_id):
                 db.session.delete(process)
 
         db.session.commit()
-        flash('Project updated successfully!', 'success')
+        flash('プロジェクトを更新しました。', 'success')
         return redirect(url_for('sheet'))
 
     # プロジェクトの技術と担当工程を取得
@@ -679,7 +679,7 @@ def contact():
         db.session.add(new_contact)
         db.session.commit()
 
-        flash('Thank you for contacting us! We will get back to you soon.', 'success')
+        flash('お問い合わせありがとうございます。こちらからの返信をお待ちください。', 'success')
         return redirect(url_for('contact'))
     return render_template('contact.html')
 
