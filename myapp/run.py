@@ -886,7 +886,49 @@ def admin_users_pagination():
     page = request.args.get('page', 1, type=int)
     per_page = 10
 
-    users_paginated = User.query.paginate(page=page, per_page=per_page, error_out=False)
+    # 検索条件の取得
+    user_id = request.args.get('user_id')
+    username = request.args.get('username')
+    display_name = request.args.get('display_name')
+    age = request.args.get('age')
+    gender = request.args.get('gender')
+    nearest_station = request.args.get('nearest_station')
+    experience_years = request.args.get('experience_years')
+    education = request.args.get('education')
+    latest_active_link_url = request.args.get('latest_active_link_url')
+    is_admin = request.args.get('is_admin')
+
+    # クエリの作成
+    query = User.query
+
+    if user_id:
+        query = query.filter(User.id == user_id)
+    if username:
+        query = query.filter(User.username.like(f'%{username}%'))
+    if display_name:
+        query = query.filter(User.display_name.like(f'%{display_name}%'))
+    if age:
+        query = query.filter(User.age == age)
+    if gender:
+        query = query.filter(User.gender.like(f'%{gender}%'))
+    if nearest_station:
+        query = query.filter(User.nearest_station.like(f'%{nearest_station}%'))
+    if experience_years:
+        query = query.filter(User.experience_years == experience_years)
+    if education:
+        query = query.filter(User.education.like(f'%{education}%'))
+    if latest_active_link_url:
+        subquery = Link.query.filter(Link.link_code.like(f'%{latest_active_link_url}%')).subquery()
+        query = query.filter(User.id.in_(db.session.query(Link.user_id).filter(Link.is_active == True).filter(Link.link_code.like(f'%{latest_active_link_url}%')).subquery()))
+    if is_admin is not None:
+        if is_admin == 'null':
+            query = query.filter(User.is_admin.is_(None))
+        elif is_admin == 'true':
+            query = query.filter(User.is_admin.is_(True))
+        elif is_admin == 'false':
+            query = query.filter(User.is_admin.is_(False))
+
+    users_paginated = query.paginate(page=page, per_page=per_page, error_out=False)
 
     users = users_paginated.items
     total = users_paginated.total
@@ -916,6 +958,7 @@ def admin_users_pagination():
         'pages': pages,
         'current_page': page
     })
+
 
 
 ####################################################################################################
