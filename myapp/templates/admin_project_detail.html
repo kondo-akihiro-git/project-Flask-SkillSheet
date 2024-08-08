@@ -1,16 +1,157 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>プロジェクト詳細</h1>
-<a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
-<a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
-<a href="{{ url_for('admin_projects') }}">プロジェクト一覧に戻る</a>
-<p>ID: {{ project.id }}</p>
-<p>プロジェクト名: {{ project.project_name }}</p>
-<p>業界: {{ project.industry }}</p>
-<p>開始月: {{ project.start_month }}</p>
-<p>終了月: {{ project.end_month }}</p>
-<p>プロジェクト概要: {{ project.project_summary }}</p>
-<p>責任範囲: {{ project.responsibilities }}</p>
-<a href="{{ url_for('admin_projects') }}">戻る</a>
+
+<section class="section">
+    <div class="container">
+        <h1 class="title">プロジェクト詳細</h1>
+
+        <a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
+        <a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
+        <a href="{{ url_for('admin_projects') }}">プロジェクト一覧に戻る</a>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% set category, message = messages[messages|length-1] %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="box">
+            <div class="field">
+                <label class="label" for="start_month">プロジェクトに参加した月</label>
+                <div class="control">
+                    <input class="input" type="month" id="start_month" name="start_month" value="{{ project.start_month }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="end_month">プロジェクトを退場した月</label>
+                <div class="control">
+                    <input class="input" type="month" id="end_month" name="end_month" value="{{ project.end_month }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="industry">クライアントの業種</label>
+                <div class="control">
+                    <input class="input" type="text" id="industry" name="industry" value="{{ project.industry }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="project_name">プロジェクト名</label>
+                <div class="control">
+                    <input class="input" type="text" id="project_name" name="project_name" value="{{ project.project_name }}" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="project_summary">プロジェクト概要</label>
+                <div class="control">
+                    <textarea class="textarea" id="project_summary" name="project_summary" required>{{ project.project_summary }}</textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">担当した工程</label>
+                <div class="control">
+                    {% for process in ['要件定義', '基本設計', '詳細設計', '実装', '単体テスト', '結合テスト', '受入テスト', '運用・保守'] %}
+                    <label class="checkbox">
+                        <input type="checkbox" id="{{ process }}" name="process" value="{{ process }}"
+                        {% if process in processes %} checked {% endif %}>
+                        {{ process }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="responsibilities">担当業務</label>
+                <div class="control">
+                    <textarea class="textarea" id="responsibilities" name="responsibilities" required>{{ project.responsibilities }}</textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">使用技術</label>
+                {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'] %}
+                <div class="field">
+                    <label class="label" for="{{ tech_type }}">{{ tech_type | capitalize }}</label>
+                    <div class="control">
+                        <div id="{{ tech_type }}-fields">
+                            {% if technologies[tech_type] %}
+                                {% for tech in technologies[tech_type] %}
+                                <div class="input-group">
+                                    <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
+                                    <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間">
+                                    <span>ヶ月</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="input-group">
+                                    <input class="input input-name" type="text" name="{{ tech_type }}_0" placeholder="技術名">
+                                    <input class="input input-duration" type="number" name="{{ tech_type }}_0_num" placeholder="期間">
+                                    <span>ヶ月</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <button type="button" id="add-{{ tech_type }}" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-{{ tech_type }}" class="button is-danger has-text-light">ー</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link">送信</button>
+                </div>
+            </div>
+        </form>
+
+        <a href="{{ url_for('admin_login') }}" class="button is-link">ログイン画面に戻る</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="button is-link">ダッシュボードに戻る</a>
+        <a href="{{ url_for('admin_projects') }}" class="button is-link">プロジェクト一覧に戻る</a>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        function addField(buttonId, containerId, namePrefix) {
+            const button = document.getElementById(buttonId);
+            button.addEventListener('click', () => {
+                const container = document.getElementById(containerId);
+                const count = container.childElementCount;
+                const inputGroup = document.createElement('div');
+                inputGroup.classList.add('input-group');
+                inputGroup.innerHTML = `
+                    <input class="input input-name" type="text" id="${namePrefix}_${count}" name="${namePrefix}_${count}" placeholder="技術名">
+                    <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間">
+                    <span>ヶ月</span>
+                `;
+                container.appendChild(inputGroup);
+                container.style.display = 'block';
+            });
+        }
+
+        function removeField(buttonId, containerId) {
+            const button = document.getElementById(buttonId);
+            button.addEventListener('click', () => {
+                const container = document.getElementById(containerId);
+                if (container.childElementCount > 1) { // 1つ以上の項目がある場合のみ削除
+                    container.removeChild(container.lastElementChild);
+                }
+            });
+        }
+
+        ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'].forEach(techType => {
+            addField(`add-${techType}`, `${techType}-fields`, techType);
+            removeField(`remove-${techType}`, `${techType}-fields`);
+        });
+    });
+</script>
+
 {% endblock %}

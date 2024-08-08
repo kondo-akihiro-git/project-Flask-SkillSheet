@@ -813,13 +813,76 @@ def admin_projects():
     projects = Project.query.all()
     return render_template('admin_projects.html', projects=projects)
 
-# プロジェクトの詳細表示
-@app.route('/admin/project/<int:project_id>')
+@app.route('/admin/project/<int:project_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def admin_project_detail(project_id):
     project = Project.query.get_or_404(project_id)
-    return render_template('admin_project_detail.html', project=project)
+
+    if request.method == 'POST':
+        # プロジェクトの基本情報を更新
+        project.project_name = request.form['project_name']
+        project.industry = request.form['industry']
+        project.start_month = request.form['start_month']
+        project.end_month = request.form['end_month']
+        project.project_summary = request.form['project_summary']
+        project.responsibilities = request.form['responsibilities']
+
+        # 技術の処理
+        tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
+        for tech_type in tech_types:
+            tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(0, len(request.form)) if f'{tech_type}_{i}' in request.form]
+            tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(0, len(request.form)) if f'{tech_type}_{i}_num' in request.form]
+            existing_techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
+            existing_names = {tech.name for tech in existing_techs}
+
+            for name, duration in zip(tech_names, tech_durations):
+                if name:
+                    if duration.isdigit() and int(duration) > 0:
+                        if name in existing_names:
+                            tech = next(tech for tech in existing_techs if tech.name == name)
+                            tech.duration_months = int(duration)
+                        else:
+                            new_technology = Technology(
+                                project_id=project.id,
+                                type=tech_type,
+                                name=name,
+                                duration_months=int(duration)
+                            )
+                            db.session.add(new_technology)
+                    elif name in existing_names:
+                        tech = next(tech for tech in existing_techs if tech.name == name)
+                        db.session.delete(tech)
+
+            # 空白にする処理を追加
+            for tech in existing_techs:
+                if tech.name not in tech_names:
+                    db.session.delete(tech)
+
+        # 工程の処理
+        processes = request.form.getlist('process')
+        existing_processes = Process.query.filter_by(project_id=project.id).all()
+        existing_names = {process.name for process in existing_processes}
+
+        for process_name in ['要件定義', '基本設計', '詳細設計', '実装', '単体テスト', '結合テスト', '受入テスト', '運用・保守']:
+            if process_name in processes:
+                if process_name not in existing_names:
+                    new_process = Process(project_id=project.id, name=process_name)
+                    db.session.add(new_process)
+            else:
+                if process_name in existing_names:
+                    process = next(p for p in existing_processes if p.name == process_name)
+                    db.session.delete(process)
+
+        db.session.commit()
+        flash('プロジェクトが更新されました。', 'success')
+        return redirect(url_for('admin_project_detail', project_id=project_id))
+
+    technologies = {tech_type: Technology.query.filter_by(project_id=project.id, type=tech_type).all() for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']}
+    processes = [process.name for process in Process.query.filter_by(project_id=project.id).all()]
+
+    return render_template('admin_project_detail.html', project=project, technologies=technologies, processes=processes)
+
 
 # プロジェクトの削除
 @app.route('/admin/project/delete/<int:project_id>', methods=['POST'])
