@@ -40,7 +40,7 @@
             </td>
             <td>
                 <ul>
-                    {% for proc in project.processes %}
+                    {% for proc in project_processes[project.id] %}
                     <li>{{ proc.name }}</li>
                     {% endfor %}
                 </ul>
