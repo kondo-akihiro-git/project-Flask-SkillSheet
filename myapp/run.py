@@ -122,6 +122,7 @@ class Link(db.Model):
     link_code = db.Column(db.String(36), unique=True, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     user = db.relationship('User', backref='links', lazy=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
 ####################################################################################################
 # 
@@ -427,7 +428,13 @@ def sheet():
         skills_list = [{'name': name, 'duration_months': duration} for name, duration in skills.items()]
         skills_by_category_formatted[category] = skills_list
 
-    return render_template('sheet.html', user=current_user, projects=project_data, skills_by_category=skills_by_category_formatted, tech_type_mapping=tech_type_mapping)
+    # 最新のアクティブなリンクを取得
+    active_link = Link.query.filter_by(user_id=user_id, is_active=True).order_by(Link.created_at.desc()).first()
+
+    link_url = url_for('view_sheet', link_code=active_link.link_code, _external=True) if active_link else None
+
+    return render_template('sheet.html', user=current_user, projects=project_data, skills_by_category=skills_by_category_formatted, tech_type_mapping=tech_type_mapping, link_url=link_url)
+
 
 ####################################################################################################
 # 
