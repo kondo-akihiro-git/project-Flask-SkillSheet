@@ -545,9 +545,6 @@ def edit_project(project_id):
 @app.route('/create_link', methods=['POST'])
 @login_required
 def create_link():
-    # 現在のユーザーの既存のアクティブリンクをすべて無効化
-    Link.query.filter_by(user_id=current_user.id, is_active=True).update({'is_active': False})
-    db.session.commit()
 
     new_link = Link(
         user_id=current_user.id,
@@ -609,8 +606,13 @@ def view_sheet(link_code):
 @app.route('/invalidate_link', methods=['POST'])
 @login_required
 def invalidate_link():
-    # 現在のユーザーのアクティブなリンクをすべて無効化
+    # 現在のアクティブなリンクを無効化
     Link.query.filter_by(user_id=current_user.id, is_active=True).update({'is_active': False})
+    
+    # 現在のユーザーの既存のアクティブリンク以外をすべて削除
+    inactive_links = Link.query.filter_by(user_id=current_user.id, is_active=False).all()
+    for link in inactive_links:
+        db.session.delete(link)
     db.session.commit()
 
     flash('リンクが無効化されました。', 'success')
