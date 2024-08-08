@@ -2,6 +2,14 @@
 
 {% block content %}
 <h1>ユーザー詳細</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% set category, message = messages[messages|length-1] %}
+<div class="notification is-{{ category }}">
+    {{ message }}
+</div>
+{% endif %}
+{% endwith %}
 <a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
 <a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
 <a href="{{ url_for('admin_users') }}">ユーザー一覧に戻る</a>

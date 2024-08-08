@@ -176,25 +176,6 @@ class AdminLoginForm(FlaskForm):
 ####################################################################################################
 @login_manager.user_loader
 def load_user(user_id):
-
-    # admin_user = config['admin']['username']
-    # admin_password = config['admin']['password']
-
-    # # すでに存在する管理者ユーザーを削除
-    # existing_admin = User.query.filter_by(username=admin_user).first()
-    # if existing_admin:
-    #     db.session.delete(existing_admin)
-    #     db.session.commit()
-
-    # # 管理者ユーザーを追加
-    # admin = User(
-    # username=admin_user,
-    # password=generate_password_hash(admin_password),  # 管理者パスワードを設定
-    # is_admin=True
-    # )
-    # db.session.add(admin)
-    # db.session.commit()
-
     # print("管理者ユーザーが追加されました。")
     return User.query.get(int(user_id))
 
@@ -419,7 +400,7 @@ def input():
         db.session.commit()
 
         flash('プロジェクトを追加しました。', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('input'))
 
     return render_template('input.html', user=current_user)
 
@@ -480,8 +461,10 @@ def sheet():
 
     link_url = url_for('view_sheet', link_code=active_link.link_code, _external=True) if active_link else None
 
-    return render_template('sheet.html', user=current_user, projects=project_data, skills_by_category=skills_by_category_formatted, tech_type_mapping=tech_type_mapping, link_url=link_url)
+    # `user.experience_years` が None の場合に備えてデフォルト値を設定
+    experience_years = current_user.experience_years or 0
 
+    return render_template('sheet.html', user=current_user, projects=project_data, skills_by_category=skills_by_category_formatted, tech_type_mapping=tech_type_mapping, link_url=link_url, experience_years=experience_years)
 
 ####################################################################################################
 # 
@@ -963,6 +946,26 @@ def admin_users_pagination():
         'pages': pages,
         'current_page': page
     })
+
+# run.py の一部
+
+@app.route('/create_admin', methods=['POST'])
+def create_admin():
+    if not current_user.is_authenticated or not current_user.is_admin:
+        return redirect(url_for('login'))
+    
+    username = request.form.get('username')
+    password = request.form.get('password')
+    if username and password:
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        admin_user = User(username=username, password=hashed_password, is_admin=True)
+        db.session.add(admin_user)
+        db.session.commit()
+        flash('Admin user created successfully!')
+        return redirect(url_for('admin_dashboard'))
+    flash('Failed to create admin user. Please check the form and try again.')
+    return redirect(url_for('admin_dashboard'))
+
 
 
 ####################################################################################################

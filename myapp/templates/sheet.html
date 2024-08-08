@@ -30,8 +30,7 @@
                     <p><strong>最寄駅:</strong> {{ user.nearest_station }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p><strong>経験年数:</strong> {{ user.experience_years // 12 }} 年 {{ user.experience_years % 12 }} ヶ月
-                    </p>
+                    <p><strong>経験年数:</strong> {{ experience_years // 12 }} 年 {{ experience_years % 12 }} ヶ月</p>
                 </div>
                 <div class="column is-one-third">
                     <p><strong>学歴:</strong> {{ user.education }}</p>
@@ -42,7 +41,7 @@
 
         <hr>
 
-
+        {% if skills_by_category|length > 0 %}
         <div class="box">
             <h1 class="title is-4">スキル歴</h1>
             <div class="columns is-multiline">
@@ -76,9 +75,11 @@
                 {% endfor %}
             </div>
         </div>
+        {% endif %}
 
         <hr>
 
+        {% if projects|length > 0 %}
         <h1 class="title is-4">プロジェクト</h1>
         {% for item in projects %}
         <div class="card" style="margin-bottom: 2rem;">
@@ -138,6 +139,7 @@
             </footer>
         </div>
         {% endfor %}
+        {% endif %}
 
         <div class="box">
             <div class="buttons is-centered">
@@ -153,7 +155,6 @@
             <input type="text" id="link-field" readonly class="input" {% if link_url %} value="{{ link_url }}" style="display: block;" {% else %} style="display: none;" {% endif %}>
 
         </div>
-
 
     </div>
 </section>
