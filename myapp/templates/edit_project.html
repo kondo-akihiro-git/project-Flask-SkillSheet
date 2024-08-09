@@ -72,17 +72,25 @@
 
             <div class="field">
                 <label class="label">使用技術</label>
-                {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'] %}
+                {% for tech_type, tech_label in {'os': 'OS', 'language': '言語', 'framework': 'フレームワーク', 'database': 'データベース', 'containertech': 'コンテナ技術', 'cicd': 'CI/CD', 'logging': 'ログ管理', 'tools': 'ツール'}.items() %}
                 <div class="field">
-                    <label class="label" for="{{ tech_type }}">{{ tech_type | capitalize }}</label>
+                    <label class="label" for="{{ tech_type }}">{{ tech_label }}</label>
                     <div class="control">
                         <div id="{{ tech_type }}-fields">
                             {% for tech in technologies[tech_type] %}
+                            {% if loop.index0 == 0 %}
                             <div class="input-group">
                                 <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
                                 <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間">
                                 <span>ヶ月</span>
                             </div>
+                            {% else %}
+                            <div class="input-group" style="display: none;">
+                                <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
+                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間">
+                                <span>ヶ月</span>
+                            </div>
+                            {% endif %}
                             {% endfor %}
                         </div>
                         <button type="button" id="add-{{ tech_type }}" class="button is-primary has-text-light">＋</button>
@@ -107,16 +115,15 @@
             const button = document.getElementById(buttonId);
             button.addEventListener('click', () => {
                 const container = document.getElementById(containerId);
-                const count = container.childElementCount;
+                const count = container.querySelectorAll('.input-group').length;
                 const inputGroup = document.createElement('div');
                 inputGroup.classList.add('input-group');
                 inputGroup.innerHTML = `
-                    <input class="input input-name" type="text" id="${namePrefix}_${count}" name="${namePrefix}_${count}" placeholder="技術名">
-                    <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間">
+                    <input class="input input-name" type="text" name="${namePrefix}_${count}" placeholder="技術名">
+                    <input class="input input-duration" type="number" name="${namePrefix}_${count}_num" placeholder="期間">
                     <span>ヶ月</span>
                 `;
                 container.appendChild(inputGroup);
-                container.style.display = 'block';
             });
         }
 
@@ -124,11 +131,9 @@
             const button = document.getElementById(buttonId);
             button.addEventListener('click', () => {
                 const container = document.getElementById(containerId);
-                if (container.childElementCount > 0) {
-                    container.removeChild(container.lastElementChild);
-                    if (container.childElementCount === 0) {
-                        container.style.display = 'none';
-                    }
+                const inputGroups = container.querySelectorAll('.input-group');
+                if (inputGroups.length > 1) { // 最初の入力フィールドは削除しない
+                    container.removeChild(inputGroups[inputGroups.length - 1]);
                 }
             });
         }

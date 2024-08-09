@@ -502,6 +502,9 @@ def edit_profile():
 @login_required
 def edit_project(project_id):
     project = Project.query.get_or_404(project_id)
+    
+    tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
+
     if request.method == 'POST':
         # プロジェクトの基本情報を更新
         project.project_name = request.form['project_name']
@@ -512,65 +515,61 @@ def edit_project(project_id):
         project.responsibilities = request.form['responsibilities']
 
         # 技術の処理
-        tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
         for tech_type in tech_types:
-            tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(0, len(request.form)) if f'{tech_type}_{i}' in request.form]
-            tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(0, len(request.form)) if f'{tech_type}_{i}_num' in request.form]
+            tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(len(request.form)) if f'{tech_type}_{i}' in request.form]
+            tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(len(request.form)) if f'{tech_type}_{i}_num' in request.form]
             existing_techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
             existing_names = {tech.name for tech in existing_techs}
 
             for name, duration in zip(tech_names, tech_durations):
-                if name:
-                    if duration.isdigit() and int(duration) > 0:
-                        if name in existing_names:
-                            tech = next(tech for tech in existing_techs if tech.name == name)
-                            tech.duration_months = int(duration)
-                        else:
-                            new_technology = Technology(
-                                project_id=project.id,
-                                type=tech_type,
-                                name=name,
-                                duration_months=int(duration)
-                            )
-                            db.session.add(new_technology)
-                    elif name in existing_names:
+                if name and duration.isdigit() and int(duration) > 0:
+                    if name in existing_names:
                         tech = next(tech for tech in existing_techs if tech.name == name)
-                        db.session.delete(tech)
-
-            # 空白にされた技術を削除する処理
-            for tech in existing_techs:
-                if tech.name not in tech_names or not tech.name:
-                    db.session.delete(tech)
+                        tech.duration_months = int(duration)
+                    else:
+                        new_technology = Technology(
+                            project_id=project.id,
+                            type=tech_type,
+                            name=name,
+                            duration_months=int(duration)
+                        )
+                        db.session.add(new_technology)
+            db.session.commit()
 
         # 担当工程の処理
         selected_processes = request.form.getlist('process')
+        # DBからの取得と一致する工程の処理
         existing_processes = Process.query.filter_by(project_id=project.id).all()
-        existing_names = {process.name for process in existing_processes}
-        for process in selected_processes:
-            if process not in existing_names:
+        existing_process_names = {process.name for process in existing_processes}
+
+        for process_name in selected_processes:
+            if process_name not in existing_process_names:
                 new_process = Process(
                     project_id=project.id,
-                    name=process
+                    name=process_name
                 )
                 db.session.add(new_process)
-
-        # 既存のプロセスを削除
+        
+        # 既存の工程で選択されていないものを削除
         for process in existing_processes:
             if process.name not in selected_processes:
                 db.session.delete(process)
-
+                
         db.session.commit()
-        flash('プロジェクトを更新しました。', 'success')
-        return redirect(url_for('sheet'))
 
-    # プロジェクトの技術と担当工程を取得
-    technologies = {tech_type: [] for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']}
-    for tech in Technology.query.filter_by(project_id=project_id).all():
-        technologies[tech.type].append(tech)
+        flash('プロジェクトが更新されました', 'success')
+        return redirect(url_for('edit_project', project_id=project.id))
 
-    processes = [process.name for process in Process.query.filter_by(project_id=project_id).all()]
+    # 空のフィールドも表示するための処理
+    technologies = {}
+    for tech_type in tech_types:
+        techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
+        technologies[tech_type] = techs if techs else [{}]
 
-    return render_template('edit_project.html', project=project, technologies=technologies, processes=processes)
+    # 担当工程の処理
+    processes = [process.name for process in Process.query.filter_by(project_id=project.id).all()]
+
+    return render_template('edit_project.html', project=project, processes=processes, technologies=technologies)
 
 ####################################################################################################
 # 
