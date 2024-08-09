@@ -36,7 +36,7 @@
                     <p><strong>学歴:</strong> {{ user.education }}</p>
                 </div>
             </div>
-            <a href="{{ url_for('edit_profile') }}" class="button is-primary is-light">プロフィールを編集</a>
+            <a href="{{ url_for('edit_profile') }}" class="button is-primary is-light">プロフィール編集</a>
         </div>
 
         <hr>
@@ -82,7 +82,7 @@
         {% if projects|length > 0 %}
         <div id="projects-container">
             {% for item in projects %}
-            <div class="card project-card" style="margin-bottom: 2rem;">
+            <div class="card project-card">
                 <div class="card-content">
                     <h2 class="subtitle project-title" data-index="{{ loop.index }}" style="font-size: 1.5rem;">
                         {{ loop.index }}. {{ item.project.project_name }}
@@ -137,29 +137,35 @@
                             </table>
                         </div>
                     </div>
+                    <footer class="card-footer">
+                        <a href="{{ url_for('edit_project', project_id=item.project.id) }}"
+                            class="card-footer-item button is-primary is-light">プロジェクト編集</a>
+                        <form action="{{ url_for('delete_project', project_id=item.project.id) }}" method="post"
+                            style="display:inline;">
+                            <button type="submit" class="button is-danger is-light card-footer-item">プロジェクト削除</button>
+                        </form>
+                    </footer>
                 </div>
-                <footer class="card-footer">
-                    <a href="{{ url_for('edit_project', project_id=item.project.id) }}"
-                        class="card-footer-item button is-primary is-light is-small">プロジェクトを編集</a>
-                    <form action="{{ url_for('delete_project', project_id=item.project.id) }}" method="post"
-                        style="display:inline;">
-                        <button type="submit" class="button is-danger is-light is-small card-footer-item">プロジェクトを削除</button>
-                    </form>
-                </footer>
+
             </div>
             {% endfor %}
         </div>
         {% endif %}
 
+        <div class="hero-button-container" >
+            <a href="{{ url_for('input') }}" class="button hero-button small-button">＋</a>
+        </div>
+        
+        <div class="spacer"></div>
         <div class="box">
             <div class="buttons is-centered">
                 <form id="create-link-form" action="{{ url_for('create_link') }}" method="post" class="button-form">
-                    <button type="submit" class="button is-info is-light is-fullwidth">リンクを作成</button>
+                    <button type="submit" class="button is-info is-light is-fullwidth">リンク作成</button>
                 </form>
 
                 <form id="invalidate-link-form" action="{{ url_for('invalidate_link') }}" method="post"
                     class="button-form">
-                    <button type="submit" class="button is-danger is-light is-fullwidth">リンクを無効にする</button>
+                    <button type="submit" class="button is-danger is-light is-fullwidth">リンク無効化</button>
                 </form>
             </div>
             <input type="text" id="link-field" readonly class="input" {% if link_url %} value="{{ link_url }}"
