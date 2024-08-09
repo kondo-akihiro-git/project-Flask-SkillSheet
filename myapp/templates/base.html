@@ -133,6 +133,7 @@
             border: none;
             color: #fff;
         }
+
         .button:hover {
             background-color: #5a6268;
         }
@@ -324,11 +325,55 @@
             justify-content: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
         }
+
         .button.is-small {
-    font-size: 0.875rem; /* フォントサイズを小さくする */
-    padding: 0.5rem 1rem; /* パディングを調整 */
-    border-radius: 3px; /* ボーダー半径を小さくする */
-}
+            font-size: 0.875rem;
+            /* フォントサイズを小さくする */
+            padding: 0.5rem 1rem;
+            /* パディングを調整 */
+            border-radius: 3px;
+            /* ボーダー半径を小さくする */
+        }
+
+        .process-section {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            /* タイトルとタグ間のスペース */
+        }
+
+        .process-title {
+            margin-right: 0rem;
+            /* タイトルとタグ間のスペース */
+            white-space: nowrap;
+            /* タイトルの改行を防ぐ */
+        }
+
+        .process-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            /* タグ間のスペース */
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            height: 1.5rem;
+            /* 高さを指定してタグの縦の位置を揃える */
+            padding: 0.5rem 1rem;
+            /* タグ内の余白 */
+            line-height: 2rem;
+            /* テキストを縦方向で中央揃えに */
+            background-color: #f5f5f5;
+            /* タグの背景色 */
+            border-radius: 4px;
+            /* タグの角を丸める */
+        }
+        .industry-item {
+        font-size: 1.2rem; /* 文字サイズを少し大きくする */
+    }
     </style>
 </head>
 
