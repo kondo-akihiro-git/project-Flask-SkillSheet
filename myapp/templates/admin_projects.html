@@ -5,7 +5,21 @@
 
 <a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
 <a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
-<a href="{{ url_for('admin_project_create') }}">新規ユーザー登録</a>
+<a href="{{ url_for('admin_project_create') }}">新規プロジェクト登録</a>
+
+<form id="searchForm">
+    <input type="text" name="project_id" placeholder="プロジェクトID" />
+    <input type="text" name="project_name" placeholder="プロジェクト名" />
+    <input type="text" name="industry" placeholder="業界" />
+    <input type="month" name="start_month" placeholder="開始月" />
+    <input type="month" name="end_month" placeholder="終了月" />
+    <input type="text" name="project_summary" placeholder="プロジェクト概要" />
+    <input type="text" name="responsibilities" placeholder="責任範囲" />
+    <input type="text" name="technologies" placeholder="技術" />
+    <input type="text" name="processes" placeholder="プロセス" />
+    <button type="submit">検索</button>
+</form>
+
 <table>
     <thead>
         <tr>
@@ -21,42 +35,71 @@
             <th>アクション</th>
         </tr>
     </thead>
-    <tbody>
-        {% for project in projects %}
-        <tr>
-            <td>{{ project.id }}</td>
-            <td>{{ project.project_name }}</td>
-            <td>{{ project.industry }}</td>
-            <td>{{ project.start_month }}</td>
-            <td>{{ project.end_month }}</td>
-            <td>{{ project.project_summary }}</td>
-            <td>{{ project.responsibilities }}</td>
-            <td>
-                <ul>
-                    {% for tech in project.technologies %}
-                    <li>{{ tech.name }} ({{ tech.duration_months }}ヶ月)</li>
-                    {% endfor %}
-                </ul>
-            </td>
-            <td>
-                <ul>
-                    {% for proc in project_processes[project.id] %}
-                    <li>{{ proc.name }}</li>
-                    {% endfor %}
-                </ul>
-            </td>
-            <td>
-                <a href="{{ url_for('admin_project_detail', project_id=project.id) }}">詳細</a>
-                <form action="{{ url_for('admin_project_delete', project_id=project.id) }}" method="post" style="display:inline;">
-                    <button type="submit">削除</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
+    <tbody id="projectTableBody">
+        <!-- プロジェクトデータがここに表示される -->
     </tbody>
 </table>
-
 <div id="pagination">
     <!-- ページネーションがここに表示される -->
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadProjects(1);
+        
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            loadProjects(1);
+        });
+    });
+
+    function loadProjects(page) {
+        const formData = new FormData(document.getElementById('searchForm'));
+        const query = new URLSearchParams(formData).toString();
+
+        fetch(`/admin/projects_pagination?page=${page}&${query}`)
+            .then(response => response.json())
+            .then(data => {
+                const projectTableBody = document.getElementById('projectTableBody');
+                projectTableBody.innerHTML = '';
+
+                data.projects.forEach(project => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${project.id}</td>
+                        <td>${project.project_name}</td>
+                        <td>${project.industry}</td>
+                        <td>${project.start_month}</td>
+                        <td>${project.end_month}</td>
+                        <td>${project.project_summary}</td>
+                        <td>${project.responsibilities}</td>
+                        <td>${project.technologies.join(', ')}</td>
+                        <td>${project.processes.join(', ')}</td>
+                        <td>
+                            <a href="/admin/project/${project.id}">詳細</a>
+                            <form action="/admin/project/delete/${project.id}" method="post" style="display:inline;">
+                                <button type="submit">削除</button>
+                            </form>
+                        </td>
+                    `;
+
+                    projectTableBody.appendChild(row);
+                });
+
+                const pagination = document.getElementById('pagination');
+                pagination.innerHTML = '';
+
+                for (let i = 1; i <= data.pages; i++) {
+                    const pageLink = document.createElement('a');
+                    pageLink.href = "#";
+                    pageLink.innerText = i;
+                    pageLink.onclick = function() {
+                        loadProjects(i);
+                    };
+                    pagination.appendChild(pageLink);
+                }
+            });
+    }
+</script>
 {% endblock %}

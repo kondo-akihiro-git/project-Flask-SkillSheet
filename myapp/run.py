@@ -94,6 +94,7 @@ class Project(db.Model):
     project_summary = db.Column(db.Text, nullable=False)
     responsibilities = db.Column(db.Text, nullable=False)
     technologies = db.relationship('Technology', backref='project', lazy=True)
+    processes = db.relationship('Process', backref='project', lazy=True)
 
 ####################################################################################################
 # 
@@ -1100,6 +1101,78 @@ def admin_project_create():
         return redirect(url_for('admin_dashboard'))
 
     return render_template('admin_project_create.html')
+
+@app.route('/admin/projects_pagination', methods=['GET'])
+@login_required
+@admin_required
+def admin_projects_pagination():
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
+    # 検索条件の取得
+    project_id = request.args.get('project_id')
+    project_name = request.args.get('project_name')
+    industry = request.args.get('industry')
+    start_month = request.args.get('start_month')
+    end_month = request.args.get('end_month')
+    project_summary = request.args.get('project_summary')
+    responsibilities = request.args.get('responsibilities')
+    technologies = request.args.get('technologies')
+    processes = request.args.get('processes')
+
+    # クエリの作成
+    query = Project.query
+
+    if project_id:
+        query = query.filter(Project.id == project_id)
+    if project_name:
+        query = query.filter(Project.project_name.like(f'%{project_name}%'))
+    if industry:
+        query = query.filter(Project.industry.like(f'%{industry}%'))
+    if start_month:
+        query = query.filter(Project.start_month >= start_month)
+    if end_month:
+        query = query.filter(Project.end_month <= end_month)
+    if project_summary:
+        query = query.filter(Project.project_summary.like(f'%{project_summary}%'))
+    if responsibilities:
+        query = query.filter(Project.responsibilities.like(f'%{responsibilities}%'))
+    if technologies:
+        query = query.join(Project.technologies).filter(Technology.name.like(f'%{technologies}%'))
+    if processes:
+        query = query.join(Project.processes).filter(Process.name.like(f'%{processes}%'))
+
+    projects_paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    projects = projects_paginated.items
+    total = projects_paginated.total
+    pages = projects_paginated.pages
+
+    projects_data = []
+    for project in projects:
+        technologies_list = [tech.name for tech in project.technologies]
+        processes_list = [proc.name for proc in project.processes]
+
+        projects_data.append({
+            'id': project.id,
+            'project_name': project.project_name,
+            'industry': project.industry,
+            'start_month': project.start_month,
+            'end_month': project.end_month,
+            'project_summary': project.project_summary,
+            'responsibilities': project.responsibilities,
+            'technologies': technologies_list,
+            'processes': processes_list,
+        })
+
+    return jsonify({
+        'projects': projects_data,
+        'total': total,
+        'pages': pages,
+        'current_page': page
+    })
+
+
 
 
 ####################################################################################################
