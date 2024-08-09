@@ -40,4 +40,6 @@
 </div>
 <hr>
 {% endfor %}
+
+<a href="{{ url_for('download_pdf', link_code=link_code) }}" class="button is-primary">PDFダウンロード</a>
 {% endblock %}

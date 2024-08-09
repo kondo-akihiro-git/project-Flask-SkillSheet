@@ -13,6 +13,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 import yaml
+from flask import send_file
+from pdf_utils import generate_pdf
 
 # Flaskアプリのインスタンス
 app = Flask(__name__)
@@ -629,7 +631,7 @@ def view_sheet(link_code):
             'processes': processes
         })
 
-    return render_template('view_sheet.html', user=user, projects=project_data)
+    return render_template('view_sheet.html', user=user, projects=project_data,link_code=link_code)
 
 ####################################################################################################
 # 
@@ -1173,6 +1175,32 @@ def admin_projects_pagination():
 
 
 
+@app.route('/download_pdf/<link_code>', methods=['GET'])
+def download_pdf(link_code):
+    # リンクコードに対応するリンクを取得
+    link = Link.query.filter_by(link_code=link_code, is_active=True).first()
+    if link is None:
+        flash('無効なリンクです。', 'error')
+        return redirect(url_for('invalid'))
+
+    # スキルシートのデータを取得
+    user_id = link.user_id
+    user = User.query.get_or_404(user_id)
+    projects = Project.query.filter_by(user_id=user_id).all()
+    project_data = []
+
+    for project in projects:
+        technologies = Technology.query.filter_by(project_id=project.id).all()
+        processes = Process.query.filter_by(project_id=project.id).all()
+        project_data.append({
+            'project': project,
+            'technologies': technologies,
+            'processes': processes
+        })
+
+    # PDF生成
+    pdf_buffer = generate_pdf(user, project_data)
+    return send_file(pdf_buffer, as_attachment=True, download_name='skill_sheet.pdf', mimetype='application/pdf')
 
 ####################################################################################################
 # 
