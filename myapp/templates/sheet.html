@@ -18,22 +18,22 @@
             <h1 class="title is-4">プロフィール</h1>
             <div class="columns is-multiline">
                 <div class="column is-one-third">
-                    <p><strong>名前:</strong> {{ user.display_name }}</p>
+                    <p class="profile-item"><strong>名前:</strong> {{ user.display_name }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p><strong>年齢:</strong> {{ user.age }}</p>
+                    <p class="profile-item"><strong>年齢:</strong> {{ user.age }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p><strong>性別:</strong> {{ user.gender }}</p>
+                    <p class="profile-item"><strong>性別:</strong> {{ user.gender }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p><strong>最寄駅:</strong> {{ user.nearest_station }}</p>
+                    <p class="profile-item"><strong>最寄駅:</strong> {{ user.nearest_station }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p><strong>経験年数:</strong> {{ experience_years // 12 }} 年 {{ experience_years % 12 }} ヶ月</p>
+                    <p class="profile-item"><strong>経験年数:</strong> {{ experience_years // 12 }} 年 {{ experience_years % 12 }} ヶ月</p>
                 </div>
                 <div class="column is-one-third">
-                    <p><strong>学歴:</strong> {{ user.education }}</p>
+                    <p class="profile-item"><strong>学歴:</strong> {{ user.education }}</p>
                 </div>
             </div>
             <a href="{{ url_for('edit_profile') }}" class="button is-primary is-light">プロフィール編集</a>
@@ -109,7 +109,7 @@
                         <div class="box is-light">
                             <p><strong>担当業務</strong><br> {{ item.project.responsibilities }}</p>
                         </div>
-                        <div class="content">
+                        <div class="content mb-3">
                             <h3 class="title is-5">使用技術</h3>
                             <table class="table is-striped is-fullwidth">
                                 <thead>
