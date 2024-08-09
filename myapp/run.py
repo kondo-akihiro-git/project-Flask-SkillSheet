@@ -15,6 +15,11 @@ from wtforms.validators import DataRequired
 import yaml
 from flask import send_file
 from pdf_utils import generate_pdf
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+from datetime import datetime, timedelta
+import re
 
 # Flaskアプリのインスタンス
 app = Flask(__name__)
@@ -38,6 +43,21 @@ login_manager.login_view = 'login'
 # YAMLファイルの読み込み
 # with open('config.yml', 'r') as file:
 #     config = yaml.safe_load(file)
+# ログディレクトリの作成
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+
+# ロガーの設定
+file_handler = RotatingFileHandler('logs/skill_canvas.log', maxBytes=10240, backupCount=10)
+file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+file_handler.setLevel(logging.INFO)
+
+# Flaskアプリケーションのロガーにハンドラーを追加
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
+
+# アプリケーション起動時のログ
+app.logger.info('SkillCanvas startup')
 
 ####################################################################################################
 # 
@@ -211,7 +231,9 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
+            app.logger.info(f'User {username} logged in successfully.')
             return redirect(url_for('index'))
+        app.logger.warning(f'Failed login attempt for username: {username}')
         flash('Invalid username or password')
     return render_template('login.html')
 
@@ -232,9 +254,14 @@ def register():
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
-        db.session.commit()
-        flash('Registration successful. You can now log in.')
-        return redirect(url_for('login'))
+        try:
+            db.session.commit()
+            app.logger.info(f'New user registered: {username}')
+            flash('Registration successful. You can now log in.')
+            return redirect(url_for('login'))
+        except Exception as e:
+            app.logger.error(f'Error during registration for username: {username} - {str(e)}')
+            flash('Registration failed. Please try again.')
     return render_template('register.html')
 
 
@@ -250,6 +277,7 @@ def register():
 @login_required
 def logout():
     logout_user()
+    app.logger.info(f'User {current_user.username} logged out successfully.')
     return redirect(url_for('index'))
 
 ####################################################################################################
@@ -284,8 +312,12 @@ def account():
         if new_password:
             hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
             current_user.password = hashed_password
+        try:
             db.session.commit()
+            app.logger.info(f'User account updated for user ID: {current_user.id}')
             flash('ユーザーID/パスワードを更新しました.', 'success')
+        except Exception as e:
+            app.logger.error(f'Error updating user account for user ID: {current_user.id} - {str(e)}')
         return redirect(url_for('account'))
     return render_template('account.html', user=current_user)
 
@@ -315,8 +347,13 @@ def profile():
         current_user.experience_years = new_experience_years
         current_user.education = new_education
 
-        db.session.commit()
-        flash('アカウント情報の更新を完了しました。', 'success')
+        try:
+            db.session.commit()
+            app.logger.info(f'Profile updated for user ID: {current_user.id}')
+            flash('アカウント情報の更新を完了しました。', 'success')
+        except Exception as e:
+            app.logger.error(f'Error updating profile for user ID: {current_user.id} - {str(e)}')
+
 
         return redirect(url_for('profile'))
     return render_template('profile.html', user=current_user)
@@ -334,10 +371,14 @@ def profile():
 def delete_user():
     user = User.query.get(current_user.id)
     if user:
-        logout_user()
-        db.session.delete(user)
-        db.session.commit()
-        flash('Your account has been deleted.', 'info')
+        try:
+            logout_user()
+            db.session.delete(user)
+            db.session.commit()
+            app.logger.info(f'User account deleted for user ID: {current_user.id}')
+            flash('Your account has been deleted.', 'info')
+        except Exception as e:
+            app.logger.error(f'Error deleting user account for user ID: {current_user.id} - {str(e)}')
     return redirect(url_for('index'))
 
 ####################################################################################################
@@ -373,7 +414,12 @@ def input():
         )
 
         db.session.add(new_project)
-        db.session.commit()
+        try:
+            db.session.commit()
+            app.logger.info(f'New project added for user ID: {current_user.id}')
+        except Exception as e:
+            app.logger.error(f'Error adding project for user ID: {current_user.id} - {str(e)}')
+
 
         # 経験した技術のDB登録
         tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
@@ -390,6 +436,13 @@ def input():
                     )
                     db.session.add(new_technology)
 
+        try:
+            db.session.commit()
+            app.logger.info(f'Technologies added for project ID: {new_project.id}')
+        except Exception as e:
+            app.logger.error(f'Error adding technologies for project ID: {new_project.id} - {str(e)}')
+
+
         # 担当した工程のDB登録
         processes = request.form.getlist('process')
         for process in processes:
@@ -399,8 +452,11 @@ def input():
             )
             db.session.add(new_process)
 
-
-        db.session.commit()
+        try:
+            db.session.commit()
+            app.logger.info(f'Processes added for project ID: {new_project.id}')
+        except Exception as e:
+            app.logger.error(f'Error adding processes for project ID: {new_project.id} - {str(e)}')
 
         flash('プロジェクトを追加しました。', 'success')
         return redirect(url_for('input'))
@@ -1202,6 +1258,37 @@ def download_pdf(link_code):
     pdf_buffer = generate_pdf(user, project_data)
     return send_file(pdf_buffer, as_attachment=True, download_name='skill_sheet.pdf', mimetype='application/pdf')
 
+
+
+@app.route('/admin/logs')
+@login_required
+@admin_required
+def admin_logs():
+    logs = []
+    log_file_path = 'logs/skill_canvas.log'
+    
+    # 最新の10日分のログを保持するためのリスト
+    recent_logs = []
+    now = datetime.now()
+
+    try:
+        with open(log_file_path, 'r') as log_file:
+            for line in log_file:
+                # ログのタイムスタンプを抽出してパースする
+                try:
+                    timestamp_str = line.split()[0] + ' ' + line.split()[1]
+                    timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S,%f')
+                except ValueError:
+                    continue
+                
+                # 最新の10日以内のログをリストに追加
+                if now - timedelta(days=10) <= timestamp <= now:
+                    recent_logs.append(line)
+    except FileNotFoundError:
+        app.logger.error('Log file not found.')
+
+    # 最新の10日分のログを表示
+    return render_template('admin_logs.html', logs=recent_logs)
 ####################################################################################################
 # 
 # 関数名：メインの実行メソッド

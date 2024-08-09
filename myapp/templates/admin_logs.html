@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
+<a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
+<div class="container">
+    <h1>ログの確認</h1>
+    <div class="log-container">
+        {% if logs %}
+            <ul>
+                {% for log in logs %}
+                    <li>{{ log }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>表示するログがありません。</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
