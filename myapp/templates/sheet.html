@@ -80,70 +80,75 @@
         <hr>
 
         {% if projects|length > 0 %}
-        {% for item in projects %}
-        <div class="card" style="margin-bottom: 2rem;">
-            <div class="card-content">
-                <h2 class="subtitle" style="font-size: 1.5rem;">{{ item.project.project_name }}</h2>
-                <p><strong>業界</strong><span class="industry-item"> {{ item.project.industry }}</span></p>
-                <p><strong>期間</strong><span class="industry-item"> {{ item.project.start_month }}〜{{
-                        item.project.end_month }}</span></p>
-                <div class="spacer"></div>
-                <!-- プロジェクト概要をボックスで囲む -->
-                <div class="box is-light">
-                    <p><strong>プロジェクト概要</strong><br> {{ item.project.project_summary }}</p>
-                </div>
-                <!-- 担当工程の視覚化 -->
-                <div class="process-section">
-                    <strong class="process-title">担当工程</strong>
-                    <div class="process-container">
-                        {% for process in item.processes %}
-                        <span class="tag">{{ process.name }}</span>
-                        {% endfor %}
+        <div id="projects-container">
+            {% for item in projects %}
+            <div class="card project-card" style="margin-bottom: 2rem;">
+                <div class="card-content">
+                    <h2 class="subtitle project-title" data-index="{{ loop.index }}" style="font-size: 1.5rem;">
+                        {{ loop.index }}. {{ item.project.project_name }}
+                    </h2>
+                    <div class="project-details" style="display: none;">
+                        <p><strong>業界</strong><span class="industry-item"> {{ item.project.industry }}</span></p>
+                        <p><strong>期間</strong><span class="industry-item"> {{ item.project.start_month }}〜{{ item.project.end_month }}</span></p>
+                        <div class="spacer"></div>
+                        <!-- プロジェクト概要をボックスで囲む -->
+                        <div class="box is-light">
+                            <p><strong>プロジェクト概要</strong><br> {{ item.project.project_summary }}</p>
+                        </div>
+                        <!-- 担当工程の視覚化 -->
+                        <div class="process-section">
+                            <strong class="process-title">担当工程</strong>
+                            <div class="process-container">
+                                {% for process in item.processes %}
+                                <span class="tag">{{ process.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="spacer"></div>
+                        <!-- 担当業務をボックスで囲む -->
+                        <div class="box is-light">
+                            <p><strong>担当業務</strong><br> {{ item.project.responsibilities }}</p>
+                        </div>
+                        <div class="content">
+                            <h3 class="title is-5">使用技術</h3>
+                            <table class="table is-striped is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th>技術タイプ</th>
+                                        <th>技術名</th>
+                                        <th>使用期間</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tech in item.technologies %}
+                                    <tr>
+                                        <td>{{ tech_type_mapping[tech.type] }}</td>
+                                        <td>{{ tech.name }}</td>
+                                        <td>
+                                            {% if tech.duration_months >= 12 %}
+                                            {{ tech.duration_months // 12 }} 年 {{ tech.duration_months % 12 }} ヶ月
+                                            {% else %}
+                                            {{ tech.duration_months }} ヶ月
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <div class="spacer"></div>
-                <!-- 担当業務をボックスで囲む -->
-                <div class="box is-light">
-                    <p><strong>担当業務</strong><br> {{ item.project.responsibilities }}</p>
-                </div>
-                <div class="content">
-                    <h3 class="title is-5">使用技術</h3>
-                    <table class="table is-striped is-fullwidth">
-                        <thead>
-                            <tr>
-                                <th>技術タイプ</th>
-                                <th>技術名</th>
-                                <th>使用期間</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for tech in item.technologies %}
-                            <tr>
-                                <td>{{ tech_type_mapping[tech.type] }}</td>
-                                <td>{{ tech.name }}</td>
-                                <td>
-                                    {% if tech.duration_months >= 12 %}
-                                    {{ tech.duration_months // 12 }} 年 {{ tech.duration_months % 12 }} ヶ月
-                                    {% else %}
-                                    {{ tech.duration_months }} ヶ月
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                <footer class="card-footer">
+                    <a href="{{ url_for('edit_project', project_id=item.project.id) }}"
+                        class="card-footer-item button is-primary is-light is-small">プロジェクトを編集</a>
+                    <form action="{{ url_for('delete_project', project_id=item.project.id) }}" method="post"
+                        style="display:inline;">
+                        <button type="submit" class="button is-danger is-light is-small card-footer-item">プロジェクトを削除</button>
+                    </form>
+                </footer>
             </div>
-            <footer class="card-footer">
-                <a href="{{ url_for('edit_project', project_id=item.project.id) }}"
-                    class="card-footer-item button is-primary is-light is-small">プロジェクトを編集</a>
-                <form action="{{ url_for('delete_project', project_id=item.project.id) }}" method="post"
-                    style="display:inline;">
-                    <button type="submit" class="button is-danger is-light is-small card-footer-item">プロジェクトを削除</button>
-                </form>
-            </footer>
+            {% endfor %}
         </div>
-        {% endfor %}
         {% endif %}
 
         <div class="box">
@@ -166,6 +171,20 @@
 </section>
 
 <script>
+    document.querySelectorAll('.project-title').forEach(title => {
+        title.addEventListener('click', function () {
+            const index = this.getAttribute('data-index');
+            const details = document.querySelector(`.project-card:nth-of-type(${index}) .project-details`);
+
+            // Toggle visibility
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        });
+    });
+
     document.getElementById('create-link-form').addEventListener('submit', function (event) {
         event.preventDefault();
 
