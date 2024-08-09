@@ -20,6 +20,7 @@ from logging.handlers import RotatingFileHandler
 import os
 from datetime import datetime, timedelta
 import re
+from flask_mail import Mail, Message
 
 # Flaskアプリのインスタンス
 app = Flask(__name__)
@@ -58,6 +59,13 @@ app.logger.setLevel(logging.INFO)
 
 # アプリケーション起動時のログ
 app.logger.info('SkillCanvas startup')
+
+
+# Flask-Mailの設定
+app.config['MAIL_SERVER'] = 'localhost'
+app.config['MAIL_PORT'] = 1025
+mail = Mail(app)
+
 
 ####################################################################################################
 # 
@@ -1289,6 +1297,34 @@ def admin_logs():
 
     # 最新の10日分のログを表示
     return render_template('admin_logs.html', logs=recent_logs)
+
+
+@app.route('/admin/contacts')
+@login_required
+@admin_required
+def admin_contacts():
+    contacts = Contact.query.order_by(Contact.created_at.desc()).all()
+    return render_template('admin_contacts.html', contacts=contacts)
+
+@app.route('/admin/contact/<int:contact_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def reply_contact(contact_id):
+    contact = Contact.query.get_or_404(contact_id)
+    if request.method == 'POST':
+        reply_message = request.form['reply_message']
+        # 件名を手動で設定
+        msg = Message('Re: お問い合わせについて',
+                    sender='your_email@example.com',
+                    recipients=[contact.email])
+        msg.body = reply_message
+        mail.send(msg)
+        flash('返信が送信されました。', 'success')
+        return redirect(url_for('admin_contacts'))
+
+    return render_template('reply_contact.html', contact=contact)
+
+
 ####################################################################################################
 # 
 # 関数名：メインの実行メソッド
