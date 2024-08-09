@@ -24,6 +24,8 @@
         <option value="true">管理者</option>
     </select>
     <button type="submit">検索</button>
+    <button type="button" id="clearButton">クリア</button>
+
 </form>
 
 <table>
@@ -58,6 +60,11 @@
             event.preventDefault();
             loadUsers(1);
         });
+        document.getElementById('clearButton').addEventListener('click', function() {
+            document.getElementById('searchForm').reset();
+            loadUsers(1); // クリア後にプロジェクトを再読み込み
+        });
+        
     });
 
     function loadUsers(page) {
