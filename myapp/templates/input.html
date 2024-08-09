@@ -259,23 +259,10 @@
         });
     }
 
-    addField('add-os', 'os-fields', 'os');
-    removeField('remove-os', 'os-fields');
-
-    addField('add-language', 'language-fields', 'language');
-    removeField('remove-language', 'language-fields');
-
-    addField('add-framework', 'framework-fields', 'framework');
-    removeField('remove-framework', 'framework-fields');
-
-    addField('add-database', 'database-fields', 'database');
-    removeField('remove-database', 'database-fields');
-
-    addField('add-containertech', 'containertech-fields', 'containertech');
-    removeField('remove-containertech', 'containertech-fields');
-
-    addField('add-cicd', 'cicd-fields', 'cicd');
-    removeField('remove-cicd', 'cicd-fields');
+    ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'].forEach(techType => {
+            addField(`add-${techType}`, `${techType}-fields`, techType);
+            removeField(`remove-${techType}`, `${techType}-fields`);
+        });
 });
 
 </script>
