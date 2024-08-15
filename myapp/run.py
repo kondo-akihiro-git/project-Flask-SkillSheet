@@ -911,12 +911,12 @@ def contact():
 
 ####################################################################################################
 # 
-# 関数群：admin
-# 詳細：管理者画面における画面遷移、CRUDを担当する
+# 関数名：admin_required
+# 引数：f (デコレータとして使用する関数)
+# 返却値：デコレータ関数
+# 詳細：このデコレータは、アクセスするユーザーが管理者であるかを確認します。ユーザーが管理者でない場合、403 Forbidden エラーを返します。
 # 
 ####################################################################################################
-
-# 管理者確認のためのデコレーター
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -925,7 +925,14 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# 管理者ログイン
+####################################################################################################
+# 
+# 関数名：admin_login
+# 引数：なし
+# 返却値：admin_login.html
+# 詳細：管理者ログインページを表示し、ログイン情報を検証します。正しい情報が提供された場合、管理者ダッシュボードにリダイレクトします。
+# 
+####################################################################################################
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     form = AdminLoginForm()  # フォームクラスを定義してください
@@ -937,14 +944,28 @@ def admin_login():
         flash('ログイン情報が無効です。', 'danger')
     return render_template('admin_login.html', form=form)
 
-# 管理者ダッシュボード
+####################################################################################################
+# 
+# 関数名：admin_dashboard
+# 引数：なし
+# 返却値：admin_dashboard.html
+# 詳細：管理者ダッシュボードページを表示します。アクセスにはログインと管理者権限が必要です。
+# 
+####################################################################################################
 @app.route('/admin/dashboard')
 @login_required
 @admin_required
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
-# ログアウト処理
+####################################################################################################
+# 
+# 関数名：admin_logout
+# 引数：なし
+# 返却値：管理者ログインページへのリダイレクト
+# 詳細：管理者ログアウト処理を行い、ログアウト後はログインページにリダイレクトします。
+# 
+####################################################################################################
 @app.route('/admin/logout')
 @login_required
 @admin_required
@@ -952,7 +973,14 @@ def admin_logout():
     logout_user()
     return redirect(url_for('admin_login'))
 
-# 管理者画面のユーザー一覧表示
+####################################################################################################
+# 
+# 関数名：admin_users
+# 引数：なし
+# 返却値：admin_users.html
+# 詳細：全ユーザーの一覧を表示するページを提供します。管理者のログインが必要です。
+# 
+####################################################################################################
 @app.route('/admin/users')
 @login_required
 @admin_required
@@ -960,7 +988,14 @@ def admin_users():
     users = User.query.all()
     return render_template('admin_users.html', users=users)
 
-# ユーザーの詳細表示および編集
+####################################################################################################
+# 
+# 関数名：admin_user_detail
+# 引数：user_id (ユーザーのID)
+# 返却値：admin_user_detail.html
+# 詳細：指定されたユーザーIDの詳細情報を表示し、情報の更新を行います。また、最新の有効なスキルシートのリンクを取得し、表示します。
+# 
+####################################################################################################
 @app.route('/admin/user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -991,7 +1026,14 @@ def admin_user_detail(user_id):
     return render_template('admin_user_detail.html', user=user, latest_active_url=latest_active_link_url)
 
 
-# ユーザーの削除
+####################################################################################################
+# 
+# 関数名：admin_user_delete
+# 引数：user_id (削除するユーザーのID)
+# 返却値：管理者ユーザー一覧ページへのリダイレクト
+# 詳細：指定されたユーザーIDのユーザーを削除し、削除後はユーザー一覧ページにリダイレクトします。
+# 
+####################################################################################################
 @app.route('/admin/user/delete/<int:user_id>', methods=['POST'])
 @login_required
 @admin_required
@@ -1002,6 +1044,14 @@ def admin_user_delete(user_id):
     flash('ユーザーが削除されました。', 'success')
     return redirect(url_for('admin_users'))
 
+####################################################################################################
+# 
+# 関数名：admin_projects
+# 引数：なし
+# 返却値：admin_projects.html
+# 詳細：全プロジェクトとその関連テクノロジーを一覧表示するページを提供します。プロジェクトとプロセスを取得し、表示します。
+# 
+####################################################################################################
 @app.route('/admin/projects')
 @login_required
 @admin_required
@@ -1024,7 +1074,14 @@ def admin_projects():
 
     return render_template('admin_projects.html', projects=projects, project_processes=project_processes)
 
-
+####################################################################################################
+# 
+# 関数名：admin_project_detail
+# 引数：project_id (int) - プロジェクトのID
+# 返却値：admin_project_detail.html
+# 詳細：指定されたプロジェクトIDに基づいて、プロジェクトの詳細情報とその関連技術、プロセスを表示するページを提供します。フォームからプロジェクトの基本情報と技術、プロセスを更新することができます。
+# 
+####################################################################################################
 @app.route('/admin/project/<int:project_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -1110,7 +1167,14 @@ def admin_project_detail(project_id):
 
 
 
-# プロジェクトの削除
+####################################################################################################
+# 
+# 関数名：admin_project_delete
+# 引数：project_id (int) - 削除するプロジェクトのID
+# 返却値：admin_projects.html
+# 詳細：指定されたプロジェクトIDに基づいてプロジェクトを削除し、全プロジェクトの一覧ページにリダイレクトします。
+# 
+####################################################################################################
 @app.route('/admin/project/delete/<int:project_id>', methods=['POST'])
 @login_required
 @admin_required
@@ -1120,7 +1184,14 @@ def admin_project_delete(project_id):
     db.session.commit()
     flash('プロジェクトが削除されました。', 'success')
     return redirect(url_for('admin_projects'))
-
+####################################################################################################
+# 
+# 関数名：admin_user_create
+# 引数：なし
+# 返却値：admin_user_create.html
+# 詳細：新しいユーザーを作成するためのページを提供します。フォームからユーザー情報を入力して、データベースに追加します。成功時にはユーザー一覧ページにリダイレクトします。
+# 
+####################################################################################################
 @app.route('/admin/user/create', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -1157,7 +1228,14 @@ def admin_user_create():
     return render_template('admin_user_create.html')
 
 
-
+####################################################################################################
+# 
+# 関数名：admin_users_pagination
+# 引数：page (int) - ページ番号
+# 返却値：JSON形式のユーザーデータ
+# 詳細：検索条件に基づいてユーザーをページネーションで取得し、JSON形式で返却します。検索条件にはユーザーID、ユーザー名、メールアドレスなどが含まれます。
+# 
+####################################################################################################
 @app.route('/admin/users_pagination', methods=['GET'])
 @login_required
 @admin_required
@@ -1242,8 +1320,14 @@ def admin_users_pagination():
         'current_page': page
     })
 
-# run.py の一部
-
+####################################################################################################
+# 
+# 関数名：create_admin
+# 引数：なし
+# 返却値：リダイレクト先のURL
+# 詳細：管理者ユーザーを新規作成します。管理者ユーザーのユーザー名とパスワードを取得し、パスワードをハッシュ化してからデータベースに保存します。成功すればダッシュボードにリダイレクトし、失敗すればエラーメッセージを表示します。
+# 
+####################################################################################################
 @app.route('/create_admin', methods=['POST'])
 def create_admin():
     if not current_user.is_authenticated or not current_user.is_admin:
@@ -1260,7 +1344,14 @@ def create_admin():
         return redirect(url_for('admin_dashboard'))
     flash('Failed to create admin user. Please check the form and try again.')
     return redirect(url_for('admin_dashboard'))
-
+####################################################################################################
+# 
+# 関数名：admin_project_create
+# 引数：なし（POSTリクエストでフォームデータを使用）
+# 返却値：リダイレクト先のURL
+# 詳細：新しいプロジェクトを作成します。フォームから取得したプロジェクト情報と技術情報、工程情報をデータベースに保存し、ダッシュボードにリダイレクトします。
+# 
+####################################################################################################
 @app.route('/admin/project/create', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -1315,7 +1406,14 @@ def admin_project_create():
         return redirect(url_for('admin_dashboard'))
 
     return render_template('admin_project_create.html')
-
+####################################################################################################
+# 
+# 関数名：admin_projects_pagination
+# 引数：page (int) - ページ番号
+# 返却値：JSON形式のプロジェクトデータ
+# 詳細：検索条件に基づいてプロジェクトをページネーションで取得し、JSON形式で返却します。検索条件にはプロジェクトID、プロジェクト名、業界、開始月、終了月などが含まれます。
+# 
+####################################################################################################
 @app.route('/admin/projects_pagination', methods=['GET'])
 @login_required
 @admin_required
@@ -1387,7 +1485,14 @@ def admin_projects_pagination():
     })
 
 
-
+####################################################################################################
+# 
+# 関数名：download_pdf
+# 引数：link_code (str) - PDFファイルをダウンロードするためのリンクコード
+# 返却値：PDFファイル
+# 詳細：指定されたリンクコードに基づいて、関連するユーザーとプロジェクトのデータを取得し、スキルシートのPDFファイルを生成して返却します。リンクが無効な場合はエラーメッセージを表示し、無効なリンク画面にリダイレクトします。
+# 
+####################################################################################################
 @app.route('/download_pdf/<link_code>', methods=['GET'])
 def download_pdf(link_code):
     # リンクコードに対応するリンクを取得
@@ -1416,7 +1521,14 @@ def download_pdf(link_code):
     return send_file(pdf_buffer, as_attachment=True, download_name='skill_sheet.pdf', mimetype='application/pdf')
 
 
-
+####################################################################################################
+# 
+# 関数名：admin_logs
+# 引数：なし
+# 返却値：HTMLテンプレート
+# 詳細：ログファイルから最新の10日間のログを読み込み、表示するためのHTMLテンプレートに渡します。ログファイルが存在しない場合はエラーログを記録します。
+# 
+####################################################################################################
 @app.route('/admin/logs')
 @login_required
 @admin_required
@@ -1447,14 +1559,28 @@ def admin_logs():
     # 最新の10日分のログを表示
     return render_template('admin_logs.html', logs=recent_logs)
 
-
+####################################################################################################
+# 
+# 関数名：admin_contacts
+# 引数：なし
+# 返却値：HTMLテンプレート
+# 詳細：データベースから全ての問い合わせを取得し、作成日時順にソートして表示するためのHTMLテンプレートに渡します。
+# 
+####################################################################################################
 @app.route('/admin/contacts')
 @login_required
 @admin_required
 def admin_contacts():
     contacts = Contact.query.order_by(Contact.created_at.desc()).all()
     return render_template('admin_contacts.html', contacts=contacts)
-
+####################################################################################################
+# 
+# 関数名：reply_contact
+# 引数：contact_id (int) - 対応するお問い合わせのID
+# 返却値：HTMLテンプレートまたはリダイレクト
+# 詳細：指定されたお問い合わせIDに基づいて、お問い合わせの詳細を表示し、返信メッセージを送信する機能を提供します。POSTリクエスト時にメールで返信を送信し、成功メッセージを表示して一覧ページにリダイレクトします。
+# 
+####################################################################################################
 @app.route('/admin/contact/<int:contact_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
