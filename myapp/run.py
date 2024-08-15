@@ -396,20 +396,41 @@ def userinfo():
 def account():
     if request.method == 'POST':
         new_username = request.form['username']
+        new_email = request.form['email']
         new_password = request.form['password']
+        
+        # ユーザー名の更新
         if new_username:
             current_user.username = new_username
+        
+        # メールアドレスの更新
+        if new_email:
+            current_user.email = new_email
+        
+        # パスワードの更新
         if new_password:
             hashed_password = generate_password_hash(new_password, method='pbkdf2:sha256')
             current_user.password = hashed_password
+        
+        if new_email:
+            existing_user = User.query.filter_by(email=new_email).first()
+        if existing_user and existing_user.id != current_user.id:
+            flash('このメールアドレスは既に使用されています。', 'danger')
+        else:
+            current_user.email = new_email
+
         try:
             db.session.commit()
             app.logger.info(f'User account updated for user ID: {current_user.id}')
-            flash('ユーザーID/パスワードを更新しました.', 'success')
+            flash('アカウント情報を更新しました。', 'success')
         except Exception as e:
             app.logger.error(f'Error updating user account for user ID: {current_user.id} - {str(e)}')
+            flash('アカウント情報の更新中にエラーが発生しました。', 'danger')
+        
         return redirect(url_for('account'))
+    
     return render_template('account.html', user=current_user)
+
 
 ####################################################################################################
 # 
@@ -920,6 +941,7 @@ def admin_user_detail(user_id):
     user = User.query.get_or_404(user_id)
     if request.method == 'POST':
         user.username = request.form['username']
+        user.email = request.form['email']
         user.display_name = request.form['display_name']
         user.age = request.form['age']
         user.gender = request.form['gender']
@@ -1060,7 +1082,6 @@ def admin_project_delete(project_id):
     flash('プロジェクトが削除されました。', 'success')
     return redirect(url_for('admin_projects'))
 
-# 新規ユーザー登録画面
 @app.route('/admin/user/create', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -1068,6 +1089,7 @@ def admin_user_create():
     if request.method == 'POST':
         username = request.form['username']
         password = generate_password_hash(request.form['password'])
+        email = request.form['email']  # メールアドレスの取得
         display_name = request.form.get('display_name')
         age = request.form.get('age')
         gender = request.form.get('gender')
@@ -1079,6 +1101,7 @@ def admin_user_create():
         new_user = User(
             username=username,
             password=password,
+            email=email,  # メールアドレスを設定
             display_name=display_name,
             age=age,
             gender=gender,
@@ -1095,6 +1118,7 @@ def admin_user_create():
     return render_template('admin_user_create.html')
 
 
+
 @app.route('/admin/users_pagination', methods=['GET'])
 @login_required
 @admin_required
@@ -1105,6 +1129,7 @@ def admin_users_pagination():
     # 検索条件の取得
     user_id = request.args.get('user_id')
     username = request.args.get('username')
+    email = request.args.get('email')
     display_name = request.args.get('display_name')
     age = request.args.get('age')
     gender = request.args.get('gender')
@@ -1121,6 +1146,8 @@ def admin_users_pagination():
         query = query.filter(User.id == user_id)
     if username:
         query = query.filter(User.username.like(f'%{username}%'))
+    if email:
+        query = query.filter(User.email.like(f"%{email}%"))
     if display_name:
         query = query.filter(User.display_name.like(f'%{display_name}%'))
     if age:
@@ -1158,6 +1185,7 @@ def admin_users_pagination():
         users_data.append({
             'id': user.id,
             'username': user.username,
+            'email': user.email,
             'display_name': user.display_name,
             'age': user.age,
             'gender': user.gender,
