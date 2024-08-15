@@ -703,6 +703,7 @@ def edit_project(project_id):
             existing_techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
             existing_names = {tech.name for tech in existing_techs}
 
+            # 新しい技術を追加または更新
             for name, duration in zip(tech_names, tech_durations):
                 if name and duration.isdigit() and int(duration) > 0:
                     if name in existing_names:
@@ -716,11 +717,17 @@ def edit_project(project_id):
                             duration_months=int(duration)
                         )
                         db.session.add(new_technology)
-            db.session.commit()
+            
+            # 削除された技術を特定して削除
+            submitted_names = set(tech_names)
+            for tech in existing_techs:
+                if tech.name not in submitted_names:
+                    db.session.delete(tech)
+        
+        db.session.commit()
 
         # 担当工程の処理
         selected_processes = request.form.getlist('process')
-        # DBからの取得と一致する工程の処理
         existing_processes = Process.query.filter_by(project_id=project.id).all()
         existing_process_names = {process.name for process in existing_processes}
 
@@ -732,7 +739,6 @@ def edit_project(project_id):
                 )
                 db.session.add(new_process)
         
-        # 既存の工程で選択されていないものを削除
         for process in existing_processes:
             if process.name not in selected_processes:
                 db.session.delete(process)
@@ -742,13 +748,13 @@ def edit_project(project_id):
         flash('プロジェクトが更新されました', 'success')
         return redirect(url_for('edit_project', project_id=project.id))
 
-    # 空のフィールドも表示するための処理
     technologies = {}
     for tech_type in tech_types:
         techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
-        technologies[tech_type] = techs if techs else [{}]
+        if not techs:
+            techs = [{'name': '', 'duration_months': ''}]  # 空のリストを渡す
+        technologies[tech_type] = techs
 
-    # 担当工程の処理
     processes = [process.name for process in Process.query.filter_by(project_id=project.id).all()]
 
     return render_template('edit_project.html', project=project, processes=processes, technologies=technologies)

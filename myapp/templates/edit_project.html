@@ -78,19 +78,11 @@
                     <div class="control">
                         <div id="{{ tech_type }}-fields">
                             {% for tech in technologies[tech_type] %}
-                            {% if loop.index0 == 0 %}
                             <div class="input-group">
                                 <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
-                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間" value="0" min="0">
+                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間"  min="0">
                                 <span>ヶ月</span>
                             </div>
-                            {% else %}
-                            <div class="input-group" style="display: none;">
-                                <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
-                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間" value="0" min="0">
-                                <span>ヶ月</span>
-                            </div>
-                            {% endif %}
                             {% endfor %}
                         </div>
                         <button type="button" id="add-{{ tech_type }}" class="button is-primary has-text-light">＋</button>
@@ -99,6 +91,7 @@
                 </div>
                 {% endfor %}
             </div>
+            
 
             <div class="field">
                 <div class="control">
