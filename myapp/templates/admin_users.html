@@ -1,72 +1,164 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>ユーザー一覧</h1>
+<div class="container mt-5">
+    <h1 class="title">ユーザー一覧</h1>
 
-<a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
-<a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
-<a href="{{ url_for('admin_user_create') }}">新規ユーザー登録</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% set category, message = messages[messages|length-1] %}
+    <div class="notification is-{{ category }}">
+        {{ message }}
+    </div>
+    {% endif %}
+    {% endwith %}
 
-<form id="searchForm">
-    <input type="text" name="user_id" placeholder="ユーザーID" />
-    <input type="text" name="username" placeholder="ユーザー名" />
-    <input type="text" name="display_name" placeholder="表示名" />
-    <input type="text" name="email" placeholder="メールアドレス" /> <!-- メールアドレスの検索項目を追加 -->
-    <input type="text" name="age" placeholder="年齢" />
-    <input type="text" name="gender" placeholder="性別" />
-    <input type="text" name="nearest_station" placeholder="最寄り駅" />
-    <input type="text" name="experience_years" placeholder="経験年数" />
-    <input type="text" name="education" placeholder="学歴" />
-    <input type="text" name="latest_active_link_url" placeholder="最新スキルシート" />
-    <select name="is_admin">
-        <option value="">管理者ステータス</option>
-        <option value="null">登録なし</option>
-        <option value="false">一般ユーザー</option>
-        <option value="true">管理者</option>
-    </select>
-    <button type="submit">検索</button>
-    <button type="button" id="clearButton">クリア</button>
+    <div class="buttons mb-4">
+        <a class="button is-link" href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
+        <a class="button is-primary" href="{{ url_for('admin_user_create') }}">新規ユーザー登録</a>
+        <a class="button is-link" href="{{ url_for('admin_login') }}">管理者ログイン画面に戻る</a>
+    </div>
 
-</form>
+    <div class="box">
+        <button class="button is-info is-fullwidth" id="toggleSearchForm">検索条件を表示</button>
+        <form id="searchForm" class="mt-4 is-hidden">
+            <div class="field">
+                <div class="field-item">
+                    <label class="label">ユーザーID</label>
+                    <input class="input" type="text" name="user_id" placeholder="ユーザーID" />
+                </div>
+                <div class="field-item">
+                    <label class="label">ユーザー名</label>
+                    <input class="input" type="text" name="username" placeholder="ユーザー名" />
+                </div>
+                <div class="field-item">
+                    <label class="label">表示名</label>
+                    <input class="input" type="text" name="display_name" placeholder="表示名" />
+                </div>
+                <div class="field-item">
+                    <label class="label">メールアドレス</label>
+                    <input class="input" type="text" name="email" placeholder="メールアドレス" />
+                </div>
+                <div class="field-item">
+                    <label class="label">年齢</label>
+                    <input class="input" type="text" name="age" placeholder="年齢" />
+                </div>
+                <div class="field-item">
+                    <label class="label">性別</label>
+                    <input class="input" type="text" name="gender" placeholder="性別" />
+                </div>
+                <div class="field-item">
+                    <label class="label">最寄り駅</label>
+                    <input class="input" type="text" name="nearest_station" placeholder="最寄り駅" />
+                </div>
+                <div class="field-item">
+                    <label class="label">経験年数</label>
+                    <input class="input" type="text" name="experience_years" placeholder="経験年数" />
+                </div>
+                <div class="field-item">
+                    <label class="label">学歴</label>
+                    <input class="input" type="text" name="education" placeholder="学歴" />
+                </div>
+                <div class="field-item">
+                    <label class="label">最新スキルシート</label>
+                    <input class="input" type="text" name="latest_active_link_url" placeholder="最新スキルシート" />
+                </div>
+                <div class="field-item">
+                    <label class="label">管理者ステータス</label>
+                    <div class="select">
+                        <select name="is_admin">
+                            <option value="">管理者ステータス</option>
+                            <option value="null">登録なし</option>
+                            <option value="false">一般ユーザー</option>
+                            <option value="true">管理者</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="field is-grouped mt-2">
+                <div class="control">
+                    <button class="button is-primary" type="submit">検索</button>
+                </div>
+                <div class="control">
+                    <button class="button is-light" type="button" id="clearButton">クリア</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>ユーザーID</th>
-            <th>ユーザー名</th>
-            <th>表示名</th>
-            <th>メールアドレス</th> <!-- メールアドレスを追加 -->
-            <th>年齢</th>
-            <th>性別</th>
-            <th>最寄り駅</th>
-            <th>経験年数</th>
-            <th>学歴</th>
-            <th>最新スキルシート</th>
-            <th>管理者</th>
-            <th>アクション</th>
-        </tr>
-    </thead>
-    <tbody id="userTableBody">
-        <!-- ユーザーデータがここに表示される -->
-    </tbody>
-</table>
-<div id="pagination">
-    <!-- ページネーションがここに表示される -->
+    <table class="table is-striped is-bordered is-hoverable">
+        <thead>
+            <tr>
+                <th>ユーザーID</th>
+                <th>ユーザー名</th>
+                <th>表示名</th>
+                <th>メールアドレス</th>
+                <th>年齢</th>
+                <th>性別</th>
+                <th>最寄り駅</th>
+                <th>経験年数</th>
+                <th>学歴</th>
+                <th>最新スキルシート</th>
+                <th>管理者</th>
+                <th>アクション</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody">
+            <!-- ユーザーデータがここに表示される -->
+        </tbody>
+    </table>
+
+    <nav class="pagination is-centered mt-4" id="pagination">
+        <!-- ページネーションがここに表示される -->
+    </nav>
 </div>
+
+<style>
+    .field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .field-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem; /* 入力ボックス間のスペース */
+    }
+
+    .field-item label {
+        width: 150px; /* ラベルの幅を固定 */
+        margin-right: 1rem; /* ラベルと入力ボックスの間隔 */
+    }
+
+    .input {
+        flex: 1; /* 入力ボックスが残りのスペースを占める */
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         loadUsers(1);
-        
+
         document.getElementById('searchForm').addEventListener('submit', function(event) {
             event.preventDefault();
             loadUsers(1);
         });
+
         document.getElementById('clearButton').addEventListener('click', function() {
             document.getElementById('searchForm').reset();
-            loadUsers(1); // クリア後にプロジェクトを再読み込み
+            loadUsers(1);
         });
-        
+
+        document.getElementById('toggleSearchForm').addEventListener('click', function() {
+            const searchForm = document.getElementById('searchForm');
+            if (searchForm.classList.contains('is-hidden')) {
+                searchForm.classList.remove('is-hidden');
+                this.innerText = '検索条件を非表示';
+            } else {
+                searchForm.classList.add('is-hidden');
+                this.innerText = '検索条件を表示';
+            }
+        });
     });
 
     function loadUsers(page) {
@@ -88,7 +180,7 @@
                         <td>${user.id}</td>
                         <td>${user.username || ''}</td>
                         <td>${user.display_name || ''}</td>
-                        <td>${user.email || ''}</td> <!-- メールアドレスを表示 -->
+                        <td>${user.email || ''}</td>
                         <td>${user.age || ''}</td>
                         <td>${user.gender || ''}</td>
                         <td>${user.nearest_station || ''}</td>
@@ -97,9 +189,9 @@
                         <td>${user.latest_active_link_url ? `<a href="${user.latest_active_link_url}">${user.latest_active_link_url}</a>` : 'なし'}</td>
                         <td>${adminStatus}</td>
                         <td>
-                            <a href="/admin/user/${user.id}">詳細</a>
+                            <a class="button is-small is-info" href="/admin/user/${user.id}">詳細</a>
                             <form action="/admin/user/delete/${user.id}" method="post" style="display:inline;">
-                                <button type="submit">削除</button>
+                                <button class="button is-small is-danger mt-2" type="submit">削除</button>
                             </form>
                         </td>
                     `;
@@ -112,6 +204,7 @@
 
                 for (let i = 1; i <= data.pages; i++) {
                     const pageLink = document.createElement('a');
+                    pageLink.className = 'pagination-link';
                     pageLink.href = "#";
                     pageLink.innerText = i;
                     pageLink.onclick = function() {

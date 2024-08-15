@@ -1,60 +1,146 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>プロジェクト一覧</h1>
+<div class="container mt-5">
+    <h1 class="title">プロジェクト一覧</h1>
 
-<a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
-<a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
-<a href="{{ url_for('admin_project_create') }}">新規プロジェクト登録</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% set category, message = messages[messages|length-1] %}
+    <div class="notification is-{{ category }}">
+        {{ message }}
+    </div>
+    {% endif %}
+    {% endwith %}
 
-<form id="searchForm">
-    <input type="text" name="project_id" placeholder="プロジェクトID" />
-    <input type="text" name="project_name" placeholder="プロジェクト名" />
-    <input type="text" name="industry" placeholder="業界" />
-    <input type="month" name="start_month" placeholder="開始月" />
-    <input type="month" name="end_month" placeholder="終了月" />
-    <input type="text" name="project_summary" placeholder="プロジェクト概要" />
-    <input type="text" name="responsibilities" placeholder="責任範囲" />
-    <input type="text" name="technologies" placeholder="技術" />
-    <input type="text" name="processes" placeholder="プロセス" />
-    <button type="submit">検索</button>
-    <button type="button" id="clearButton">クリア</button>
-</form>
+    <div class="buttons mb-4">
+        <a class="button is-link" href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
+        <a class="button is-primary" href="{{ url_for('admin_project_create') }}">新規プロジェクト登録</a>
+        <a class="button is-link" href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
+    </div>
 
-<table>
-    <thead>
-        <tr>
-            <th>プロジェクトID</th>
-            <th>プロジェクト名</th>
-            <th>業界</th>
-            <th>開始月</th>
-            <th>終了月</th>
-            <th>プロジェクト概要</th>
-            <th>責任範囲</th>
-            <th>技術</th>
-            <th>プロセス</th>
-            <th>アクション</th>
-        </tr>
-    </thead>
-    <tbody id="projectTableBody">
-        <!-- プロジェクトデータがここに表示される -->
-    </tbody>
-</table>
-<div id="pagination">
-    <!-- ページネーションがここに表示される -->
+    <div class="box">
+        <button class="button is-info is-fullwidth" id="toggleSearchForm">検索条件を表示</button>
+        <form id="searchForm" class="mt-4 is-hidden">
+            <div class="field">
+                <div class="field-item">
+                    <label class="label">プロジェクトID</label>
+                    <input class="input" type="text" name="project_id" placeholder="プロジェクトID" />
+                </div>
+                <div class="field-item">
+                    <label class="label">プロジェクト名</label>
+                    <input class="input" type="text" name="project_name" placeholder="プロジェクト名" />
+                </div>
+                <div class="field-item">
+                    <label class="label">業界</label>
+                    <input class="input" type="text" name="industry" placeholder="業界" />
+                </div>
+                <div class="field-item">
+                    <label class="label">開始月</label>
+                    <input class="input" type="month" name="start_month" placeholder="開始月" />
+                </div>
+                <div class="field-item">
+                    <label class="label">終了月</label>
+                    <input class="input" type="month" name="end_month" placeholder="終了月" />
+                </div>
+                <div class="field-item">
+                    <label class="label">プロジェクト概要</label>
+                    <input class="input" type="text" name="project_summary" placeholder="プロジェクト概要" />
+                </div>
+                <div class="field-item">
+                    <label class="label">責任範囲</label>
+                    <input class="input" type="text" name="responsibilities" placeholder="責任範囲" />
+                </div>
+                <div class="field-item">
+                    <label class="label">技術</label>
+                    <input class="input" type="text" name="technologies" placeholder="技術" />
+                </div>
+                <div class="field-item">
+                    <label class="label">プロセス</label>
+                    <input class="input" type="text" name="processes" placeholder="プロセス" />
+                </div>
+            </div>
+            <div class="field is-grouped mt-2">
+                <div class="control">
+                    <button class="button is-primary" type="submit">検索</button>
+                </div>
+                <div class="control">
+                    <button class="button is-light" type="button" id="clearButton">クリア</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <table class="table is-striped is-bordered is-hoverable">
+        <thead>
+            <tr>
+                <th>プロジェクトID</th>
+                <th>プロジェクト名</th>
+                <th>業界</th>
+                <th>開始月</th>
+                <th>終了月</th>
+                <th>プロジェクト概要</th>
+                <th>責任範囲</th>
+                <th>技術</th>
+                <th>プロセス</th>
+                <th>アクション</th>
+            </tr>
+        </thead>
+        <tbody id="projectTableBody">
+            <!-- プロジェクトデータがここに表示される -->
+        </tbody>
+    </table>
+
+    <nav class="pagination is-centered mt-4" id="pagination">
+        <!-- ページネーションがここに表示される -->
+    </nav>
 </div>
+
+<style>
+    .field {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .field-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem; /* 入力ボックス間のスペース */
+    }
+
+    .field-item label {
+        width: 150px; /* ラベルの幅を固定 */
+        margin-right: 1rem; /* ラベルと入力ボックスの間隔 */
+    }
+
+    .input {
+        flex: 1; /* 入力ボックスが残りのスペースを占める */
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         loadProjects(1);
-        
+
         document.getElementById('searchForm').addEventListener('submit', function(event) {
             event.preventDefault();
             loadProjects(1);
         });
+
         document.getElementById('clearButton').addEventListener('click', function() {
             document.getElementById('searchForm').reset();
-            loadProjects(1); // クリア後にプロジェクトを再読み込み
+            loadProjects(1);
+        });
+
+        document.getElementById('toggleSearchForm').addEventListener('click', function() {
+            const searchForm = document.getElementById('searchForm');
+            if (searchForm.classList.contains('is-hidden')) {
+                searchForm.classList.remove('is-hidden');
+                this.innerText = '検索条件を非表示';
+            } else {
+                searchForm.classList.add('is-hidden');
+                this.innerText = '検索条件を表示';
+            }
         });
     });
 
@@ -82,9 +168,9 @@
                         <td>${project.technologies.join(', ')}</td>
                         <td>${project.processes.join(', ')}</td>
                         <td>
-                            <a href="/admin/project/${project.id}">詳細</a>
+                            <a class="button is-small is-info" href="/admin/project/${project.id}">詳細</a>
                             <form action="/admin/project/delete/${project.id}" method="post" style="display:inline;">
-                                <button type="submit">削除</button>
+                                <button class="button is-small is-danger mt-2" type="submit">削除</button>
                             </form>
                         </td>
                     `;
@@ -97,6 +183,7 @@
 
                 for (let i = 1; i <= data.pages; i++) {
                     const pageLink = document.createElement('a');
+                    pageLink.className = 'pagination-link';
                     pageLink.href = "#";
                     pageLink.innerText = i;
                     pageLink.onclick = function() {

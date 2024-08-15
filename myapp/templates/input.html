@@ -87,130 +87,25 @@
             </div>
 
             <div class="field">
-                <label class="label" for="skill">使用技術</label>
+                <label class="label">使用技術</label>
             
+                {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'] %}
                 <div class="field">
-                    <label class="label" for="os">OS</label>
+                    <label class="label" for="{{ tech_type }}">{{ tech_type | capitalize }}</label>
                     <div class="control">
-                        <div class="input-group">
-                            <input class="input input-name" type="text" id="os_0" name="os_0" placeholder="技術名">
-                            <input class="input input-duration" type="number" id="os_0_num" name="os_0_num" placeholder="期間">
-                            <span>ヶ月</span>
+                        <div id="{{ tech_type }}-fields">
+                            <div class="input-group">
+                                <input class="input input-name" type="text" id="{{ tech_type }}_0" name="{{ tech_type }}_0" placeholder="技術名">
+                                <input class="input input-duration" type="number" id="{{ tech_type }}_0_num" name="{{ tech_type }}_0_num" placeholder="期間" value="0" min="0">
+                                <span>ヶ月</span>
+                            </div>
                         </div>
-                        <div id="os-fields" class="input-group" style="display: none;"></div>
-                        <button type="button" id="add-os" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-os" class="button is-danger has-text-light">ー</button>
+                        <button type="button" id="add-{{ tech_type }}" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-{{ tech_type }}" class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
-                <div class="spacer"></div>
-            
-                <div class="field">
-                    <label class="label" for="language">言語</label>
-                    <div class="control">
-                        <div class="input-group">
-                            <input class="input input-name" type="text" id="language_0" name="language_0" placeholder="技術名">
-                            <input class="input input-duration" type="number" id="language_0_num" name="language_0_num" placeholder="期間">
-                            <span>ヶ月</span>
-                        </div>
-                        <div id="language-fields" class="input-group"style="display: none;"></div>
-                        <button type="button" id="add-language" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-language" class="button is-danger has-text-light">ー</button>
-                    </div>
-                </div>
-                <div class="spacer"></div>
-            
-                <div class="field">
-                    <label class="label" for="framework">フレームワーク</label>
-                    <div class="control">
-                        <div class="input-group">
-                            <input class="input input-name" type="text" id="framework_0" name="framework_0" placeholder="技術名">
-                            <input class="input input-duration" type="number" id="framework_0_num" name="framework_0_num" placeholder="期間">
-                            <span>ヶ月</span>
-                        </div>
-                        <div id="framework-fields" class="input-group"style="display: none;"></div>
-                        <button type="button" id="add-framework" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-framework" class="button is-danger has-text-light">ー</button>
-                    </div>
-                </div>
-                <div class="spacer"></div>
-            
-                <div class="field">
-                    <label class="label" for="database">データベース</label>
-                    <div class="control">
-                        <div class="input-group">
-                            <input class="input input-name" type="text" id="database_0" name="database_0" placeholder="技術名">
-                            <input class="input input-duration" type="number" id="database_0_num" name="database_0_num" placeholder="期間">
-                            <span>ヶ月</span>
-                        </div>
-                        <div id="database-fields" class="input-group"style="display: none;"></div>
-                        <button type="button" id="add-database" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-database" class="button is-danger has-text-light">ー</button>
-                    </div>
-                </div>
-                <div class="spacer"></div>
-            
-                <div class="field">
-                    <label class="label" for="containertech">仮想化/コンテナ</label>
-                    <div class="control">
-                        <div class="input-group">
-                            <input class="input input-name" type="text" id="containertech_0" name="containertech_0" placeholder="技術名">
-                            <input class="input input-duration" type="number" id="containertech_0_num" name="containertech_0_num" placeholder="期間">
-                            <span>ヶ月</span>
-                        </div>
-                        <div id="containertech-fields" class="input-group"style="display: none;"></div>
-                        <button type="button" id="add-containertech" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-containertech" class="button is-danger has-text-light">ー</button>
-                    </div>
-                </div>
-                <div class="spacer"></div>
-            
-                <div class="field">
-                    <label class="label" for="cicd">CI/CD</label>
-                    <div class="control">
-                        <div class="input-group">
-                            <input class="input input-name" type="text" id="cicd_0" name="cicd_0" placeholder="技術名">
-                            <input class="input input-duration" type="number" id="cicd_0_num" name="cicd_0_num" placeholder="期間">
-                            <span>ヶ月</span>
-                        </div>
-                        <div id="cicd-fields" class="input-group"style="display: none;"></div>
-                        <button type="button" id="add-cicd" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-cicd" class="button is-danger has-text-light">ー</button>
-                    </div>
-                </div>
-                <div class="spacer"></div>
-            
-                <div class="field">
-                    <label class="label" for="logging">ログ収集・可視化</label>
-                    <div class="control">
-                        <div class="input-group">
-                            <input class="input input-name" type="text" id="logging_0" name="logging_0" placeholder="技術名">
-                            <input class="input input-duration" type="number" id="logging_0_num" name="logging_0_num" placeholder="期間">
-                            <span>ヶ月</span>
-                        </div>
-                        <div id="logging-fields" class="input-group"style="display: none;"></div>
-                        <button type="button" id="add-logging" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-logging" class="button is-danger has-text-light">ー</button>
-                    </div>
-                </div>
-                <div class="spacer"></div>
-            
-                <div class="field">
-                    <label class="label" for="tools">その他ツール類</label>
-                    <div class="control">
-                        <div class="input-group">
-                            <input class="input input-name" type="text" id="tools_0" name="tools_0" placeholder="技術名">
-                            <input class="input input-duration" type="number" id="tools_0_num" name="tools_0_num" placeholder="期間">
-                            <span>ヶ月</span>
-                        </div>
-                        <div id="tools-fields" class="input-group"style="display: none;"></div>
-                        <button type="button" id="add-tools" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-tools" class="button is-danger has-text-light">ー</button>                       
-                    </div>
-                </div>
+                {% endfor %}
             </div>
-            
-
-            <div class="spacer"></div>
 
             <div class="field">
                 <div class="control">
@@ -218,53 +113,47 @@
                 </div>
             </div>
         </form>
+
+        <a href="{{ url_for('admin_login') }}" class="button is-link">ログイン画面に戻る</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="button is-link">ダッシュボードに戻る</a>
+        <a href="{{ url_for('admin_projects') }}" class="button is-link">プロジェクト一覧に戻る</a>
     </div>
 </section>
 
 <script>
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 
-    // イベント：addField関数への仲介
-    // 詳細：input画面やedit_project画面において、どの＋ボタンがクリックされているのか確認する
-    // 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
     document.addEventListener('DOMContentLoaded', () => {
-    function addField(buttonId, containerId, namePrefix) {
-        const button = document.getElementById(buttonId);
-        button.addEventListener('click', () => {
-            const container = document.getElementById(containerId);
-            const count = container.childElementCount;
-            const inputGroup = document.createElement('div');
-            inputGroup.classList.add('input-group');
-            inputGroup.innerHTML = `
-                <input class="input input-name" type="text" id="${namePrefix}_${count}" name="${namePrefix}_${count}" placeholder="技術名">
-                <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間">
-                <span>ヶ月</span>
-            `;
-            container.appendChild(inputGroup);
-            container.style.display = 'block';
-        });
-    }
+        function addField(buttonId, containerId, namePrefix) {
+            const button = document.getElementById(buttonId);
+            button.addEventListener('click', () => {
+                const container = document.getElementById(containerId);
+                const count = container.childElementCount;
+                const inputGroup = document.createElement('div');
+                inputGroup.classList.add('input-group');
+                inputGroup.innerHTML = `
+                    <input class="input input-name" type="text" id="${namePrefix}_${count}" name="${namePrefix}_${count}" placeholder="技術名">
+                    <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間" value="0" min="0">
+                    <span>ヶ月</span>
+                `;
+                container.appendChild(inputGroup);
+                container.style.display = 'block';
+            });
+        }
 
-    function removeField(buttonId, containerId) {
-        const button = document.getElementById(buttonId);
-        button.addEventListener('click', () => {
-            const container = document.getElementById(containerId);
-            if (container.childElementCount > 0) {
-                container.removeChild(container.lastElementChild);
-                if (container.childElementCount === 0) {
-                    container.style.display = 'none';
+        function removeField(buttonId, containerId) {
+            const button = document.getElementById(buttonId);
+            button.addEventListener('click', () => {
+                const container = document.getElementById(containerId);
+                if (container.childElementCount > 1) { // 1つ以上の項目がある場合のみ削除
+                    container.removeChild(container.lastElementChild);
                 }
-            }
-        });
-    }
+            });
+        }
 
-    ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'].forEach(techType => {
+        ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'].forEach(techType => {
             addField(`add-${techType}`, `${techType}-fields`, techType);
             removeField(`remove-${techType}`, `${techType}-fields`);
         });
-});
-
+    });
 </script>
 
 {% endblock %}

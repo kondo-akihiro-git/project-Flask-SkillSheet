@@ -1,39 +1,77 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>新規ユーザー登録</h1>
-<form action="{{ url_for('admin_user_create') }}" method="post">
-    <label for="username">ユーザー名</label>
-    <input type="text" name="username" required>
-
-    <label for="password">パスワード</label>
-    <input type="password" name="password" required>
-
-    <label for="email">メールアドレス</label>
-    <input type="email" name="email" required>
-
-    <label for="display_name">表示名</label>
-    <input type="text" name="display_name">
-
-    <label for="age">年齢</label>
-    <input type="number" name="age">
-
-    <label for="gender">性別</label>
-    <input type="text" name="gender">
-
-    <label for="nearest_station">最寄り駅</label>
-    <input type="text" name="nearest_station">
-
-    <label for="experience_years">経験年数</label>
-    <input type="number" name="experience_years">
-
-    <label for="education">学歴</label>
-    <input type="text" name="education">
-
-    <label for="is_admin">管理者権限</label>
-    <input type="checkbox" name="is_admin">
-
-    <button type="submit">登録</button>
-</form>
-<a href="{{ url_for('admin_users') }}">ユーザー一覧に戻る</a>
+<div class="container mt-5">
+    <h1 class="title">新規ユーザー登録</h1>
+    <div class="box">
+        <form action="{{ url_for('admin_user_create') }}" method="post">
+            <div class="field">
+                <label class="label" for="username">ユーザー名</label>
+                <div class="control">
+                    <input class="input" type="text" name="username" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="password">パスワード</label>
+                <div class="control">
+                    <input class="input" type="password" name="password" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="email">メールアドレス</label>
+                <div class="control">
+                    <input class="input" type="email" name="email" required>
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="display_name">表示名</label>
+                <div class="control">
+                    <input class="input" type="text" name="display_name">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="age">年齢</label>
+                <div class="control">
+                    <input class="input" type="number" name="age">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="gender">性別</label>
+                <div class="control">
+                    <input class="input" type="text" name="gender">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="nearest_station">最寄り駅</label>
+                <div class="control">
+                    <input class="input" type="text" name="nearest_station">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="experience_years">経験年数</label>
+                <div class="control">
+                    <input class="input" type="number" name="experience_years">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="education">学歴</label>
+                <div class="control">
+                    <input class="input" type="text" name="education">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label" for="is_admin">管理者権限</label>
+                <div class="control">
+                    <input class="checkbox" type="checkbox" name="is_admin">
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button class="button is-primary" type="submit">登録</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <a class="button is-link mt-5" href="{{ url_for('admin_users') }}">ユーザー一覧に戻る</a>
+</div>
 {% endblock %}

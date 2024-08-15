@@ -81,13 +81,13 @@
                             {% if loop.index0 == 0 %}
                             <div class="input-group">
                                 <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
-                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間">
+                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間" value="0" min="0">
                                 <span>ヶ月</span>
                             </div>
                             {% else %}
                             <div class="input-group" style="display: none;">
                                 <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
-                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間">
+                                <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間" value="0" min="0">
                                 <span>ヶ月</span>
                             </div>
                             {% endif %}
@@ -120,7 +120,7 @@
                 inputGroup.classList.add('input-group');
                 inputGroup.innerHTML = `
                     <input class="input input-name" type="text" name="${namePrefix}_${count}" placeholder="技術名">
-                    <input class="input input-duration" type="number" name="${namePrefix}_${count}_num" placeholder="期間">
+                    <input class="input input-duration" type="number" name="${namePrefix}_${count}_num" placeholder="期間" value="0" min="0">
                     <span>ヶ月</span>
                 `;
                 container.appendChild(inputGroup);

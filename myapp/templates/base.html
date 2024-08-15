@@ -18,6 +18,22 @@
             height: 100%;
         }
 
+        html {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+            background-color: #f5f5f5;
+            /* 背景色を全体と一致させる */
+        }
+
         .navbar {
             background-color: #363636;
             color: #f5f5f5;
@@ -411,36 +427,35 @@
             white-space: pre-wrap;
         }
 
+        .pagination-link {
+            margin: 0 auto;
+        }
         .log-container {
-            max-height: 500px;
-            /* 必要に応じて調整 */
-            overflow-y: auto;
-            white-space: pre-wrap;
-            background-color: #f5f5f5;
-            /* 背景色の設定 */
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-        .custom-hero {
-            background: linear-gradient(135deg, #4a90e2, #9013fe);
-            background-size: 300% 300%;
-            animation: moveBackground 20s ease infinite;
-        }
+.log-list {
+    list-style-type: none;
+    padding: 0;
+}
 
-        @keyframes moveBackground {
-            0% {
-                background-position: 0% 50%;
-            }
+.log-item {
+    padding: 0.5rem;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.3s;
+}
 
-            50% {
-                background-position: 100% 50%;
-            }
+.log-item:hover {
+    background-color: #f0f0f0;
+}
 
-            100% {
-                background-position: 0% 50%;
-            }
-        }
+.has-text-centered {
+    text-align: center;
+}
+
     </style>
 </head>
 
@@ -449,7 +464,7 @@
         <nav id="navbar" class="navbar is-fixed-top">
             <div class="container">
                 <div class="navbar-brand">
-                    <a class="navbar-item" href="{{ url_for('index') }}">
+                    <a class="navbar-item" href="{{ url_for('index') }}" tabindex="-1">
                         <h1 class="title has-text-light">SkillCanvas</h1>
                     </a>
                     <span class="navbar-burger burger" data-target="navbarMenu">
@@ -460,9 +475,10 @@
                 </div>
                 <div id="navbarMenu" class="navbar-menu">
                     <div class="navbar-end">
-                        <a class="navbar-item has-text-light" href="{{ url_for('index') }}">Home</a>
-                        <a class="navbar-item has-text-light" href="{{ url_for('features') }}">Features</a>
-                        <a class="navbar-item has-text-light" href="{{ url_for('contact') }}">Contact</a>
+                        <a class="navbar-item has-text-light" href="{{ url_for('index') }}" tabindex="-1">Home</a>
+                        <a class="navbar-item has-text-light" href="{{ url_for('features') }}"
+                            tabindex="-1">Features</a>
+                        <a class="navbar-item has-text-light" href="{{ url_for('contact') }}" tabindex="-1">Contact</a>
                     </div>
                 </div>
             </div>

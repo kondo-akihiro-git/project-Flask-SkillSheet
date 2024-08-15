@@ -6,7 +6,7 @@
     <div class="container">
         <h1 class="title">プロジェクト詳細</h1>
 
-        <a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
+        <a href="{{ url_for('admin_login') }}">管理者ログイン画面に戻る</a>
         <a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
         <a href="{{ url_for('admin_projects') }}">プロジェクト一覧に戻る</a>
 
@@ -86,14 +86,14 @@
                                 {% for tech in technologies[tech_type] %}
                                 <div class="input-group">
                                     <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
-                                    <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間">
+                                    <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間" value="0" min="0">
                                     <span>ヶ月</span>
                                 </div>
                                 {% endfor %}
                             {% else %}
                                 <div class="input-group">
                                     <input class="input input-name" type="text" name="{{ tech_type }}_0" placeholder="技術名">
-                                    <input class="input input-duration" type="number" name="{{ tech_type }}_0_num" placeholder="期間">
+                                    <input class="input input-duration" type="number" name="{{ tech_type }}_0_num" placeholder="期間" value="0" min="0">
                                     <span>ヶ月</span>
                                 </div>
                             {% endif %}
@@ -129,7 +129,7 @@
                 inputGroup.classList.add('input-group');
                 inputGroup.innerHTML = `
                     <input class="input input-name" type="text" id="${namePrefix}_${count}" name="${namePrefix}_${count}" placeholder="技術名">
-                    <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間">
+                    <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間" value="0" min="0">
                     <span>ヶ月</span>
                 `;
                 container.appendChild(inputGroup);

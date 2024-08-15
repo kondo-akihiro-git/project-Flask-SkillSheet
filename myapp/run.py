@@ -506,9 +506,9 @@ def input():
     if request.method == 'POST':
         start_month_str = request.form['start_month']
         end_month_str = request.form['end_month']
-        start_month = start_month_str[:7]  # YYYY-MM形式の文字列に変換
-        end_month = end_month_str[:7]      # YYYY-MM形式の文字列に変換
-        
+        start_month = start_month_str[:7]
+        end_month = end_month_str[:7]
+
         industry = request.form['industry']
         project_name = request.form['project_name']
         project_summary = request.form['project_summary']
@@ -531,12 +531,24 @@ def input():
         except Exception as e:
             app.logger.error(f'Error adding project for user ID: {current_user.id} - {str(e)}')
 
-
         # 経験した技術のDB登録
         tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
         for tech_type in tech_types:
-            tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(0, len(request.form) + 1) if f'{tech_type}_{i}' in request.form]
-            tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(0, len(request.form) + 1) if f'{tech_type}_{i}_num' in request.form]
+            tech_names = []
+            tech_durations = []
+            index = 0
+            while f'{tech_type}_{index}' in request.form:
+                tech_name = request.form[f'{tech_type}_{index}']
+                tech_duration = request.form.get(f'{tech_type}_{index}_num', '0')
+
+                # 技術名が入力されている場合、期間が未入力なら0を設定
+                if tech_name and not tech_duration:
+                    tech_duration = '0'
+
+                tech_names.append(tech_name)
+                tech_durations.append(tech_duration)
+                index += 1
+
             for name, duration in zip(tech_names, tech_durations):
                 if name:
                     new_technology = Technology(
@@ -552,7 +564,6 @@ def input():
             app.logger.info(f'Technologies added for project ID: {new_project.id}')
         except Exception as e:
             app.logger.error(f'Error adding technologies for project ID: {new_project.id} - {str(e)}')
-
 
         # 担当した工程のDB登録
         processes = request.form.getlist('process')
@@ -573,6 +584,8 @@ def input():
         return redirect(url_for('input'))
 
     return render_template('input.html', user=current_user)
+
+
 
 ####################################################################################################
 # 
@@ -999,7 +1012,6 @@ def admin_projects():
 
 
 
-
 @app.route('/admin/project/<int:project_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -1018,28 +1030,36 @@ def admin_project_detail(project_id):
         # 技術の処理
         tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
         for tech_type in tech_types:
-            tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(0, len(request.form)) if f'{tech_type}_{i}' in request.form]
-            tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(0, len(request.form)) if f'{tech_type}_{i}_num' in request.form]
+            tech_names = []
+            tech_durations = []
+            i = 0
+            while f'{tech_type}_{i}' in request.form:
+                tech_name = request.form.get(f'{tech_type}_{i}')
+                tech_duration = request.form.get(f'{tech_type}_{i}_num')
+                if tech_name:
+                    tech_names.append(tech_name)
+                    tech_durations.append(tech_duration)
+                i += 1
+
             existing_techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
             existing_names = {tech.name for tech in existing_techs}
 
             for name, duration in zip(tech_names, tech_durations):
-                if name:
-                    if duration.isdigit() and int(duration) > 0:
-                        if name in existing_names:
-                            tech = next(tech for tech in existing_techs if tech.name == name)
-                            tech.duration_months = int(duration)
-                        else:
-                            new_technology = Technology(
-                                project_id=project.id,
-                                type=tech_type,
-                                name=name,
-                                duration_months=int(duration)
-                            )
-                            db.session.add(new_technology)
-                    elif name in existing_names:
+                if name and duration.isdigit() and int(duration) > 0:
+                    if name in existing_names:
                         tech = next(tech for tech in existing_techs if tech.name == name)
-                        db.session.delete(tech)
+                        tech.duration_months = int(duration)
+                    else:
+                        new_technology = Technology(
+                            project_id=project.id,
+                            type=tech_type,
+                            name=name,
+                            duration_months=int(duration)
+                        )
+                        db.session.add(new_technology)
+                elif name in existing_names:
+                    tech = next(tech for tech in existing_techs if tech.name == name)
+                    db.session.delete(tech)
 
             # 空白にする処理を追加
             for tech in existing_techs:

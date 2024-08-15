@@ -1,21 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h1>管理者ダッシュボード</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% set category, message = messages[messages|length-1] %}
-    <div class="notification is-{{ category }}">
-        {{ message }}
+<main class="section">
+    <div class="container">
+        <h1 class="title has-text-centered">管理者ダッシュボード</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% set category, message = messages[messages|length-1] %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="columns is-multiline">
+            <div class="column is-12-mobile is-6-tablet is-6-desktop">
+                <div class="box has-background-light">
+                    <a href="{{ url_for('admin_users') }}" class="title is-4">ユーザー一覧</a>
+                    <p>ユーザーの一覧を表示し、管理することができます。</p>
+                </div>
+            </div>
+            <div class="column is-12-mobile is-6-tablet is-6-desktop">
+                <div class="box has-background-light">
+                    <a href="{{ url_for('admin_projects') }}" class="title is-4">プロジェクト一覧</a>
+                    <p>プロジェクトの一覧を表示し、管理することができます。</p>
+                </div>
+            </div>
+            <div class="column is-12-mobile is-6-tablet is-6-desktop">
+                <div class="box has-background-light">
+                    <a href="{{ url_for('admin_logs') }}" class="title is-4">ログの確認</a>
+                    <p>システムのログを確認し、問題をトラブルシュートすることができます。</p>
+                </div>
+            </div>
+            <div class="column is-12-mobile is-6-tablet is-6-desktop">
+                <div class="box has-background-light">
+                    <a href="{{ url_for('admin_contacts') }}" class="title is-4">お問い合わせ一覧</a>
+                    <p>ユーザーからのお問い合わせを一覧で確認できます。</p>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endif %}
-    {% endwith %}
-    <div class="list-group">
-        <a href="{{ url_for('admin_users') }}" class="list-group-item list-group-item-action">ユーザー一覧</a>
-        <a href="{{ url_for('admin_projects') }}" class="list-group-item list-group-item-action">プロジェクト一覧</a>
-        <a href="{{ url_for('admin_logs') }}" class="list-group-item list-group-item-action">ログの確認</a>
-        <a href="{{ url_for('admin_contacts') }}" class="list-group-item list-group-item-action">お問い合わせ一覧</a>
-    </div>
-</div>
+</main>
 {% endblock %}

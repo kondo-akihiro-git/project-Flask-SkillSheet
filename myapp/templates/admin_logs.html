@@ -1,19 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<a href="{{ url_for('admin_login') }}">ログイン画面に戻る</a>
-<a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
-<div class="container">
-    <h1>ログの確認</h1>
-    <div class="log-container">
+<div class="container mt-5">
+    <div class="buttons mb-4">
+        <a class="button is-link" href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
+        <a class="button is-link" href="{{ url_for('admin_login') }}">管理者ログイン画面に戻る</a>
+    </div>
+    <h1 class="title has-text-centered">ログの確認</h1>
+    <div class="box log-container">
         {% if logs %}
-            <ul>
+            <ul class="log-list">
                 {% for log in logs %}
-                    <li>{{ log }}</li>
+                    <li class="log-item">{{ log }}</li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>表示するログがありません。</p>
+            <p class="has-text-centered">表示するログがありません。</p>
         {% endif %}
     </div>
 </div>
