@@ -29,7 +29,7 @@ def admin_required(f):
 ####################################################################################################
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
-    form = AdminLoginForm()  # フォームクラスを定義してください
+    form = AdminLoginForm()  # type: ignore # フォームクラスを定義してください
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data) and user.is_admin:

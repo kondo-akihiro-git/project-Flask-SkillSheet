@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<section class="hero custom-hero is-fullheight">
+<section class="section">
+<section class="hero custom-hero">
     <div class="hero-body">
         <div class="container has-text-centered">
             <h1 class="title is-size-2-mobile is-size-1-tablet is-size-1-desktop">Welcome to SkillCanvas</h1>
@@ -10,8 +10,6 @@
         </div>
     </div>
 </section>
-
-
 
 <div class="spacer"></div>
 
@@ -25,28 +23,30 @@
 {% endwith %}
 
 <div class="container">
-    <div class="columns is-multiline">
+    <div class="columns is-centered is-multiline">
         {% if user.is_authenticated %}
-        <div class="column is-half">
+        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
             <a href="{{ url_for('input') }}" class="button is-fullwidth hero-button">プロジェクト入力</a>
         </div>
-        <div class="column is-half">
+        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
             <a href="{{ url_for('sheet') }}" class="button is-fullwidth hero-button">スキルシート</a>
         </div>
-        <div class="column is-half">
+        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
             <a href="{{ url_for('userinfo') }}" class="button is-fullwidth hero-button">ユーザー情報の更新</a>
         </div>
-        <div class="column is-half">
+        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
             <a href="{{ url_for('logout') }}" class="button is-fullwidth hero-button">ログアウト</a>
         </div>
         {% else %}
-        <div class="column is-half">
+        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
             <a href="{{ url_for('login') }}" class="button is-fullwidth hero-button">ログイン</a>
         </div>
-        <div class="column is-half">
+        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
             <a href="{{ url_for('register') }}" class="button is-fullwidth hero-button">新規登録</a>
         </div>
         {% endif %}
     </div>
 </div>
+</section>
+
 {% endblock %}

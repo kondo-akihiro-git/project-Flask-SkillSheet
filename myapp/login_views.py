@@ -9,7 +9,7 @@ from run import *
 # 詳細：ユーザーIDに基づいてユーザーをロードする
 # 
 ####################################################################################################
-@login_manager.user_loader
+@login_manager.user_loader # type: ignore
 def load_user(user_id):
     # print("管理者ユーザーが追加されました。")
     return User.query.get(int(user_id))
@@ -22,7 +22,7 @@ def load_user(user_id):
 # 詳細：ホームページを表示する
 # 
 ####################################################################################################
-@app.route('/')
+@app.route('/') # type: ignore
 def index():
     return render_template('index.html', user=current_user)
 
@@ -34,12 +34,12 @@ def index():
 # 詳細：ユーザーのログイン処理を行う
 # 
 ####################################################################################################
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST']) # type: ignore
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(username=username).first() # type: ignore
 
         if user and user.check_password(password):
             if not user.is_active:
