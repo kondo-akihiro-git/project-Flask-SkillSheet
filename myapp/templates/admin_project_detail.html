@@ -23,35 +23,40 @@
             <div class="field">
                 <label class="label" for="start_month">プロジェクトに参加した月</label>
                 <div class="control">
-                    <input class="input" type="month" id="start_month" name="start_month" value="{{ project.start_month }}" required>
+                    <input class="input" type="month" id="start_month" name="start_month"
+                        value="{{ project.start_month }}" required>
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="end_month">プロジェクトを退場した月</label>
                 <div class="control">
-                    <input class="input" type="month" id="end_month" name="end_month" value="{{ project.end_month }}" required>
+                    <input class="input" type="month" id="end_month" name="end_month" value="{{ project.end_month }}"
+                        required>
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="industry">クライアントの業種</label>
                 <div class="control">
-                    <input class="input" type="text" id="industry" name="industry" value="{{ project.industry }}" required>
+                    <input class="input" type="text" id="industry" name="industry" value="{{ project.industry }}"
+                        required>
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="project_name">プロジェクト名</label>
                 <div class="control">
-                    <input class="input" type="text" id="project_name" name="project_name" value="{{ project.project_name }}" required>
+                    <input class="input" type="text" id="project_name" name="project_name"
+                        value="{{ project.project_name }}" required>
                 </div>
             </div>
 
             <div class="field">
                 <label class="label" for="project_summary">プロジェクト概要</label>
                 <div class="control">
-                    <textarea class="textarea" id="project_summary" name="project_summary" required>{{ project.project_summary }}</textarea>
+                    <textarea class="textarea" id="project_summary" name="project_summary"
+                        required>{{ project.project_summary }}</textarea>
                 </div>
             </div>
 
@@ -60,8 +65,8 @@
                 <div class="control">
                     {% for process in ['要件定義', '基本設計', '詳細設計', '実装', '単体テスト', '結合テスト', '受入テスト', '運用・保守'] %}
                     <label class="checkbox">
-                        <input type="checkbox" id="{{ process }}" name="process" value="{{ process }}"
-                        {% if process in processes %} checked {% endif %}>
+                        <input type="checkbox" id="{{ process }}" name="process" value="{{ process }}" {% if process in
+                            processes %} checked {% endif %}>
                         {{ process }}
                     </label>
                     {% endfor %}
@@ -71,35 +76,43 @@
             <div class="field">
                 <label class="label" for="responsibilities">担当業務</label>
                 <div class="control">
-                    <textarea class="textarea" id="responsibilities" name="responsibilities" required>{{ project.responsibilities }}</textarea>
+                    <textarea class="textarea" id="responsibilities" name="responsibilities"
+                        required>{{ project.responsibilities }}</textarea>
                 </div>
             </div>
 
             <div class="field">
                 <label class="label">使用技術</label>
-                {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'] %}
+                {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging',
+                'tools'] %}
                 <div class="field">
                     <label class="label" for="{{ tech_type }}">{{ tech_type | capitalize }}</label>
                     <div class="control">
                         <div id="{{ tech_type }}-fields">
                             {% if technologies[tech_type] %}
-                                {% for tech in technologies[tech_type] %}
-                                <div class="input-group">
-                                    <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}" value="{{ tech.name }}" placeholder="技術名">
-                                    <input class="input input-duration" type="number" name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}" placeholder="期間" value="0" min="0">
-                                    <span>ヶ月</span>
-                                </div>
-                                {% endfor %}
+                            {% for tech in technologies[tech_type] %}
+                            <div class="input-group">
+                                <input class="input input-name" type="text" name="{{ tech_type }}_{{ loop.index0 }}"
+                                    value="{{ tech.name }}" placeholder="技術名">
+                                <input class="input input-duration" type="number"
+                                    name="{{ tech_type }}_{{ loop.index0 }}_num" value="{{ tech.duration_months }}"
+                                    placeholder="期間" value="0" min="0">
+                                <span>ヶ月</span>
+                            </div>
+                            {% endfor %}
                             {% else %}
-                                <div class="input-group">
-                                    <input class="input input-name" type="text" name="{{ tech_type }}_0" placeholder="技術名">
-                                    <input class="input input-duration" type="number" name="{{ tech_type }}_0_num" placeholder="期間" value="0" min="0">
-                                    <span>ヶ月</span>
-                                </div>
+                            <div class="input-group">
+                                <input class="input input-name" type="text" name="{{ tech_type }}_0" placeholder="技術名">
+                                <input class="input input-duration" type="number" name="{{ tech_type }}_0_num"
+                                    placeholder="期間" value="0" min="0">
+                                <span>ヶ月</span>
+                            </div>
                             {% endif %}
                         </div>
-                        <button type="button" id="add-{{ tech_type }}" class="button is-primary has-text-light">＋</button>
-                        <button type="button" id="remove-{{ tech_type }}" class="button is-danger has-text-light">ー</button>
+                        <button type="button" id="add-{{ tech_type }}"
+                            class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-{{ tech_type }}"
+                            class="button is-danger has-text-light">ー</button>
                     </div>
                 </div>
                 {% endfor %}
@@ -152,6 +165,41 @@
             removeField(`remove-${techType}`, `${techType}-fields`);
         });
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        function validateTechFields(techType) {
+            const container = document.getElementById(`${techType}-fields`);
+            const inputs = container.querySelectorAll('.input-name');
+            const techNames = [];
+            let hasDuplicate = false;
+
+            inputs.forEach(input => {
+                const name = input.value.trim();
+                if (name && techNames.includes(name)) {
+                    hasDuplicate = true;
+                } else if (name) {
+                    techNames.push(name);
+                }
+            });
+
+            if (hasDuplicate) {
+                alert(`同じプロジェクト内で「${techType}」カテゴリーの技術名が重複しています。`);
+                return false;
+            }
+            return true;
+        }
+
+        document.querySelector('form').addEventListener('submit', (event) => {
+            const techTypes = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'];
+            for (const techType of techTypes) {
+                if (!validateTechFields(techType)) {
+                    event.preventDefault(); // フォームの送信をキャンセル
+                    break;
+                }
+            }
+        });
+    });
+
 </script>
 
 {% endblock %}

@@ -136,6 +136,40 @@
             removeField(`remove-${techType}`, `${techType}-fields`);
         });
     });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        function validateTechFields(techType) {
+            const container = document.getElementById(`${techType}-fields`);
+            const inputs = container.querySelectorAll('.input-name');
+            const techNames = [];
+            let hasDuplicate = false;
+
+            inputs.forEach(input => {
+                const name = input.value.trim();
+                if (name && techNames.includes(name)) {
+                    hasDuplicate = true;
+                } else if (name) {
+                    techNames.push(name);
+                }
+            });
+
+            if (hasDuplicate) {
+                alert(`同じプロジェクト内で「${techType}」カテゴリーの技術名が重複しています。`);
+                return false;
+            }
+            return true;
+        }
+
+        document.querySelector('form').addEventListener('submit', (event) => {
+            const techTypes = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'];
+            for (const techType of techTypes) {
+                if (!validateTechFields(techType)) {
+                    event.preventDefault(); // フォームの送信をキャンセル
+                    break;
+                }
+            }
+        });
+    });
 </script>
 
 {% endblock %}

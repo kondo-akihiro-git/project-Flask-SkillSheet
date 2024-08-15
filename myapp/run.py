@@ -514,6 +514,25 @@ def input():
         project_summary = request.form['project_summary']
         responsibilities = request.form['responsibilities']
 
+        # 経験した技術の取得
+        tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
+        tech_data = {tech_type: {} for tech_type in tech_types}
+
+        for tech_type in tech_types:
+            index = 0
+            while f'{tech_type}_{index}' in request.form:
+                tech_name = request.form[f'{tech_type}_{index}']
+                tech_duration = request.form.get(f'{tech_type}_{index}_num', '0')
+
+                if tech_name:
+                    if tech_name in tech_data[tech_type]:
+                        flash(f'同じプロジェクト内で「{tech_type}」カテゴリーの技術名が重複しています。', 'error')
+                        return redirect(url_for('input'))
+
+                    tech_data[tech_type][tech_name] = tech_duration
+                index += 1
+
+        # プロジェクトの作成
         new_project = Project(
             user_id=current_user.id,
             start_month=start_month,
@@ -532,32 +551,15 @@ def input():
             app.logger.error(f'Error adding project for user ID: {current_user.id} - {str(e)}')
 
         # 経験した技術のDB登録
-        tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
         for tech_type in tech_types:
-            tech_names = []
-            tech_durations = []
-            index = 0
-            while f'{tech_type}_{index}' in request.form:
-                tech_name = request.form[f'{tech_type}_{index}']
-                tech_duration = request.form.get(f'{tech_type}_{index}_num', '0')
-
-                # 技術名が入力されている場合、期間が未入力なら0を設定
-                if tech_name and not tech_duration:
-                    tech_duration = '0'
-
-                tech_names.append(tech_name)
-                tech_durations.append(tech_duration)
-                index += 1
-
-            for name, duration in zip(tech_names, tech_durations):
-                if name:
-                    new_technology = Technology(
-                        project_id=new_project.id,
-                        type=tech_type,
-                        name=name,
-                        duration_months=int(duration)
-                    )
-                    db.session.add(new_technology)
+            for name, duration in tech_data[tech_type].items():
+                new_technology = Technology(
+                    project_id=new_project.id,
+                    type=tech_type,
+                    name=name,
+                    duration_months=int(duration)
+                )
+                db.session.add(new_technology)
 
         try:
             db.session.commit()
@@ -700,6 +702,12 @@ def edit_project(project_id):
         for tech_type in tech_types:
             tech_names = [request.form.get(f'{tech_type}_{i}') for i in range(len(request.form)) if f'{tech_type}_{i}' in request.form]
             tech_durations = [request.form.get(f'{tech_type}_{i}_num') for i in range(len(request.form)) if f'{tech_type}_{i}_num' in request.form]
+
+            # 重複チェック
+            if len(tech_names) != len(set(tech_names)):
+                flash('技術名が重複しています。修正してください。', 'error')
+                return redirect(url_for('edit_project', project_id=project.id))
+
             existing_techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
             existing_names = {tech.name for tech in existing_techs}
 
@@ -1017,7 +1025,6 @@ def admin_projects():
     return render_template('admin_projects.html', projects=projects, project_processes=project_processes)
 
 
-
 @app.route('/admin/project/<int:project_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -1047,9 +1054,17 @@ def admin_project_detail(project_id):
                     tech_durations.append(tech_duration)
                 i += 1
 
+            # 重複チェック
+            tech_names_set = set(tech_names)
+            if len(tech_names) != len(tech_names_set):
+                flash(f'{tech_type.capitalize()} の技術名が重複しています。', 'error')
+                return redirect(url_for('admin_project_detail', project_id=project_id))
+
+            # 既存技術の取得と名前のリスト作成
             existing_techs = Technology.query.filter_by(project_id=project.id, type=tech_type).all()
             existing_names = {tech.name for tech in existing_techs}
 
+            # 更新と新規追加
             for name, duration in zip(tech_names, tech_durations):
                 if name and duration.isdigit() and int(duration) > 0:
                     if name in existing_names:
@@ -1063,11 +1078,8 @@ def admin_project_detail(project_id):
                             duration_months=int(duration)
                         )
                         db.session.add(new_technology)
-                elif name in existing_names:
-                    tech = next(tech for tech in existing_techs if tech.name == name)
-                    db.session.delete(tech)
 
-            # 空白にする処理を追加
+            # 削除処理
             for tech in existing_techs:
                 if tech.name not in tech_names:
                     db.session.delete(tech)
@@ -1075,15 +1087,15 @@ def admin_project_detail(project_id):
         # 工程の処理
         processes = request.form.getlist('process')
         existing_processes = Process.query.filter_by(project_id=project.id).all()
-        existing_names = {process.name for process in existing_processes}
+        existing_process_names = {process.name for process in existing_processes}
 
         for process_name in ['要件定義', '基本設計', '詳細設計', '実装', '単体テスト', '結合テスト', '受入テスト', '運用・保守']:
             if process_name in processes:
-                if process_name not in existing_names:
+                if process_name not in existing_process_names:
                     new_process = Process(project_id=project.id, name=process_name)
                     db.session.add(new_process)
             else:
-                if process_name in existing_names:
+                if process_name in existing_process_names:
                     process = next(p for p in existing_processes if p.name == process_name)
                     db.session.delete(process)
 
@@ -1095,6 +1107,7 @@ def admin_project_detail(project_id):
     processes = [process.name for process in Process.query.filter_by(project_id=project.id).all()]
 
     return render_template('admin_project_detail.html', project=project, technologies=technologies, processes=processes)
+
 
 
 # プロジェクトの削除
