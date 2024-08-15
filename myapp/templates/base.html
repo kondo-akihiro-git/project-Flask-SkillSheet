@@ -400,22 +400,47 @@
             margin-bottom: 2rem;
             /* 上下のマージン */
         }
+
         /* プロフィール項目のフォントサイズを大きくする */
-.profile-item {
-    font-size: 1.2rem; /* 必要に応じてサイズを調整 */
-}
-.preformatted {
-        white-space: pre-wrap;
-    }
-    .log-container {
-    max-height: 500px; /* 必要に応じて調整 */
-    overflow-y: auto;
-    white-space: pre-wrap;
-    background-color: #f5f5f5; /* 背景色の設定 */
-    padding: 10px;
-    border: 1px solid #ddd;
-}
-        
+        .profile-item {
+            font-size: 1.2rem;
+            /* 必要に応じてサイズを調整 */
+        }
+
+        .preformatted {
+            white-space: pre-wrap;
+        }
+
+        .log-container {
+            max-height: 500px;
+            /* 必要に応じて調整 */
+            overflow-y: auto;
+            white-space: pre-wrap;
+            background-color: #f5f5f5;
+            /* 背景色の設定 */
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .custom-hero {
+            background: linear-gradient(135deg, #4a90e2, #9013fe);
+            background-size: 300% 300%;
+            animation: moveBackground 20s ease infinite;
+        }
+
+        @keyframes moveBackground {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
     </style>
 </head>
 

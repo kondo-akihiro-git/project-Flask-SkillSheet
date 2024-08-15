@@ -21,6 +21,8 @@ import os
 from datetime import datetime, timedelta
 import re
 from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
+
 
 # Flaskアプリのインスタンス
 app = Flask(__name__)
@@ -67,6 +69,9 @@ app.config['MAIL_PORT'] = 1025
 mail = Mail(app)
 
 
+# パスワードリセット用のシリアライザ
+serializer = URLSafeTimedSerializer(app.secret_key)
+
 ####################################################################################################
 # 
 # 変数：中間テーブル
@@ -90,7 +95,9 @@ class User(db.Model, UserMixin):
     # 認証関連のデータ
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
+    is_active = db.Column(db.Boolean, default=False) 
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
     is_admin = db.Column(db.Boolean, default=False)  # 管理者フラグ
@@ -237,14 +244,62 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
+
+        if user and user.check_password(password):
+            if not user.is_active:
+                flash('Account not confirmed. Please check your email.', 'warning')
+                return redirect(url_for('login'))
+
             login_user(user)
             app.logger.info(f'User {username} logged in successfully.')
             return redirect(url_for('index'))
+        
         app.logger.warning(f'Failed login attempt for username: {username}')
-        flash('Invalid username or password')
+        flash('Invalid username or password', 'danger')
+
     return render_template('login.html')
 
+
+
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        user = User.query.filter_by(email=email).first()
+        if user:
+            token = serializer.dumps(user.email, salt='password-reset-salt')
+            reset_url = url_for('reset_password', token=token, _external=True)
+            msg = Message('Password Reset Request', sender='noreply@yourapp.com', recipients=[user.email])
+            msg.body = f'Please click the following link to reset your password: {reset_url}'
+            mail.send(msg)
+            flash('A password reset link has been sent to your email.', 'info')
+        else:
+            flash('Email not found', 'warning')
+    return render_template('forgot_password.html')
+
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        email = serializer.loads(token, salt='password-reset-salt', max_age=3600)
+    except:
+        flash('The reset link is invalid or has expired.', 'danger')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        password = request.form['password']
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.password = generate_password_hash(password, method='pbkdf2:sha256')
+            db.session.commit()
+            flash('Your password has been updated!', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash('User not found', 'danger')
+            return redirect(url_for('forgot_password'))
+
+    return render_template('reset_password.html', token=token)
 
 ####################################################################################################
 # 
@@ -258,20 +313,47 @@ def login():
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password']
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, password=hashed_password)
+        email = request.form['email']
+        password = generate_password_hash(request.form['password'], method='pbkdf2:sha256')
+
+        # 新しいユーザーを作成（まだアクティブ化されていない）
+        new_user = User(username=username, email=email, password=password, is_active=False)
         db.session.add(new_user)
-        try:
-            db.session.commit()
-            app.logger.info(f'New user registered: {username}')
-            flash('Registration successful. You can now log in.')
-            return redirect(url_for('login'))
-        except Exception as e:
-            app.logger.error(f'Error during registration for username: {username} - {str(e)}')
-            flash('Registration failed. Please try again.')
+        db.session.commit()
+
+        # 承認トークンの生成
+        token = serializer.dumps(email, salt='email-confirm-salt')
+        confirm_url = url_for('confirm_email', token=token, _external=True)
+
+        # 承認メールの送信
+        msg = Message('Please confirm your email', sender='noreply@yourapp.com', recipients=[email])
+        msg.body = f'Please click the following link to confirm your email: {confirm_url}'
+        mail.send(msg)
+
+        flash('A confirmation email has been sent to your email address.', 'info')
+        return redirect(url_for('login'))
+    
     return render_template('register.html')
 
+
+
+@app.route('/confirm_email/<token>')
+def confirm_email(token):
+    try:
+        email = serializer.loads(token, salt='email-confirm-salt', max_age=3600)
+    except:
+        flash('The confirmation link is invalid or has expired.', 'danger')
+        return redirect(url_for('register'))
+
+    user = User.query.filter_by(email=email).first()
+    if user.is_active:
+        flash('Account already confirmed. Please log in.', 'success')
+    else:
+        user.is_active = True
+        db.session.commit()
+        flash('Your account has been confirmed. You can now log in.', 'success')
+    
+    return redirect(url_for('login'))
 
 ####################################################################################################
 # 
@@ -284,8 +366,8 @@ def register():
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()
     app.logger.info(f'User {current_user.username} logged out successfully.')
+    logout_user()
     return redirect(url_for('index'))
 
 ####################################################################################################

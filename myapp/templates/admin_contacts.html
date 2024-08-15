@@ -14,7 +14,14 @@
 {% endif %}
 {% endwith %}
 <div class="container">
-
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% set category, message = messages[messages|length-1] %}
+    <div class="notification is-{{ category }}">
+        {{ message }}
+    </div>
+    {% endif %}
+    {% endwith %}
     <h1>お問い合わせ一覧</h1>
     <div class="list-group">
         {% for contact in contacts %}

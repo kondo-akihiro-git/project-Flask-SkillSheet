@@ -3,6 +3,14 @@
 {% block content %}
 <div class="container">
     <h1>管理者ダッシュボード</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% set category, message = messages[messages|length-1] %}
+    <div class="notification is-{{ category }}">
+        {{ message }}
+    </div>
+    {% endif %}
+    {% endwith %}
     <div class="list-group">
         <a href="{{ url_for('admin_users') }}" class="list-group-item list-group-item-action">ユーザー一覧</a>
         <a href="{{ url_for('admin_projects') }}" class="list-group-item list-group-item-action">プロジェクト一覧</a>
