@@ -881,6 +881,7 @@ def delete_project(project_id):
 ####################################################################################################
 @app.route('/features')
 def features():
+    app.logger.info('Feature page accessed')
     return render_template('features.html')
 
 ####################################################################################################
@@ -894,6 +895,7 @@ def features():
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
+        app.logger.info('Contact form submitted')
         # Process the contact form data
         name = request.form['name']
         email = request.form['email']
@@ -907,6 +909,7 @@ def contact():
 
         flash('お問い合わせありがとうございます。こちらからの返信をお待ちください。', 'success')
         return redirect(url_for('contact'))
+    app.logger.info('Contact page accessed')
     return render_template('contact.html')
 
 ####################################################################################################
@@ -921,6 +924,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_admin:
+            app.logger.warning(f'Unauthorized access attempt by user {current_user.id}')
             abort(403)  # アクセス禁止
         return f(*args, **kwargs)
     return decorated_function
@@ -940,8 +944,11 @@ def admin_login():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data) and user.is_admin:
             login_user(user)
+            app.logger.info(f'Admin {user.id} logged in')
             return redirect(url_for('admin_dashboard'))
         flash('ログイン情報が無効です。', 'danger')
+        app.logger.warning(f'Failed admin login attempt for username: {form.username.data}')
+    app.logger.info('Admin login page accessed')
     return render_template('admin_login.html', form=form)
 
 ####################################################################################################
@@ -956,6 +963,7 @@ def admin_login():
 @login_required
 @admin_required
 def admin_dashboard():
+    app.logger.info(f'Admin {current_user.id} accessed dashboard')
     return render_template('admin_dashboard.html')
 
 ####################################################################################################
@@ -970,6 +978,7 @@ def admin_dashboard():
 @login_required
 @admin_required
 def admin_logout():
+    app.logger.info(f'Admin {current_user.id} logged out')
     logout_user()
     return redirect(url_for('admin_login'))
 
@@ -985,6 +994,7 @@ def admin_logout():
 @login_required
 @admin_required
 def admin_users():
+    app.logger.info(f'Admin {current_user.id} accessed user list')
     users = User.query.all()
     return render_template('admin_users.html', users=users)
 
@@ -1002,6 +1012,7 @@ def admin_users():
 def admin_user_detail(user_id):
     user = User.query.get_or_404(user_id)
     if request.method == 'POST':
+        app.logger.info(f'Admin {current_user.id} updated user {user.id}')
         user.username = request.form['username']
         user.email = request.form['email']
         user.display_name = request.form['display_name']
@@ -1023,6 +1034,7 @@ def admin_user_detail(user_id):
     else:
         latest_active_link_url = None
 
+    app.logger.info(f'Admin {current_user.id} accessed user detail for user {user.id}')
     return render_template('admin_user_detail.html', user=user, latest_active_url=latest_active_link_url)
 
 
@@ -1041,6 +1053,7 @@ def admin_user_delete(user_id):
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
     db.session.commit()
+    app.logger.info(f'Admin {current_user.id} deleted user {user.id}')
     flash('ユーザーが削除されました。', 'success')
     return redirect(url_for('admin_users'))
 
@@ -1072,6 +1085,7 @@ def admin_projects():
             project_processes[process.project_id] = []
         project_processes[process.project_id].append(process)
 
+    app.logger.info(f'Admin {current_user.id} accessed project list')
     return render_template('admin_projects.html', projects=projects, project_processes=project_processes)
 
 ####################################################################################################
@@ -1086,9 +1100,12 @@ def admin_projects():
 @login_required
 @admin_required
 def admin_project_detail(project_id):
+    app.logger.info('Accessing admin_project_detail')
+
     project = Project.query.get_or_404(project_id)
 
     if request.method == 'POST':
+        app.logger.info(f'Updating project {project_id}')
         # プロジェクトの基本情報を更新
         project.project_name = request.form['project_name']
         project.industry = request.form['industry']
@@ -1115,6 +1132,7 @@ def admin_project_detail(project_id):
             tech_names_set = set(tech_names)
             if len(tech_names) != len(tech_names_set):
                 flash(f'{tech_type.capitalize()} の技術名が重複しています。', 'error')
+                app.logger.info(f'Duplicate technology name found in {tech_type}')
                 return redirect(url_for('admin_project_detail', project_id=project_id))
 
             # 既存技術の取得と名前のリスト作成
@@ -1127,6 +1145,7 @@ def admin_project_detail(project_id):
                     if name in existing_names:
                         tech = next(tech for tech in existing_techs if tech.name == name)
                         tech.duration_months = int(duration)
+                        app.logger.info(f'Updated technology {name} in {tech_type}')
                     else:
                         new_technology = Technology(
                             project_id=project.id,
@@ -1135,11 +1154,13 @@ def admin_project_detail(project_id):
                             duration_months=int(duration)
                         )
                         db.session.add(new_technology)
+                        app.logger.info(f'Added new technology {name} in {tech_type}')
 
             # 削除処理
             for tech in existing_techs:
                 if tech.name not in tech_names:
                     db.session.delete(tech)
+                    app.logger.info(f'Deleted technology {tech.name} from {tech_type}')
 
         # 工程の処理
         processes = request.form.getlist('process')
@@ -1151,13 +1172,16 @@ def admin_project_detail(project_id):
                 if process_name not in existing_process_names:
                     new_process = Process(project_id=project.id, name=process_name)
                     db.session.add(new_process)
+                    app.logger.info(f'Added new process {process_name}')
             else:
                 if process_name in existing_process_names:
                     process = next(p for p in existing_processes if p.name == process_name)
                     db.session.delete(process)
+                    app.logger.info(f'Deleted process {process_name}')
 
         db.session.commit()
         flash('プロジェクトが更新されました。', 'success')
+        app.logger.info(f'Project {project_id} updated successfully')
         return redirect(url_for('admin_project_detail', project_id=project_id))
 
     technologies = {tech_type: Technology.query.filter_by(project_id=project.id, type=tech_type).all() for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']}
@@ -1179,10 +1203,12 @@ def admin_project_detail(project_id):
 @login_required
 @admin_required
 def admin_project_delete(project_id):
+    app.logger.info(f'Deleting project {project_id}')
     project = Project.query.get_or_404(project_id)
     db.session.delete(project)
     db.session.commit()
     flash('プロジェクトが削除されました。', 'success')
+    app.logger.info(f'Project {project_id} deleted successfully')
     return redirect(url_for('admin_projects'))
 ####################################################################################################
 # 
@@ -1197,6 +1223,7 @@ def admin_project_delete(project_id):
 @admin_required
 def admin_user_create():
     if request.method == 'POST':
+        app.logger.info('Creating a new user')
         username = request.form['username']
         password = generate_password_hash(request.form['password'])
         email = request.form['email']  # メールアドレスの取得
@@ -1223,6 +1250,7 @@ def admin_user_create():
         db.session.add(new_user)
         db.session.commit()
         flash('新規ユーザーが登録されました。', 'success')
+        app.logger.info(f'User {username} created successfully')
         return redirect(url_for('admin_users'))
     
     return render_template('admin_user_create.html')
@@ -1240,6 +1268,7 @@ def admin_user_create():
 @login_required
 @admin_required
 def admin_users_pagination():
+    app.logger.info('admin_users_pagination start')
     page = request.args.get('page', 1, type=int)
     per_page = 10
 
@@ -1313,6 +1342,7 @@ def admin_users_pagination():
             'is_admin': user.is_admin,
         })
 
+    app.logger.info('admin_users_pagination end')
     return jsonify({
         'users': users_data,
         'total': total,
@@ -1330,6 +1360,7 @@ def admin_users_pagination():
 ####################################################################################################
 @app.route('/create_admin', methods=['POST'])
 def create_admin():
+    app.logger.info('create_admin start')
     if not current_user.is_authenticated or not current_user.is_admin:
         return redirect(url_for('login'))
     
@@ -1341,8 +1372,10 @@ def create_admin():
         db.session.add(admin_user)
         db.session.commit()
         flash('Admin user created successfully!')
+        app.logger.info('create_admin success')
         return redirect(url_for('admin_dashboard'))
     flash('Failed to create admin user. Please check the form and try again.')
+    app.logger.info('create_admin failed')
     return redirect(url_for('admin_dashboard'))
 ####################################################################################################
 # 
@@ -1356,6 +1389,7 @@ def create_admin():
 @login_required
 @admin_required
 def admin_project_create():
+    app.logger.info('admin_project_create start')
     if request.method == 'POST':
         # ログインユーザーのIDを取得
         user_id = current_user.id
@@ -1403,8 +1437,10 @@ def admin_project_create():
         db.session.commit()
 
         flash('プロジェクトが正常に作成されました', 'success')
+        app.logger.info('admin_project_create success')
         return redirect(url_for('admin_dashboard'))
 
+    app.logger.info('admin_project_create render form')
     return render_template('admin_project_create.html')
 ####################################################################################################
 # 
@@ -1418,6 +1454,7 @@ def admin_project_create():
 @login_required
 @admin_required
 def admin_projects_pagination():
+    app.logger.info('admin_projects_pagination start')
     page = request.args.get('page', 1, type=int)
     per_page = 10
 
@@ -1477,6 +1514,7 @@ def admin_projects_pagination():
             'processes': processes_list,
         })
 
+    app.logger.info('admin_projects_pagination end')
     return jsonify({
         'projects': projects_data,
         'total': total,
@@ -1495,9 +1533,12 @@ def admin_projects_pagination():
 ####################################################################################################
 @app.route('/download_pdf/<link_code>', methods=['GET'])
 def download_pdf(link_code):
+    app.logger.info(f'Received request to download PDF with link_code: {link_code}')
+
     # リンクコードに対応するリンクを取得
     link = Link.query.filter_by(link_code=link_code, is_active=True).first()
     if link is None:
+        app.logger.warning(f'Invalid link_code provided: {link_code}')
         flash('無効なリンクです。', 'error')
         return redirect(url_for('invalid'))
 
@@ -1516,8 +1557,11 @@ def download_pdf(link_code):
             'processes': processes
         })
 
+    app.logger.info(f'Generating PDF for user_id: {user_id}')
     # PDF生成
     pdf_buffer = generate_pdf(user, project_data)
+    app.logger.info(f'PDF generated successfully for user_id: {user_id}')
+    
     return send_file(pdf_buffer, as_attachment=True, download_name='skill_sheet.pdf', mimetype='application/pdf')
 
 
@@ -1533,6 +1577,8 @@ def download_pdf(link_code):
 @login_required
 @admin_required
 def admin_logs():
+    app.logger.info('Fetching logs for admin dashboard')
+
     logs = []
     log_file_path = 'logs/skill_canvas.log'
     
@@ -1556,6 +1602,7 @@ def admin_logs():
     except FileNotFoundError:
         app.logger.error('Log file not found.')
 
+    app.logger.info('Logs fetched and rendered successfully')
     # 最新の10日分のログを表示
     return render_template('admin_logs.html', logs=recent_logs)
 
@@ -1571,7 +1618,11 @@ def admin_logs():
 @login_required
 @admin_required
 def admin_contacts():
+    app.logger.info('Fetching contacts for admin dashboard')
+
     contacts = Contact.query.order_by(Contact.created_at.desc()).all()
+    app.logger.info(f'{len(contacts)} contacts fetched successfully')
+
     return render_template('admin_contacts.html', contacts=contacts)
 ####################################################################################################
 # 
@@ -1585,6 +1636,8 @@ def admin_contacts():
 @login_required
 @admin_required
 def reply_contact(contact_id):
+    app.logger.info(f'Fetching contact details for contact_id: {contact_id}')
+
     contact = Contact.query.get_or_404(contact_id)
     if request.method == 'POST':
         reply_message = request.form['reply_message']
@@ -1594,6 +1647,7 @@ def reply_contact(contact_id):
                     recipients=[contact.email])
         msg.body = reply_message
         mail.send(msg)
+        app.logger.info(f'Reply sent to contact_id: {contact_id}')
         flash('返信が送信されました。', 'success')
         return redirect(url_for('admin_contacts'))
 
