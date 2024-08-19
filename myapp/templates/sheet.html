@@ -18,22 +18,27 @@
             <h1 class="title is-4">プロフィール</h1>
             <div class="columns is-multiline">
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>名前:</strong> {{ user.display_name }}</p>
+                    <p class="profile-item"><strong>名前:</strong> {{ user.display_name or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>年齢:</strong> {{ user.age }}</p>
+                    <p class="profile-item"><strong>年齢:</strong> {{ user.age or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>性別:</strong> {{ user.gender }}</p>
+                    <p class="profile-item"><strong>性別:</strong> {{ user.gender or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>最寄駅:</strong> {{ user.nearest_station }}</p>
+                    <p class="profile-item"><strong>最寄駅:</strong> {{ user.nearest_station or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>経験年数:</strong> {{ experience_years // 12 }} 年 {{ experience_years % 12 }} ヶ月</p>
+                    <p class="profile-item"><strong>経験年数:</strong>                
+                    {% if experience_years %}
+                        {{ experience_years // 12 }} 年 {{ experience_years % 12 }} ヶ月
+                    {% else %}
+                        記載なし
+                    {% endif %}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>学歴:</strong> {{ user.education }}</p>
+                    <p class="profile-item"><strong>学歴:</strong> {{ user.education or "記載なし" }}</p>
                 </div>
             </div>
             <a href="{{ url_for('edit_profile') }}" class="button is-primary is-light">プロフィール編集</a>
@@ -153,7 +158,7 @@
         {% endif %}
 
         <div class="hero-button-container" >
-            <a href="{{ url_for('input') }}" class="button hero-button small-button">＋</a>
+            <a href="{{ url_for('input') }}" class="button hero-button small-button">プロジェクト追加</a>
         </div>
         
         <div class="spacer"></div>

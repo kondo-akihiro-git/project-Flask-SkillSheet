@@ -16,28 +16,36 @@
 
         <div class="columns is-multiline">
             <div class="column is-12-mobile is-6-tablet is-6-desktop">
-                <div class="box has-background-light">
-                    <a href="{{ url_for('admin_users') }}" class="title is-4">ユーザー一覧</a>
-                    <p>ユーザーの一覧を表示し、管理することができます。</p>
-                </div>
+                <a href="{{ url_for('admin_users') }}">
+                    <div class="box has-background-light">
+                        <h2 class="title is-4">ユーザーリスト</h2>
+                        <p>ユーザーの一覧を表示し、管理することができます。</p>
+                    </div>
+                </a>
             </div>
             <div class="column is-12-mobile is-6-tablet is-6-desktop">
-                <div class="box has-background-light">
-                    <a href="{{ url_for('admin_projects') }}" class="title is-4">プロジェクト一覧</a>
-                    <p>プロジェクトの一覧を表示し、管理することができます。</p>
-                </div>
+                <a href="{{ url_for('admin_projects') }}">
+                    <div class="box has-background-light">
+                        <h2 class="title is-4">プロジェクトリスト</h2>
+                        <p>プロジェクトの一覧を表示し、管理することができます。</p>
+                    </div>
+                </a>
             </div>
             <div class="column is-12-mobile is-6-tablet is-6-desktop">
-                <div class="box has-background-light">
-                    <a href="{{ url_for('admin_logs') }}" class="title is-4">ログの確認</a>
-                    <p>システムのログを確認し、問題をトラブルシュートすることができます。</p>
-                </div>
+                <a href="{{ url_for('admin_logs') }}">
+                    <div class="box has-background-light">
+                        <h2 class="title is-4">ログ確認</h2>
+                        <p>システムのログを確認し、問題をトラブルシュートすることができます。</p>
+                    </div>
+                </a>
             </div>
             <div class="column is-12-mobile is-6-tablet is-6-desktop">
-                <div class="box has-background-light">
-                    <a href="{{ url_for('admin_contacts') }}" class="title is-4">お問い合わせ一覧</a>
-                    <p>ユーザーからのお問い合わせを一覧で確認できます。</p>
-                </div>
+                <a href="{{ url_for('admin_contacts') }}">
+                    <div class="box has-background-light">
+                        <h2 class="title is-4">お問い合わせ一覧</h2>
+                        <p>ユーザーからのお問い合わせを一覧で確認できます。</p>
+                    </div>
+                </a>
             </div>
         </div>
     </div>

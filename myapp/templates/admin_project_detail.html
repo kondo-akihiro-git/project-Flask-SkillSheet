@@ -6,9 +6,9 @@
     <div class="container">
         <h1 class="title">プロジェクト詳細</h1>
 
-        <a href="{{ url_for('admin_login') }}">管理者ログイン画面に戻る</a>
-        <a href="{{ url_for('admin_dashboard') }}">ダッシュボードに戻る</a>
-        <a href="{{ url_for('admin_projects') }}">プロジェクト一覧に戻る</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="button is-link">ダッシュボードに戻る</a>
+        <a href="{{ url_for('admin_projects') }}" class="button is-link">プロジェクトリストに戻る</a>
+        <div class="spacer"></div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -120,14 +120,10 @@
 
             <div class="field">
                 <div class="control">
-                    <button type="submit" class="button is-link">送信</button>
+                    <button type="submit" class="button is-link is-fullwidth">プロジェクト更新</button>
                 </div>
             </div>
         </form>
-
-        <a href="{{ url_for('admin_login') }}" class="button is-link">ログイン画面に戻る</a>
-        <a href="{{ url_for('admin_dashboard') }}" class="button is-link">ダッシュボードに戻る</a>
-        <a href="{{ url_for('admin_projects') }}" class="button is-link">プロジェクト一覧に戻る</a>
     </div>
 </section>
 
