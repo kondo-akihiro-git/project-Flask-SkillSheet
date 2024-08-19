@@ -3,76 +3,186 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, PageBreak
+from reportlab.lib import colors
 
 def generate_pdf(user, projects):
     buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72, title="スキルシート")
+    story = []
 
     # フォントの登録
-    # フォントファイルのパスは、実際のフォントファイルのパスに変更してください
     pdfmetrics.registerFont(TTFont('NotoSans', 'NotoSansJP-VariableFont_wght.ttf'))
+    pdfmetrics.registerFont(TTFont('NotoSansBold', 'NotoSansJP-Bold.ttf'))
+
+    styles = getSampleStyleSheet()
+    normal_style = styles['Normal']
+    heading1_style = styles['Heading1']
+    heading2_style = styles['Heading2']
+    heading3_style = styles['Heading3']
+    title_style = styles['Title']
+
+    # フォント設定
+    normal_style.fontName = 'NotoSans'
+    heading1_style.fontName = 'NotoSans'
+    heading2_style.fontName = 'NotoSans'
+    title_style.fontName = 'NotoSans'
+
 
     # タイトル
-    c.setFont("NotoSans", 16)
-    c.drawString(72, height - 72, "スキルシート")
+    title = Paragraph("スキルシート", title_style)
+    story.append(title)
+    story.append(Paragraph("<br/>", normal_style))
+
+    # 氏名の追加
+    name_section = Paragraph(f"氏名: {user.display_name or '記載なし'}", heading2_style)
+    story.append(name_section)
+    story.append(Paragraph("<br/>", normal_style))
 
     # プロフィール
-    c.setFont("NotoSans", 12)
-    c.drawString(72, height - 120, "Profile")
-    c.setFont("NotoSans", 12)
-    y = height - 150
-    profile_lines = [
-        f"名前: {user.display_name}",
-        f"年齢: {user.age}",
-        f"性別: {user.gender}",
-        f"最寄駅: {user.nearest_station}",
-        f"経験年数: {user.experience_years}",
-        f"学歴: {user.education}"
+    profile_title = Paragraph("プロフィール", heading2_style)
+    story.append(profile_title)
+
+    profile_data = [
+        ["内容","詳細"],
+        ["年齢:", user.age or "記載なし"],
+        ["性別:", user.gender or "記載なし"],
+        ["最寄駅:", user.nearest_station or "記載なし"],
+        ["経験年数:", f"{user.experience_years // 12} 年 {user.experience_years % 12} ヶ月" if user.experience_years else "記載なし"],
+        ["学歴:", user.education or "記載なし"]
     ]
-    for line in profile_lines:
-        c.drawString(72, y, line)
-        y -= 20
+
+    profile_table = Table(profile_data, colWidths=[150, doc.pagesize[0] - 2 * 72 - 150])
+    profile_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, -1), 'NotoSans'),
+        ('FONTNAME', (0, 0), (-1, 0), 'NotoSansBold'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    story.append(profile_table)
+    story.append(Paragraph("<br/>", normal_style))
+
+    # スキル歴項目
+    skill_history_title = Paragraph("スキル歴", heading2_style)
+    story.append(skill_history_title)
+
+    # スキル歴のデータを集計
+    skill_categories = {}
+
+    tech_labels = {
+        'os': 'OS',
+        'language': '言語',
+        'framework': 'フレームワーク',
+        'database': 'データベース',
+        'containertech': 'コンテナ技術',
+        'cicd': 'CI/CD',
+        'logging': 'ログ',
+        'tools': 'その他ツール'
+    }    
+
+    for project in projects:
+        for tech in project['technologies']:
+            tech_type = tech_labels.get(tech.type, tech.type)
+            if tech_type not in skill_categories:
+                skill_categories[tech_type] = {}
+            
+            if tech.name not in skill_categories[tech_type]:
+                skill_categories[tech_type][tech.name] = tech.duration_months
+            else:
+                skill_categories[tech_type][tech.name] += tech.duration_months
+
+    # カテゴリーごとにスキル歴テーブルを作成
+    for category, skills in skill_categories.items():
+        skill_history_data = []
+        skill_history_data.append([category, "期間"])
+        for name, duration in skills.items():
+            skill_history_data.append([name, f"{duration // 12} 年 {duration % 12} ヶ月" if duration >= 12 else f"{duration} ヶ月"])
+        
+        skill_history_table = Table(skill_history_data, colWidths=[doc.pagesize[0] - 2 * 72 - 100, 100])
+        skill_history_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'NotoSans'),
+            ('FONTNAME', (0, 0), (-1, 0), 'NotoSansBold'),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        story.append(skill_history_table)
+        story.append(Paragraph("<br/>", normal_style))
 
     # プロジェクト
-    c.setFont("NotoSans", 12)
-    y -= 40
-    c.drawString(72, y, "Projects")
-    y -= 20
+    for idx, item in enumerate(projects, 1):
+        story.append(PageBreak())
 
-    for item in projects:
-        c.setFont("NotoSans", 12)
-        c.drawString(72, y, item['project'].project_name)
-        y -= 20
-        c.setFont("NotoSans", 12)
-        c.drawString(72, y, f"業界: {item['project'].industry}")
-        y -= 20
-        c.drawString(72, y, f"プロジェクト期間: {item['project'].start_month} から {item['project'].end_month}")
-        y -= 20
-        c.drawString(72, y, f"プロジェクト概要: {item['project'].project_summary}")
-        y -= 20
-        c.drawString(72, y, f"担当業務: {item['project'].responsibilities}")
-        y -= 20
+        project_title = Paragraph(f"プロジェクトNo.{idx}  {item['project'].project_name}", heading1_style)
+        story.append(project_title)
 
-        c.setFont("NotoSans", 12)
-        c.drawString(72, y, "使用技術")
-        y -= 20
-        c.setFont("NotoSans", 12)
+        project_data = [
+            ["内容","詳細"],
+            ["業界", item['project'].industry],
+            ["プロジェクト期間", f"{item['project'].start_month} から {item['project'].end_month}"],
+            ["プロジェクト概要", item['project'].project_summary],
+            ["担当業務", item['project'].responsibilities]
+        ]
+
+        project_width = doc.pagesize[0] - 2 * 72
+
+        project_table = Table(project_data, colWidths=[150, project_width - 150])
+        project_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'NotoSans'),
+            ('FONTNAME', (0, 0), (-1, 0), 'NotoSansBold'),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        story.append(project_table)
+        story.append(Paragraph("<br/>", normal_style))
+
+        tech_data = [["技術タイプ", "技術名", "使用期間"]]
         for tech in item['technologies']:
-            c.drawString(72, y, f"{tech.type}: {tech.name} ({tech.duration_months} ヶ月)")
-            y -= 20
+            tech_data.append([tech.type, tech.name, f"{tech.duration_months // 12} 年 {tech.duration_months % 12} ヶ月" if tech.duration_months >= 12 else f"{tech.duration_months} ヶ月"])
 
-        c.setFont("NotoSans", 12)
-        c.drawString(72, y, "担当工程")
-        y -= 20
-        c.setFont("NotoSans", 12)
-        for process in item['processes']:
-            c.drawString(72, y, f"{process.name}")
-            y -= 20
+        tech_table = Table(tech_data, colWidths=[150, project_width - 300, 150])  # 統一されたカラム幅
+        tech_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'NotoSans'),
+            ('FONTNAME', (0, 0), (-1, 0), 'NotoSansBold'),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        story.append(tech_table)
 
-        y -= 20
+        # 担当工程テーブルの追加
+        role_data = [["担当工程"]]
+        for role in item['processes']:
+            role_data.append([role.name])
 
-    c.showPage()
-    c.save()
+        role_table = Table(role_data, colWidths=[project_width])
+        role_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'NotoSans'),
+            ('FONTNAME', (0, 0), (-1, 0), 'NotoSansBold'),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        story.append(role_table)
+
+    doc.build(story)
     buffer.seek(0)
     return buffer

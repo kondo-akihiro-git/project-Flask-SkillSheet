@@ -652,7 +652,7 @@ def download_pdf(link_code):
     pdf_buffer = generate_pdf(user, project_data)
     app.logger.info(f'PDF generated successfully for user_id: {user_id}')
     
-    return send_file(pdf_buffer, as_attachment=True, download_name='skill_sheet.pdf', mimetype='application/pdf')
+    return send_file(pdf_buffer, as_attachment=True, download_name='スキルシート_'+user.username+'.pdf', mimetype='application/pdf')
 
 
 ####################################################################################################
