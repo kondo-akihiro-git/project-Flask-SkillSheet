@@ -1,1 +1,2 @@
-2024-08-19 16:38:41,174 INFO: SkillCanvas startup [in /Users/aki/FlaskProject/app/app_skillsheet/project-Flask-SkillSheet/myapp/run.py:37]
+2024-08-19 16:53:10,748 INFO: Generating PDF for user_id: 1 [in /Users/aki/FlaskProject/app/app_skillsheet/project-Flask-SkillSheet/myapp/admin_views.py:650]
+2024-08-19 16:53:10,918 INFO: PDF generated successfully for user_id: 1 [in /Users/aki/FlaskProject/app/app_skillsheet/project-Flask-SkillSheet/myapp/admin_views.py:653]

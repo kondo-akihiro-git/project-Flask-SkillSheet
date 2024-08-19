@@ -117,7 +117,27 @@
                                 <tbody>
                                     {% for tech in item.technologies %}
                                     <tr>
-                                        <td>{{ tech.type }}</td>
+                                        <td>
+                                            {% if tech.type == 'os' %}
+                                                OS
+                                            {% elif tech.type == 'language' %}
+                                                言語
+                                            {% elif tech.type == 'framework' %}
+                                                フレームワーク
+                                            {% elif tech.type == 'database' %}
+                                                データベース
+                                            {% elif tech.type == 'containertech' %}
+                                                コンテナ技術
+                                            {% elif tech.type == 'cicd' %}
+                                                CI/CD
+                                            {% elif tech.type == 'logging' %}
+                                                ログ
+                                            {% elif tech.type == 'tools' %}
+                                                その他ツール
+                                            {% else %}
+                                                未知のタイプ
+                                            {% endif %}
+                                        </td>
                                         <td>{{ tech.name }}</td>
                                         <td>
                                             {% if tech.duration_months >= 12 %}

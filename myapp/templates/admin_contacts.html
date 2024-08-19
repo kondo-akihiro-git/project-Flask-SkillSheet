@@ -4,7 +4,6 @@
 <div class="container">
     <div class="buttons are-medium mb-4">
         <a href="{{ url_for('admin_dashboard') }}" class="button is-link">ダッシュボードに戻る</a>
-        <a href="{{ url_for('admin_login') }}" class="button is-primary">管理者ログイン画面に戻る</a>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -18,6 +17,7 @@
 
     <h1 class="title has-text-centered">お問い合わせ一覧</h1>
 
+    {% if contacts %}
     <div class="columns is-multiline">
         {% for contact in contacts %}
         <div class="column is-12-mobile is-6-tablet is-4-desktop">
@@ -41,5 +41,10 @@
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="notification is-warning">
+        お問い合わせはありません。
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
