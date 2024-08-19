@@ -158,7 +158,7 @@ def view_sheet(link_code):
     link = Link.query.filter_by(link_code=link_code, is_active=True).first()
     if link is None:
         flash('無効なリンクです。', 'error')
-        current_url=request.url
+        current_url = request.url
         return render_template('invalid.html', current_url=current_url)
 
     # リンクが有効な場合、スキルシートを表示するためデータを受け渡し
@@ -166,17 +166,46 @@ def view_sheet(link_code):
     user = User.query.get_or_404(user_id)
     projects = Project.query.filter_by(user_id=user_id).all()
     project_data = []
+    skills_by_category = {}
+
+    tech_type_mapping = {
+        'os': 'OS',
+        'language': '言語',
+        'framework': 'フレームワーク',
+        'database': 'データベース',
+        'containertech': 'コンテナ技術',
+        'cicd': 'CI/CD',
+        'logging': 'ログ',
+        'tools': 'その他ツール'
+    }
 
     for project in projects:
         technologies = Technology.query.filter_by(project_id=project.id).all()
         processes = Process.query.filter_by(project_id=project.id).all()
+        
+        for tech in technologies:
+            tech_type = tech_type_mapping[tech.type]
+            if tech_type not in skills_by_category:
+                skills_by_category[tech_type] = {}
+            
+            if tech.name not in skills_by_category[tech_type]:
+                skills_by_category[tech_type][tech.name] = tech.duration_months
+            else:
+                skills_by_category[tech_type][tech.name] += tech.duration_months
+        
         project_data.append({
             'project': project,
             'technologies': technologies,
             'processes': processes
         })
 
-    return render_template('view_sheet.html', user=user, projects=project_data,link_code=link_code)
+    skills_by_category_formatted = {}
+    for category, skills in skills_by_category.items():
+        skills_list = [{'name': name, 'duration_months': duration} for name, duration in skills.items()]
+        skills_by_category_formatted[category] = skills_list
+
+    return render_template('view_sheet.html', user=user, projects=project_data, skills_by_category=skills_by_category_formatted, link_code=link_code)
+
 
 ####################################################################################################
 # 

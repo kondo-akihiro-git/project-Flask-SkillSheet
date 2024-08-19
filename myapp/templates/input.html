@@ -88,10 +88,9 @@
 
             <div class="field">
                 <label class="label">使用技術</label>
-            
-                {% for tech_type in ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'] %}
+                {% for tech_type, tech_label in {'os': 'OS', 'language': '言語', 'framework': 'フレームワーク', 'database': 'データベース', 'containertech': 'コンテナ技術', 'cicd': 'CI/CD', 'logging': 'ログ管理', 'tools': 'ツール'}.items() %}
                 <div class="field">
-                    <label class="label" for="{{ tech_type }}">{{ tech_type | capitalize }}</label>
+                    <label class="label" for="{{ tech_type }}">{{ tech_label }}</label>
                     <div class="control">
                         <div id="{{ tech_type }}-fields">
                             <div class="input-group">

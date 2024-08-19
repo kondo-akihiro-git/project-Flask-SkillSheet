@@ -36,6 +36,44 @@
 
         <hr>
 
+        {% if skills_by_category|length > 0 %}
+        <div class="box">
+            <h1 class="title is-4">スキル歴</h1>
+            <div class="columns is-multiline">
+                {% for category, skills in skills_by_category.items() %}
+                <div class="column is-one-third">
+                    <div class="table-container">
+                        <table class="table is-bordered is-fullwidth skill-table">
+                            <thead>
+                                <tr>
+                                    <th>{{ category }}</th>
+                                    <th>期間</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for skill in skills %}
+                                <tr>
+                                    <td>{{ skill.name }}</td>
+                                    <td>
+                                        {% if skill.duration_months >= 12 %}
+                                        {{ skill.duration_months // 12 }} 年 {{ skill.duration_months % 12 }} ヶ月
+                                        {% else %}
+                                        {{ skill.duration_months }} ヶ月
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <hr>
+
         {% if projects|length > 0 %}
         <div id="projects-container">
             {% for item in projects %}
