@@ -14,7 +14,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired
 import yaml
 from flask import send_file
-from pdf_utils import generate_pdf
+from pdf.pdf_utils import generate_pdf
 import logging
 from logging.handlers import RotatingFileHandler
 import os

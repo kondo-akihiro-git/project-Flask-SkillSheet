@@ -174,14 +174,18 @@ class AdminLoginForm(FlaskForm):
     password = PasswordField('パスワード', validators=[DataRequired()])
     submit = SubmitField('ログイン')
 
-from login_views import *
+####################################################################################################
+# 
+# 詳細：各Viewのインポート
+# 
+####################################################################################################
 
-from top_views import *
-
-from sheet_views import *
-
-from admin_views import *
-
+from views.user_views import *
+from views.login_views import *
+from views.top_views import *
+from views.sheet_views import *
+from views.pdf_views import *
+from views.admin_views import *
 
 ####################################################################################################
 # 

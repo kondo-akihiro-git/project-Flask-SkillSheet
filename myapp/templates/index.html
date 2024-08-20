@@ -25,16 +25,16 @@
 <div class="container">
     <div class="columns is-centered is-multiline">
         {% if user.is_authenticated %}
-        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
+        <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
             <a href="{{ url_for('input') }}" class="button is-fullwidth hero-button">プロジェクト入力</a>
         </div>
-        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
+        <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
             <a href="{{ url_for('sheet') }}" class="button is-fullwidth hero-button">スキルシート</a>
         </div>
-        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
+        <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
             <a href="{{ url_for('userinfo') }}" class="button is-fullwidth hero-button">ユーザー情報の更新</a>
         </div>
-        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
+        <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
             <a href="{{ url_for('logout') }}" class="button is-fullwidth hero-button">ログアウト</a>
         </div>
         {% else %}

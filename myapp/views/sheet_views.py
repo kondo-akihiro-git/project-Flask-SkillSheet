@@ -2,6 +2,167 @@
 from imports import *
 from run import *
 
+
+####################################################################################################
+# 
+# 関数名：input
+# 引数：なし
+# 返却値：input.html テンプレートまたはリダイレクト
+# 詳細：新しいプロジェクトを入力し、データベースに追加する
+# 
+####################################################################################################
+@app.route('/input', methods=['GET', 'POST'])
+@login_required
+def input():
+    if request.method == 'POST':
+        start_month_str = request.form['start_month']
+        end_month_str = request.form['end_month']
+        start_month = start_month_str[:7]
+        end_month = end_month_str[:7]
+
+        industry = request.form['industry']
+        project_name = request.form['project_name']
+        project_summary = request.form['project_summary']
+        responsibilities = request.form['responsibilities']
+
+        # 経験した技術の取得
+        tech_types = ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools']
+        tech_data = {tech_type: {} for tech_type in tech_types}
+
+        for tech_type in tech_types:
+            index = 0
+            while f'{tech_type}_{index}' in request.form:
+                tech_name = request.form[f'{tech_type}_{index}']
+                tech_duration = request.form.get(f'{tech_type}_{index}_num', '0')
+
+                if tech_name:
+                    if tech_name in tech_data[tech_type]:
+                        flash(f'同じプロジェクト内で「{tech_type}」カテゴリーの技術名が重複しています。', 'error')
+                        return redirect(url_for('input'))
+
+                    tech_data[tech_type][tech_name] = tech_duration
+                index += 1
+
+        # プロジェクトの作成
+        new_project = Project(
+            user_id=current_user.id,
+            start_month=start_month,
+            end_month=end_month,
+            industry=industry,
+            project_name=project_name,
+            project_summary=project_summary,
+            responsibilities=responsibilities
+        )
+
+        db.session.add(new_project)
+        try:
+            db.session.commit()
+            app.logger.info(f'New project added for user ID: {current_user.id}')
+        except Exception as e:
+            app.logger.error(f'Error adding project for user ID: {current_user.id} - {str(e)}')
+
+        # 経験した技術のDB登録
+        for tech_type in tech_types:
+            for name, duration in tech_data[tech_type].items():
+                new_technology = Technology(
+                    project_id=new_project.id,
+                    type=tech_type,
+                    name=name,
+                    duration_months=int(duration)
+                )
+                db.session.add(new_technology)
+
+        try:
+            db.session.commit()
+            app.logger.info(f'Technologies added for project ID: {new_project.id}')
+        except Exception as e:
+            app.logger.error(f'Error adding technologies for project ID: {new_project.id} - {str(e)}')
+
+        # 担当した工程のDB登録
+        processes = request.form.getlist('process')
+        for process in processes:
+            new_process = Process(
+                project_id=new_project.id,
+                name=process
+            )
+            db.session.add(new_process)
+
+        try:
+            db.session.commit()
+            app.logger.info(f'Processes added for project ID: {new_project.id}')
+        except Exception as e:
+            app.logger.error(f'Error adding processes for project ID: {new_project.id} - {str(e)}')
+
+        flash('プロジェクトを追加しました。', 'success')
+        return redirect(url_for('input'))
+
+    return render_template('input.html', user=current_user)
+
+
+
+####################################################################################################
+# 
+# 関数名：sheet
+# 引数：なし
+# 返却値：sheet.html テンプレート
+# 詳細：ユーザーのプロジェクトと関連情報を表示する
+# 
+####################################################################################################
+@app.route('/sheet', methods=['GET', 'POST'])
+@login_required
+def sheet():
+    user_id = current_user.id
+    projects = Project.query.filter_by(user_id=user_id).all()
+    project_data = []
+    skills_by_category = {}
+
+    tech_type_mapping = {
+        'os': 'OS',
+        'language': '言語',
+        'framework': 'フレームワーク',
+        'database': 'データベース',
+        'containertech': 'コンテナ技術',
+        'cicd': 'CI/CD',
+        'logging': 'ログ',
+        'tools': 'その他ツール'
+    }
+
+    for project in projects:
+        processes = Process.query.filter_by(project_id=project.id).all()
+        technologies = Technology.query.filter_by(project_id=project.id).all()
+        
+        for tech in technologies:
+            tech_type = tech_type_mapping[tech.type]
+            if tech_type not in skills_by_category:
+                skills_by_category[tech_type] = {}
+            
+            if tech.name not in skills_by_category[tech_type]:
+                skills_by_category[tech_type][tech.name] = tech.duration_months
+            else:
+                skills_by_category[tech_type][tech.name] += tech.duration_months
+        
+        project_data.append({
+            'project': project,
+            'processes': processes,
+            'technologies': technologies
+        })
+
+    skills_by_category_formatted = {}
+    for category, skills in skills_by_category.items():
+        skills_list = [{'name': name, 'duration_months': duration} for name, duration in skills.items()]
+        skills_by_category_formatted[category] = skills_list
+
+    # 最新のアクティブなリンクを取得
+    active_link = Link.query.filter_by(user_id=user_id, is_active=True).order_by(Link.created_at.desc()).first()
+
+    link_url = url_for('view_sheet', link_code=active_link.link_code, _external=True) if active_link else None
+
+    # `user.experience_years` が None の場合に備えてデフォルト値を設定
+    experience_years = current_user.experience_years or 0
+
+    return render_template('sheet.html', user=current_user, projects=project_data, skills_by_category=skills_by_category_formatted, tech_type_mapping=tech_type_mapping, link_url=link_url, experience_years=experience_years)
+
+
 ####################################################################################################
 # 
 # 関数名：edit_profile

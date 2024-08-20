@@ -31,7 +31,7 @@
             <div class="field">
                 <label class="label" for="password">Password</label>
                 <div class="control">
-                    <input class="input" type="password" id="password" name="password">
+                    <input class="input" type="password" id="password" name="password" placeholder="変更がない場合は未入力のまま更新">
                 </div>
             </div>
 
@@ -45,7 +45,7 @@
         <form method="POST" action="{{ url_for('delete_user') }}" class="box">
             <div class="field">
                 <div class="control">
-                    <button type="submit" class="button is-link" onclick="return confirm('Are you sure you want to delete your account?');">Delete Account</button>
+                    <button type="submit" class="button is-link" onclick="return confirm('本当にアカウントを削除しますか？');">Delete Account</button>
                 </div>
             </div>
         </form>

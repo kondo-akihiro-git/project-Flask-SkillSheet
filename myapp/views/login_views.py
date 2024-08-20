@@ -109,3 +109,18 @@ def reset_password(token):
             return redirect(url_for('forgot_password'))
 
     return render_template('reset_password.html', token=token)
+
+####################################################################################################
+# 
+# 関数名：logout
+# 引数：なし
+# 返却値：リダイレクト
+# 詳細：ユーザーのログアウト処理を行う
+# 
+####################################################################################################
+@app.route('/logout')
+@login_required
+def logout():
+    app.logger.info(f'User {current_user.username} logged out successfully.')
+    logout_user()
+    return redirect(url_for('index'))

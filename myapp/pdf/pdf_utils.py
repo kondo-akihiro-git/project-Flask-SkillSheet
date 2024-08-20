@@ -13,8 +13,8 @@ def generate_pdf(user, projects):
     story = []
 
     # フォントの登録
-    pdfmetrics.registerFont(TTFont('NotoSans', 'NotoSansJP-VariableFont_wght.ttf'))
-    pdfmetrics.registerFont(TTFont('NotoSansBold', 'NotoSansJP-Bold.ttf'))
+    pdfmetrics.registerFont(TTFont('NotoSans', 'fonts/NotoSansJP-VariableFont_wght.ttf'))
+    pdfmetrics.registerFont(TTFont('NotoSansBold', 'fonts/NotoSansJP-Bold.ttf'))
 
     styles = getSampleStyleSheet()
     normal_style = styles['Normal']
