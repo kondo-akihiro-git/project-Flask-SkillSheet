@@ -126,10 +126,10 @@ def generate_pdf(user, projects):
 
         project_data = [
             ["内容","詳細"],
-            ["業界", item['project'].industry],
+            ["業界", Paragraph(item['project'].industry, normal_style)],
             ["プロジェクト期間", f"{item['project'].start_month} から {item['project'].end_month}"],
-            ["プロジェクト概要", item['project'].project_summary],
-            ["担当業務", item['project'].responsibilities]
+            ["プロジェクト概要", Paragraph(item['project'].project_summary, normal_style)],
+            ["担当業務", Paragraph(item['project'].responsibilities, normal_style)]
         ]
 
         project_width = doc.pagesize[0] - 2 * 72
@@ -150,7 +150,7 @@ def generate_pdf(user, projects):
 
         tech_data = [["技術タイプ", "技術名", "使用期間"]]
         for tech in item['technologies']:
-            tech_data.append([tech.type, tech.name, f"{tech.duration_months // 12} 年 {tech.duration_months % 12} ヶ月" if tech.duration_months >= 12 else f"{tech.duration_months} ヶ月"])
+            tech_data.append([tech_labels.get(tech.type, tech.type), tech.name, f"{tech.duration_months // 12} 年 {tech.duration_months % 12} ヶ月" if tech.duration_months >= 12 else f"{tech.duration_months} ヶ月"])
 
         tech_table = Table(tech_data, colWidths=[150, project_width - 300, 150])  # 統一されたカラム幅
         tech_table.setStyle(TableStyle([
