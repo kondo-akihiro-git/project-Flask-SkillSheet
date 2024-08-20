@@ -167,8 +167,13 @@ def generate_pdf(user, projects):
 
         # 担当工程テーブルの追加
         role_data = [["担当工程"]]
-        for role in item['processes']:
-            role_data.append([role.name])
+        rolename = ""
+        for i, role in enumerate(item['processes']):
+            if i==0:
+                rolename += role.name
+            else:
+                rolename += '・'+role.name
+        role_data.append([rolename])
 
         role_table = Table(role_data, colWidths=[project_width])
         role_table.setStyle(TableStyle([
