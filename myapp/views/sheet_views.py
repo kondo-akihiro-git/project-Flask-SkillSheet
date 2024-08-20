@@ -411,3 +411,19 @@ def delete_project(project_id):
     else:
         flash('削除できるのは自身のプロジェクトのみです。', 'danger')
     return redirect(url_for('sheet'))
+
+
+
+@app.route('/api/tech_projects/<tech_name>')
+@login_required
+def tech_projects(tech_name):
+    # ユーザーIDを取得
+    user_id = current_user.id
+
+    # 技術名に関連するプロジェクトを取得
+    projects = Project.query.join(Technology).filter(Technology.name == tech_name, Technology.project_id == Project.id, Project.user_id == user_id).all()
+
+    # プロジェクト情報を整形
+    project_list = [{'number': idx + 1, 'name': project.project_name} for idx, project in enumerate(projects)]
+
+    return jsonify({'projects': project_list})

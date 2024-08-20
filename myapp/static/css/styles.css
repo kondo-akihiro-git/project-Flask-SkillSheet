@@ -486,3 +486,29 @@ main {
     color: #fff;
     border-color: #363636;
 }
+
+.tooltip {
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+    z-index: 1000;
+    max-width: 300px;
+}
+
+.tooltip.show {
+    display: block;
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+    top: -10px;
+    left: 10px;
+}
