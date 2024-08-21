@@ -30,12 +30,12 @@
                     <p class="profile-item"><strong>最寄駅:</strong> {{ user.nearest_station or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>経験年数:</strong>                
-                    {% if experience_years %}
+                    <p class="profile-item"><strong>経験年数:</strong>
+                        {% if experience_years %}
                         {{ experience_years // 12 }} 年 {{ experience_years % 12 }} ヶ月
-                    {% else %}
+                        {% else %}
                         記載なし
-                    {% endif %}</p>
+                        {% endif %}</p>
                 </div>
                 <div class="column is-one-third">
                     <p class="profile-item"><strong>学歴:</strong> {{ user.education or "記載なし" }}</p>
@@ -94,11 +94,13 @@
                     </h2>
                     <div class="project-details" style="display: none;">
                         <p><strong>業界</strong><span class="industry-item"> {{ item.project.industry }}</span></p>
-                        <p><strong>期間</strong><span class="industry-item"> {{ item.project.start_month }}〜{{ item.project.end_month }}</span></p>
+                        <p><strong>期間</strong><span class="industry-item"> {{ item.project.start_month }}〜{{
+                                item.project.end_month }}</span></p>
                         <div class="spacer"></div>
                         <!-- プロジェクト概要をボックスで囲む -->
                         <div class="box is-light">
-                            <p><strong>プロジェクト概要</strong><br><span class="preformatted">{{ item.project.project_summary }}</span></p>
+                            <p><strong>プロジェクト概要</strong><br><span class="preformatted">{{ item.project.project_summary
+                                    }}</span></p>
                         </div>
                         <!-- 担当工程の視覚化 -->
                         <div class="process-section">
@@ -112,7 +114,8 @@
                         <div class="spacer"></div>
                         <!-- 担当業務をボックスで囲む -->
                         <div class="box is-light">
-                            <p><strong>担当業務</strong><br><span class="preformatted">{{ item.project.responsibilities }}</span></p>
+                            <p><strong>担当業務</strong><br><span class="preformatted">{{ item.project.responsibilities
+                                    }}</span></p>
                         </div>
                         <div class="content mb-3">
                             <h3 class="title is-5">使用技術</h3>
@@ -157,10 +160,10 @@
         </div>
         {% endif %}
 
-        <div class="hero-button-container" >
+        <div class="hero-button-container">
             <a href="{{ url_for('input') }}" class="button hero-button small-button">プロジェクト追加</a>
         </div>
-        
+
         <div class="spacer"></div>
         <div class="box">
             <div class="buttons is-centered">
@@ -175,7 +178,11 @@
             </div>
             <input type="text" id="link-field" readonly class="input" {% if link_url %} value="{{ link_url }}"
                 style="display: block;" {% else %} style="display: none;" {% endif %}>
-
+            <button id="copy-link-button"
+                class="button is-info is-light {% if link_url %}is-visible{% else %}is-hidden{% endif %}"
+                style="margin-left: 10px;">
+                コピー
+            </button>
         </div>
 
     </div>
@@ -194,6 +201,21 @@
                 details.style.display = 'none';
             }
         });
+    });
+
+    // コピーボタンのクリックイベント
+    document.getElementById('copy-link-button').addEventListener('click', function () {
+        const linkField = document.getElementById('link-field');
+
+        if (linkField.value) {
+            navigator.clipboard.writeText(linkField.value)
+                .then(() => {
+                    alert('リンクがクリップボードにコピーされました: ' + linkField.value);
+                })
+                .catch(error => console.error('Error copying text: ', error));
+        } else {
+            alert('コピーするリンクがありません');
+        }
     });
 
     document.getElementById('create-link-form').addEventListener('submit', function (event) {
@@ -297,39 +319,48 @@
 </script>
 
 <style>
-.tooltip {
-    position: absolute;
-    background: #333;
-    color: #fff;
-    padding: 10px;
-    border-radius: 6px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    white-space: nowrap;
-    z-index: 1000;
-    max-width: 600px; /* 最大幅を広げて内容に合わせる */
-    font-size: 0.875rem; /* フォントサイズを調整 */
-    line-height: 1.5;
-    transition: opacity 0.2s ease-in-out;
-    opacity: 0;
-    visibility: hidden;
-}
+    .tooltip {
+        position: absolute;
+        background: #333;
+        color: #fff;
+        padding: 10px;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        white-space: nowrap;
+        z-index: 1000;
+        max-width: 600px;
+        /* 最大幅を広げて内容に合わせる */
+        font-size: 0.875rem;
+        /* フォントサイズを調整 */
+        line-height: 1.5;
+        transition: opacity 0.2s ease-in-out;
+        opacity: 0;
+        visibility: hidden;
+    }
 
-.tooltip.show {
-    opacity: 1;
-    visibility: visible;
-}
+    .tooltip.show {
+        opacity: 1;
+        visibility: visible;
+    }
 
-.tooltip::after {
-    content: ''; /* 矢印を表示しないように設定 */
-    position: absolute;
-    border-width: 6px;
-    border-style: solid;
-    border-color: transparent transparent transparent transparent; /* 矢印の色を透明に設定 */
-    top: -12px;
-    left: 15px;
-}
+    .tooltip::after {
+        content: '';
+        /* 矢印を表示しないように設定 */
+        position: absolute;
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent transparent transparent transparent;
+        /* 矢印の色を透明に設定 */
+        top: -12px;
+        left: 15px;
+    }
 
+    .is-visible {
+        display: inline-block;
+    }
 
-
-</style>    
+    .is-hidden {
+        display: none;
+    }
+</style>
 {% endblock %}
