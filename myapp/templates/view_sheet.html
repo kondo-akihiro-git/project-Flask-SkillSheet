@@ -9,27 +9,27 @@
             <h1 class="title is-4">プロフィール</h1>
             <div class="columns is-multiline">
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>名前:</strong> {{ user.display_name or "記載なし" }}</p>
+                    <p class="profile-item hg"><strong>名前:</strong> {{ user.display_name or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>年齢:</strong> {{ user.age or "記載なし" }}</p>
+                    <p class="profile-item hg"><strong>年齢:</strong> {{ user.age or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>性別:</strong> {{ user.gender or "記載なし" }}</p>
+                    <p class="profile-item hg"><strong>性別:</strong> {{ user.gender or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>最寄駅:</strong> {{ user.nearest_station or "記載なし" }}</p>
+                    <p class="profile-item hg"><strong>最寄駅:</strong> {{ user.nearest_station or "記載なし" }}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>経験年数:</strong>
-                    {% if user.experience_years %}
+                    <p class="profile-item hg"><strong>経験年数:</strong>
+                        {% if user.experience_years %}
                         {{ user.experience_years // 12 }} 年 {{ user.experience_years % 12 }} ヶ月
-                    {% else %}
+                        {% else %}
                         記載なし
-                    {% endif %}</p>
+                        {% endif %}</p>
                 </div>
                 <div class="column is-one-third">
-                    <p class="profile-item"><strong>学歴:</strong> {{ user.education or "記載なし" }}</p>
+                    <p class="profile-item hg"><strong>学歴:</strong> {{ user.education or "記載なし" }}</p>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
                 {% for category, skills in skills_by_category.items() %}
                 <div class="column is-one-third">
                     <div class="table-container">
-                        <table class="table is-bordered is-fullwidth skill-table">
+                        <table class="hg table is-bordered is-fullwidth skill-table">
                             <thead>
                                 <tr>
                                     <th>{{ category }}</th>
@@ -79,19 +79,22 @@
             {% for item in projects %}
             <div class="card project-card">
                 <div class="card-content">
-                    <h2 class="subtitle project-title" data-index="{{ loop.index }}" style="font-size: 1.5rem;">
+                    <h2 class="subtitle project-title hg" data-index="{{ loop.index }}" style="font-size: 1.5rem;">
                         {{ loop.index }}. {{ item.project.project_name }}
                     </h2>
                     <div class="project-details" style="display: none;">
-                        <p><strong>業界</strong><span class="industry-item"> {{ item.project.industry }}</span></p>
-                        <p><strong>期間</strong><span class="industry-item"> {{ item.project.start_month }}〜{{ item.project.end_month }}</span></p>
+                        <p class="hg"><strong>業界</strong><span class="industry-item"> {{ item.project.industry }}</span>
+                        </p>
+                        <p class="hg"><strong>期間</strong><span class="industry-item"> {{ item.project.start_month }}〜{{
+                                item.project.end_month }}</span></p>
                         <div class="spacer"></div>
                         <!-- プロジェクト概要をボックスで囲む -->
-                        <div class="box is-light">
-                            <p><strong>プロジェクト概要</strong><br><span class="preformatted">{{ item.project.project_summary }}</span></p>
+                        <div class="box is-light hg">
+                            <p><strong>プロジェクト概要</strong><br><span class="preformatted">{{ item.project.project_summary
+                                    }}</span></p>
                         </div>
                         <!-- 担当工程の視覚化 -->
-                        <div class="process-section">
+                        <div class="process-section hg">
                             <strong class="process-title">担当工程</strong>
                             <div class="process-container">
                                 {% for process in item.processes %}
@@ -101,12 +104,13 @@
                         </div>
                         <div class="spacer"></div>
                         <!-- 担当業務をボックスで囲む -->
-                        <div class="box is-light">
-                            <p><strong>担当業務</strong><br><span class="preformatted">{{ item.project.responsibilities }}</span></p>
+                        <div class="box is-light hg">
+                            <p><strong>担当業務</strong><br><span class="preformatted">{{ item.project.responsibilities
+                                    }}</span></p>
                         </div>
                         <div class="content mb-3">
                             <h3 class="title is-5">使用技術</h3>
-                            <table class="table is-striped is-fullwidth">
+                            <table class="table is-striped is-fullwidth hg">
                                 <thead>
                                     <tr>
                                         <th>技術タイプ</th>
@@ -119,23 +123,23 @@
                                     <tr>
                                         <td>
                                             {% if tech.type == 'os' %}
-                                                OS
+                                            OS
                                             {% elif tech.type == 'language' %}
-                                                言語
+                                            言語
                                             {% elif tech.type == 'framework' %}
-                                                フレームワーク
+                                            フレームワーク
                                             {% elif tech.type == 'database' %}
-                                                データベース
+                                            データベース
                                             {% elif tech.type == 'containertech' %}
-                                                コンテナ技術
+                                            コンテナ技術
                                             {% elif tech.type == 'cicd' %}
-                                                CI/CD
+                                            CI/CD
                                             {% elif tech.type == 'logging' %}
-                                                ログ
+                                            ログ
                                             {% elif tech.type == 'tools' %}
-                                                その他ツール
+                                            その他ツール
                                             {% else %}
-                                                未知のタイプ
+                                            未知のタイプ
                                             {% endif %}
                                         </td>
                                         <td>{{ tech.name }}</td>
@@ -159,7 +163,8 @@
         {% endif %}
 
         <div class="hero-button-container">
-            <a href="{{ url_for('download_pdf', link_code=link_code) }}" class="button is-primary" style="margin-top: 2rem;">PDFダウンロード</a>
+            <a href="{{ url_for('download_pdf', link_code=link_code) }}" class="button is-primary"
+                style="margin-top: 2rem;">PDFダウンロード</a>
         </div>
     </div>
 </section>
@@ -181,6 +186,22 @@
 
 
     document.addEventListener('DOMContentLoaded', function () {
+
+
+        const clickableElements = document.querySelectorAll('.hg');
+
+        clickableElements.forEach(el => {
+            el.addEventListener('click', function () {
+                document.querySelectorAll('.highlighted').forEach(highlightedEl => {
+                    highlightedEl.classList.remove('highlighted');
+                });
+                el.classList.add('highlighted');
+            });
+        });
+
+
+
+
         const techElements = document.querySelectorAll('.tech-name');
 
         techElements.forEach(el => {
@@ -282,6 +303,29 @@
         /* 矢印の色を透明に設定 */
         top: -12px;
         left: 15px;
+    }
+
+    /* 強調表示のスタイル */
+    .highlighted {
+        background-color: #ffe082;
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.7);
+        border-radius: 4px;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* 強調表示が適用されるテーブル */
+    .highlighted table {
+        background-color: #ffe082;
+        /* テーブル全体の背景色を変更 */
+    }
+
+    /* テーブルのヘッダー（<th>）とデータセル（<td>）のスタイル */
+    .highlighted th,
+    .highlighted td {
+        color: #333;
+        /* テーブルのボーダー色を設定 */
+        background-color: #ffe082;
+        /* セルの背景色を変更 */
     }
 </style>
 
