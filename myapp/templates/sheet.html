@@ -176,13 +176,16 @@
                     <button type="submit" class="button is-danger is-light is-fullwidth">リンク無効化</button>
                 </form>
             </div>
-            <input type="text" id="link-field" readonly class="input" {% if link_url %} value="{{ link_url }}"
-                style="display: block;" {% else %} style="display: none;" {% endif %}>
-            <button id="copy-link-button"
-                class="button is-info is-light {% if link_url %}is-visible{% else %}is-hidden{% endif %}"
-                style="margin-left: 10px;">
-                コピー
-            </button>
+            <div style="display: flex;">
+                <input type="text" id="link-field" readonly
+                    class="input {% if link_url %}is-visible{% else %}is-hidden{% endif %}">
+                <button id="copy-link-button"
+                    class="button is-info is-light {% if link_url %}is-visible{% else %}is-hidden{% endif %}"
+                    style="margin-left: 10px;">
+                    コピー
+                </button>
+            </div>
+
         </div>
 
     </div>
@@ -203,10 +206,25 @@
         });
     });
 
-    // コピーボタンのクリックイベント
-    document.getElementById('copy-link-button').addEventListener('click', function () {
-        const linkField = document.getElementById('link-field');
+    document.addEventListener('DOMContentLoaded', function () {
+    const linkField = document.getElementById('link-field');
+    const copyLinkButton = document.getElementById('copy-link-button');
 
+    // リンクがある場合
+    if (linkField.value) {
+        linkField.classList.add('is-visible');
+        linkField.classList.remove('is-hidden');
+        copyLinkButton.classList.add('is-visible');
+        copyLinkButton.classList.remove('is-hidden');
+    } else {
+        linkField.classList.add('is-hidden');
+        linkField.classList.remove('is-visible');
+        copyLinkButton.classList.add('is-hidden');
+        copyLinkButton.classList.remove('is-visible');
+    }
+
+    // コピーボタンのクリックイベント
+    copyLinkButton.addEventListener('click', function () {
         if (linkField.value) {
             navigator.clipboard.writeText(linkField.value)
                 .then(() => {
@@ -218,6 +236,7 @@
         }
     });
 
+    // リンク作成フォームの送信処理
     document.getElementById('create-link-form').addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -228,28 +247,33 @@
             },
             credentials: 'include'
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.link) {
-                    var linkField = document.getElementById('link-field');
-                    linkField.value = data.link;
-                    linkField.style.display = 'block';
+        .then(response => response.json())
+        .then(data => {
+            if (data.link) {
+                linkField.value = data.link;
+                linkField.classList.add('is-visible');
+                linkField.classList.remove('is-hidden');
+                copyLinkButton.classList.add('is-visible');
+                copyLinkButton.classList.remove('is-hidden');
 
-                    navigator.clipboard.writeText(data.link)
-                        .then(() => {
-                            alert('リンクがクリップボードにコピーされました: ' + data.link);
-                        })
-                        .catch(error => console.error('Error copying text: ', error));
-                }
-            })
-            .catch(error => console.error('Error:', error));
+                navigator.clipboard.writeText(data.link)
+                    .then(() => {
+                        alert('リンクがクリップボードにコピーされました: ' + data.link);
+                    })
+                    .catch(error => console.error('Error copying text: ', error));
+            }
+        })
+        .catch(error => console.error('Error:', error));
     });
 
+    // リンク無効化フォームの送信処理
     document.getElementById('invalidate-link-form').addEventListener('submit', function (event) {
         if (!confirm('本当にリンクを無効にしますか？')) {
             event.preventDefault();
         }
     });
+});
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const techElements = document.querySelectorAll('.tech-name');

@@ -53,7 +53,7 @@
                             <tbody>
                                 {% for skill in skills %}
                                 <tr>
-                                    <td>{{ skill.name }}</td>
+                                    <td class="tech-name" data-tech-name="{{ skill.name }}">{{ skill.name }}</td>
                                     <td>
                                         {% if skill.duration_months >= 12 %}
                                         {{ skill.duration_months // 12 }} 年 {{ skill.duration_months % 12 }} ヶ月
@@ -178,5 +178,111 @@
             }
         });
     });
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const techElements = document.querySelectorAll('.tech-name');
+
+        techElements.forEach(el => {
+            el.addEventListener('click', function (event) {
+                // 既存のポップアップを削除
+                const existingTooltip = document.querySelector('.tooltip');
+                if (existingTooltip) {
+                    existingTooltip.remove();
+                }
+
+                const techName = this.getAttribute('data-tech-name');
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = '読み込み中...';  // 最初は「読み込み中...」と表示
+
+                document.body.appendChild(tooltip);
+
+                // ポップアップの位置を設定
+                const rect = this.getBoundingClientRect();
+                tooltip.style.left = `${rect.left + window.scrollX}px`;
+                tooltip.style.top = `${rect.bottom + window.scrollY}px`;
+                tooltip.classList.add('show');
+
+                // ポップアップの非表示処理
+                function hideTooltip(e) {
+                    if (!tooltip.contains(e.target) && !e.target.classList.contains('tech-name')) {
+                        tooltip.classList.remove('show');
+                        setTimeout(() => tooltip.remove(), 300);
+                        document.removeEventListener('click', hideTooltip);
+                    }
+                }
+
+                document.addEventListener('click', hideTooltip);
+
+                // 技術名に関連するプロジェクト情報を取得
+                fetch(`/api/tech_projects/${techName}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const content = getTooltipContent(data.projects);
+                        tooltip.innerHTML = content;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching project data:', error);
+                        tooltip.textContent = 'データの取得に失敗しました';
+                    });
+
+                // クリックイベントのバブルを防止
+                event.stopPropagation();
+            });
+        });
+
+        function getTooltipContent(projects) {
+            if (!projects || projects.length === 0) {
+                return 'この技術は使用されていません。';
+            }
+            let content = '<strong style="color: #fff" >利用されているプロジェクト</strong><ul>';
+            projects.forEach(project => {
+                content += `<li>${project.number}.  ${project.name}</li>`;
+            });
+            content += '</ul>';
+            return content;
+        }
+    });
+
 </script>
+
+<style>
+    .tooltip {
+        position: absolute;
+        background: #333;
+        color: #fff;
+        padding: 10px;
+        border-radius: 6px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        white-space: nowrap;
+        z-index: 1000;
+        max-width: 600px;
+        /* 最大幅を広げて内容に合わせる */
+        font-size: 0.875rem;
+        /* フォントサイズを調整 */
+        line-height: 1.5;
+        transition: opacity 0.2s ease-in-out;
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .tooltip.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .tooltip::after {
+        content: '';
+        /* 矢印を表示しないように設定 */
+        position: absolute;
+        border-width: 6px;
+        border-style: solid;
+        border-color: transparent transparent transparent transparent;
+        /* 矢印の色を透明に設定 */
+        top: -12px;
+        left: 15px;
+    }
+</style>
+
 {% endblock %}
