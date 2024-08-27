@@ -2,51 +2,67 @@
 
 {% block content %}
 <section class="section">
-<section class="hero custom-hero">
-    <div class="hero-body">
-        <div class="container has-text-centered">
-            <h1 class="title is-size-2-mobile is-size-1-tablet is-size-1-desktop">Welcome to SkillCanvas</h1>
-            <p class="subtitle is-size-5-mobile is-size-4-tablet is-size-3-desktop">Your skills, your canvas. Start creating now!</p>
+    <section class="hero custom-hero">
+        <div class="hero-body">
+            <div class="container has-text-centered">
+                <h1 class="title is-size-2-mobile is-size-1-tablet is-size-1-desktop">Welcome to SkillCanvas</h1>
+                <p class="subtitle is-size-5-mobile is-size-4-tablet is-size-3-desktop">Your skills, your canvas. Start
+                    creating now!</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="spacer"></div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% set category, message = messages[messages|length-1] %}
+    <div class="notification is-{{ category }}">
+        {{ message }}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="container">
+        <div class="columns is-centered is-multiline">
+            {% if user.is_authenticated %}
+            <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
+                <a href="{{ url_for('input') }}" class="button is-fullwidth hero-button">プロジェクト入力</a>
+            </div>
+            <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
+                <a href="{{ url_for('sheet') }}" class="button is-fullwidth hero-button">スキルシート</a>
+            </div>
+            <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
+                <a href="{{ url_for('userinfo') }}" class="button is-fullwidth hero-button">ユーザー情報の更新</a>
+            </div>
+            <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
+                <a href="{{ url_for('logout') }}" class="button is-fullwidth hero-button">ログアウト</a>
+            </div>
+            {% else %}
+            <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
+                <a href="{{ url_for('login') }}" class="button is-fullwidth hero-button">ログイン</a>
+            </div>
+            <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
+                <a href="{{ url_for('register') }}" class="button is-fullwidth hero-button">新規登録</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </section>
 
-<div class="spacer"></div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const logoutButton = document.querySelector('.hero-button[href="{{ url_for("logout") }}"]');
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% set category, message = messages[messages|length-1] %}
-<div class="notification is-{{ category }}">
-    {{ message }}
-</div>
-{% endif %}
-{% endwith %}
+        logoutButton.addEventListener('click', function (event) {
+            event.preventDefault(); // デフォルトのリンク動作を防止
 
-<div class="container">
-    <div class="columns is-centered is-multiline">
-        {% if user.is_authenticated %}
-        <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
-            <a href="{{ url_for('input') }}" class="button is-fullwidth hero-button">プロジェクト入力</a>
-        </div>
-        <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
-            <a href="{{ url_for('sheet') }}" class="button is-fullwidth hero-button">スキルシート</a>
-        </div>
-        <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
-            <a href="{{ url_for('userinfo') }}" class="button is-fullwidth hero-button">ユーザー情報の更新</a>
-        </div>
-        <div class="column is-half-mobile is-half-tablet is-one-quarter-desktop">
-            <a href="{{ url_for('logout') }}" class="button is-fullwidth hero-button">ログアウト</a>
-        </div>
-        {% else %}
-        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
-            <a href="{{ url_for('login') }}" class="button is-fullwidth hero-button">ログイン</a>
-        </div>
-        <div class="column is-half-mobile is-one-third-tablet is-one-quarter-desktop">
-            <a href="{{ url_for('register') }}" class="button is-fullwidth hero-button">新規登録</a>
-        </div>
-        {% endif %}
-    </div>
-</div>
-</section>
+            const userConfirmed = confirm('本当にログアウトしますか？');
+            if (userConfirmed) {
+                window.location.href = this.href; // ユーザーが「はい」を選んだ場合、ログアウトを実行
+            }
+        });
+    });
+</script>
 
 {% endblock %}

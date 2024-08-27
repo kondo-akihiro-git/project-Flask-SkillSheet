@@ -7,7 +7,7 @@
     
     <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
-    <title>Flask App</title>
+    <title>SkillCanvas</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
@@ -31,6 +31,12 @@
                         <a class="navbar-item has-text-light" href="{{ url_for('features') }}"
                             tabindex="-1">Features</a>
                         <a class="navbar-item has-text-light" href="{{ url_for('contact') }}" tabindex="-1">Contact</a>
+                        {% if current_user.is_authenticated %}
+                            <a class="navbar-item has-text-light" href="{{ url_for('userinfo') }}">こんにちは、{{ current_user.username }} さん</a>
+                            <a class="navbar-item has-text-light" href="{{ url_for('logout') }}" tabindex="-1">Logout</a>
+                        {% else %}
+                            <a class="navbar-item has-text-light" href="{{ url_for('login') }}" tabindex="-1">Login</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -61,6 +67,19 @@
                 }
             });
         });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const logoutButton = document.querySelector('.navbar-item[href="{{ url_for("logout") }}"]');
+
+        logoutButton.addEventListener('click', function (event) {
+            event.preventDefault(); // デフォルトのリンク動作を防止
+
+            const userConfirmed = confirm('本当にログアウトしますか？');
+            if (userConfirmed) {
+                window.location.href = this.href; // ユーザーが「はい」を選んだ場合、ログアウトを実行
+            }
+        });
+    });
     </script>
 </body>
 
