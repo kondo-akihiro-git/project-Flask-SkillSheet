@@ -398,7 +398,13 @@ main {
     cursor: pointer;
     /* カーソルを刺し指にする */
 }
-
+.development-title {
+    cursor: pointer;
+    /* カーソルを刺し指にする */
+}
+.clickable {
+    cursor: pointer;
+}
 /* 小さなサイズのボタン */
 .small-button {
     padding: 0.5rem 1rem;

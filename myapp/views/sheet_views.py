@@ -113,7 +113,10 @@ def input():
 def sheet():
     user_id = current_user.id
     projects = Project.query.filter_by(user_id=user_id).all()
+    individual_developments = IndividualDevelopment.query.filter_by(user_id=user_id).all()
+
     project_data = []
+    individual_dev_data = []
     skills_by_category = {}
 
     tech_type_mapping = {
@@ -141,8 +144,30 @@ def sheet():
             else:
                 skills_by_category[tech_type][tech.name] += tech.duration_months
         
+        
         project_data.append({
             'project': project,
+            'processes': processes,
+            'technologies': technologies
+        })
+
+    # 個人開発データの取得
+    for dev in individual_developments:
+        processes = IndividualProcess.query.filter_by(individual_development_id=dev.id).all()
+        technologies = IndividualTechnology.query.filter_by(individual_development_id=dev.id).all()
+        
+        for tech in technologies:
+            tech_type = tech_type_mapping[tech.type]
+            if tech_type not in skills_by_category:
+                skills_by_category[tech_type] = {}
+            
+            if tech.name not in skills_by_category[tech_type]:
+                skills_by_category[tech_type][tech.name] = tech.duration_months
+            else:
+                skills_by_category[tech_type][tech.name] += tech.duration_months
+        
+        individual_dev_data.append({
+            'individual_development': dev,
             'processes': processes,
             'technologies': technologies
         })
@@ -160,7 +185,7 @@ def sheet():
     # `user.experience_years` が None の場合に備えてデフォルト値を設定
     experience_years = current_user.experience_years or 0
 
-    return render_template('sheet.html', user=current_user, projects=project_data, skills_by_category=skills_by_category_formatted, tech_type_mapping=tech_type_mapping, link_url=link_url, experience_years=experience_years)
+    return render_template('sheet.html', user=current_user, projects=project_data, individual_developments=individual_dev_data, skills_by_category=skills_by_category_formatted, tech_type_mapping=tech_type_mapping, link_url=link_url, experience_years=experience_years)
 
 
 ####################################################################################################
@@ -415,15 +440,30 @@ def delete_project(project_id):
 
 
 @app.route('/api/tech_projects/<tech_name>')
+@app.route('/api/tech_projects/<tech_name>')
 @login_required
 def tech_projects(tech_name):
-    # ユーザーIDを取得
     user_id = current_user.id
 
     # 技術名に関連するプロジェクトを取得
-    projects = Project.query.join(Technology).filter(Technology.name == tech_name, Technology.project_id == Project.id, Project.user_id == user_id).all()
+    projects = Project.query.join(Technology).filter(
+        Technology.name == tech_name, 
+        Technology.project_id == Project.id, 
+        Project.user_id == user_id
+    ).all()
 
-    # プロジェクト情報を整形
-    project_list = [{'number': idx + 1, 'name': project.project_name} for idx, project in enumerate(projects)]
+    # プロジェクトのIDを元にプロジェクト一覧の順序を一致させる
+    project_ids = [p.id for p in Project.query.filter_by(user_id=user_id).all()]
+    project_list = [{'number': project_ids.index(project.id) + 1, 'name': project.project_name} for project in projects]
 
-    return jsonify({'projects': project_list})
+    # 個人開発のIDを元に個人開発一覧の順序を一致させる
+    developments = IndividualDevelopment.query.join(IndividualTechnology).filter(
+        IndividualTechnology.name == tech_name, 
+        IndividualTechnology.individual_development_id == IndividualDevelopment.id, 
+        IndividualDevelopment.user_id == user_id
+    ).all()
+
+    development_ids = [d.id for d in IndividualDevelopment.query.filter_by(user_id=user_id).all()]
+    development_list = [{'number': development_ids.index(development.id) + 1, 'name': development.development_name} for development in developments]
+
+    return jsonify({'projects': project_list, 'developments': development_list})
