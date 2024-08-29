@@ -35,7 +35,7 @@ def input():
                 tech_name = request.form[f'{tech_type}_{index}']
                 tech_duration = request.form.get(f'{tech_type}_{index}_num', '0')
 
-                if tech_name:
+                if tech_name and tech_duration.isdigit() and int(tech_duration) > 0:
                     if tech_name in tech_data[tech_type]:
                         flash(f'同じプロジェクト内で「{tech_type}」カテゴリーの技術名が重複しています。', 'error')
                         return redirect(url_for('input'))

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">個人開発入力</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% set category, message = messages[messages|length-1] %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="box">
+            <div class="field">
+                <label class="label" for="start_month">開発開始月</label>
+                <div class="control">
+                    <input class="input" type="month" id="start_month" name="start_month" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="end_month">開発終了月</label>
+                <div class="control">
+                    <input class="input" type="month" id="end_month" name="end_month" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="development_name">開発タイトル</label>
+                <div class="control">
+                    <input class="input" type="text" id="development_name" name="development_name" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label" for="development_summary">開発概要</label>
+                <div class="control">
+                    <textarea class="textarea" id="development_summary" name="development_summary" required></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">担当した工程</label>
+                <div class="control">
+                    <label class="checkbox">
+                        <input type="checkbox" name="process" value="要件定義"> 要件定義
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" name="process" value="基本設計"> 基本設計
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" name="process" value="詳細設計"> 詳細設計
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" name="process" value="実装"> 実装
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" name="process" value="単体テスト"> 単体テスト
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" name="process" value="結合テスト"> 結合テスト
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" name="process" value="受入テスト"> 受入テスト
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" name="process" value="運用・保守"> 運用・保守
+                    </label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">使用技術</label>
+                {% for tech_type, tech_label in {'os': 'OS', 'language': '言語', 'framework': 'フレームワーク', 'database': 'データベース', 'containertech': 'コンテナ技術', 'cicd': 'CI/CD', 'logging': 'ログ管理', 'tools': 'ツール'}.items() %}
+                <div class="field">
+                    <label class="label" for="{{ tech_type }}">{{ tech_label }}</label>
+                    <div class="control">
+                        <div id="{{ tech_type }}-fields">
+                            <div class="input-group">
+                                <input class="input input-name" type="text" id="{{ tech_type }}_0" name="{{ tech_type }}_0" placeholder="技術名">
+                                <input class="input input-duration" type="number" id="{{ tech_type }}_0_num" name="{{ tech_type }}_0_num" placeholder="期間" value="0" min="0">
+                                <span>ヶ月</span>
+                            </div>
+                        </div>
+                        <button type="button" id="add-{{ tech_type }}" class="button is-primary has-text-light">＋</button>
+                        <button type="button" id="remove-{{ tech_type }}" class="button is-danger has-text-light">ー</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button type="submit" class="button is-link is-fullwidth">個人開発登録</button>
+                </div>
+            </div>
+        </form>
+        <a href="{{ url_for('sheet') }}" class="button is-link is-fullwidth">スキルシート</a>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    function addField(buttonId, containerId, namePrefix) {
+        const button = document.getElementById(buttonId);
+        button.addEventListener('click', () => {
+            const container = document.getElementById(containerId);
+            const count = container.childElementCount;
+            const inputGroup = document.createElement('div');
+            inputGroup.classList.add('input-group');
+            inputGroup.innerHTML = `
+                <input class="input input-name" type="text" id="${namePrefix}_${count}" name="${namePrefix}_${count}" placeholder="技術名">
+                <input class="input input-duration" type="number" id="${namePrefix}_${count}_num" name="${namePrefix}_${count}_num" placeholder="期間" value="0" min="0">
+                <span>ヶ月</span>
+            `;
+            container.appendChild(inputGroup);
+            container.style.display = 'block';
+        });
+    }
+
+    function removeField(buttonId, containerId) {
+        const button = document.getElementById(buttonId);
+        button.addEventListener('click', () => {
+            const container = document.getElementById(containerId);
+            if (container.childElementCount > 1) {
+                container.removeChild(container.lastElementChild);
+            }
+        });
+    }
+
+    ['os', 'language', 'framework', 'database', 'containertech', 'cicd', 'logging', 'tools'].forEach(techType => {
+        addField(`add-${techType}`, `${techType}-fields`, techType);
+        removeField(`remove-${techType}`, `${techType}-fields`);
+    });
+});
+
+</script>
+{% endblock %}

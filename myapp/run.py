@@ -133,6 +133,33 @@ class Process(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     name = db.Column(db.String(120), nullable=False)
 
+
+class IndividualDevelopment(db.Model):
+    __tablename__ = "individual_development"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    start_month = db.Column(db.String(7), nullable=False)  # YYYY-MM形式の文字列
+    end_month = db.Column(db.String(7), nullable=False)    # YYYY-MM形式の文字列
+    development_name = db.Column(db.String(120), nullable=False)  # プロジェクトタイトル
+    development_summary = db.Column(db.Text, nullable=False)  # 開発概要
+    technologies = db.relationship('IndividualTechnology', backref='individual_development', lazy=True)
+    processes = db.relationship('IndividualProcess', backref='individual_development', lazy=True)
+
+class IndividualTechnology(db.Model):
+    __tablename__ = "individual_technology"
+    id = db.Column(db.Integer, primary_key=True)
+    individual_development_id = db.Column(db.Integer, db.ForeignKey('individual_development.id'), nullable=False)
+    type = db.Column(db.String(120), nullable=False)  # 技術の種類 (e.g., 'OS', 'language', 'framework', etc.)
+    name = db.Column(db.String(120), nullable=False)  # 技術名
+    duration_months = db.Column(db.Integer, nullable=True)  # 期間 (月単位)
+
+class IndividualProcess(db.Model):
+    __tablename__ = "individual_process"
+    id = db.Column(db.Integer, primary_key=True)
+    individual_development_id = db.Column(db.Integer, db.ForeignKey('individual_development.id'), nullable=False)
+    name = db.Column(db.String(120), nullable=False)  # プロセス名 (e.g., 'development', 'design', 'testing')
+
+
 ####################################################################################################
 # 
 # モデル：Link
@@ -163,6 +190,10 @@ class Contact(db.Model):
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
+
+
+
+
 ####################################################################################################
 # 
 # モデル：Form
@@ -186,6 +217,7 @@ from views.top_views import *
 from views.sheet_views import *
 from views.pdf_views import *
 from views.admin_views import *
+from views.ind_views import *
 
 ####################################################################################################
 # 
