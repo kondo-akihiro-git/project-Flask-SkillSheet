@@ -104,6 +104,7 @@
                                     }}</span></p>
                         </div>
                         <!-- 担当工程の視覚化 -->
+                        {% if item.processes|length > 0 %}
                         <div class="process-section">
                             <strong class="process-title">担当工程</strong>
                             <div class="process-container">
@@ -112,12 +113,16 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        {% endif %}
+
                         <div class="spacer"></div>
                         <!-- 担当業務をボックスで囲む -->
                         <div class="box is-light">
                             <p><strong>担当業務</strong><br><span class="preformatted">{{ item.project.responsibilities
                                     }}</span></p>
                         </div>
+                        <div class="spacer"></div>
+                        {% if item.technologies|length > 0 %}
                         <div class="content mb-3">
                             <h3 class="title is-5">使用技術</h3>
                             <table class="table is-striped is-fullwidth">
@@ -145,6 +150,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        {% endif %}
                     </div>
                     <footer class="card-footer">
                         <a href="{{ url_for('edit_project', project_id=item.project.id) }}"
@@ -181,6 +187,7 @@
                             <p><strong>個人開発概要</strong><br><span class="preformatted">{{ item.individual_development.development_summary }}</span></p>
                         </div>
                         <!-- 担当工程の視覚化 -->
+                        {% if item.processes|length > 0 %}
                         <div class="process-section">
                             <strong class="process-title">担当工程</strong>
                             <div class="process-container">
@@ -189,7 +196,9 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        {% endif %}
                         <div class="spacer"></div>
+                        {% if item.technologies|length > 0 %}
                         <div class="content mb-3">
                             <h3 class="title is-5">使用技術</h3>
                             <table class="table is-striped is-fullwidth">
@@ -217,6 +226,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        {% endif %}
                     </div>
                     <footer class="card-footer">
                         <!-- 個人開発編集と削除ボタン -->
