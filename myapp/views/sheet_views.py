@@ -351,7 +351,10 @@ def view_sheet(link_code):
     user_id = link.user_id
     user = User.query.get_or_404(user_id)
     projects = Project.query.filter_by(user_id=user_id).all()
+    individual_developments = IndividualDevelopment.query.filter_by(user_id=user_id).all()
+    
     project_data = []
+    individual_dev_data = []
     skills_by_category = {}
 
     tech_type_mapping = {
@@ -385,12 +388,33 @@ def view_sheet(link_code):
             'processes': processes
         })
 
+    # 個人開発データの取得
+    for dev in individual_developments:
+        processes = IndividualProcess.query.filter_by(individual_development_id=dev.id).all()
+        technologies = IndividualTechnology.query.filter_by(individual_development_id=dev.id).all()
+        
+        for tech in technologies:
+            tech_type = tech_type_mapping[tech.type]
+            if tech_type not in skills_by_category:
+                skills_by_category[tech_type] = {}
+            
+            if tech.name not in skills_by_category[tech_type]:
+                skills_by_category[tech_type][tech.name] = tech.duration_months
+            else:
+                skills_by_category[tech_type][tech.name] += tech.duration_months
+        
+        individual_dev_data.append({
+            'individual_development': dev,
+            'processes': processes,
+            'technologies': technologies
+        })
+
     skills_by_category_formatted = {}
     for category, skills in skills_by_category.items():
         skills_list = [{'name': name, 'duration_months': duration} for name, duration in skills.items()]
         skills_by_category_formatted[category] = skills_list
 
-    return render_template('view_sheet.html', user=user, projects=project_data, skills_by_category=skills_by_category_formatted, link_code=link_code)
+    return render_template('view_sheet.html', user=user, projects=project_data, individual_developments=individual_dev_data, skills_by_category=skills_by_category_formatted, link_code=link_code)
 
 
 ####################################################################################################
@@ -439,7 +463,6 @@ def delete_project(project_id):
 
 
 
-@app.route('/api/tech_projects/<tech_name>')
 @app.route('/api/tech_projects/<tech_name>')
 @login_required
 def tech_projects(tech_name):

@@ -53,7 +53,7 @@
                             <tbody>
                                 {% for skill in skills %}
                                 <tr>
-                                    <td class="tech-name" data-tech-name="{{ skill.name }}">{{ skill.name }}</td>
+                                    <td class="tech-name clickable" data-tech-name="{{ skill.name }}">{{ skill.name }}</td>
                                     <td>
                                         {% if skill.duration_months >= 12 %}
                                         {{ skill.duration_months // 12 }} 年 {{ skill.duration_months % 12 }} ヶ月
@@ -162,6 +162,97 @@
         </div>
         {% endif %}
 
+        <hr>
+
+        {% if individual_developments|length > 0 %}
+        <h1 class="title is-4">個人開発一覧</h1>
+        <div id="individual-developments-container">
+            {% for item in individual_developments %}
+            <div class="card individual-development-card">
+                <div class="card-content">
+                    <h2 class="subtitle development-title hg" data-index="{{ loop.index }}" style="font-size: 1.5rem;">
+                        {{ loop.index }}. {{ item.individual_development.development_name }}
+                    </h2>
+                    <div class="development-details" style="display: none;">
+                        <p class="hg"><strong>期間</strong><span class="industry-item"> {{ item.individual_development.start_month
+                                }}〜{{ item.individual_development.end_month }}</span></p>
+                        <div class="spacer"></div>
+                        <!-- 個人開発概要をボックスで囲む -->
+                        <div class="box is-light hg">
+                            <p><strong>個人開発概要</strong><br><span class="preformatted">{{
+                                    item.individual_development.development_summary }}</span></p>
+                        </div>
+                        <!-- 担当工程の視覚化 -->
+                        {% if item.processes|length > 0 %}
+                        <div class="process-section hg">
+                            <strong class="process-title">担当工程</strong>
+                            <div class="process-container">
+                                {% for process in item.processes %}
+                                <span class="tag">{{ process.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="spacer"></div>
+                        <!-- 使用技術のテーブル -->
+                        {% if item.technologies|length > 0 %}
+                        <div class="content mb-3">
+                            <h3 class="title is-5">使用技術</h3>
+                            <table class="table is-striped is-fullwidth hg">
+                                <thead>
+                                    <tr>
+                                        <th>技術タイプ</th>
+                                        <th>技術名</th>
+                                        <th>使用期間</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tech in item.technologies %}
+                                    <tr>
+                                        <td>
+                                            {% if tech.type == 'os' %}
+                                            OS
+                                            {% elif tech.type == 'language' %}
+                                            言語
+                                            {% elif tech.type == 'framework' %}
+                                            フレームワーク
+                                            {% elif tech.type == 'database' %}
+                                            データベース
+                                            {% elif tech.type == 'containertech' %}
+                                            コンテナ技術
+                                            {% elif tech.type == 'cicd' %}
+                                            CI/CD
+                                            {% elif tech.type == 'logging' %}
+                                            ログ
+                                            {% elif tech.type == 'tools' %}
+                                            その他ツール
+                                            {% else %}
+                                            未知のタイプ
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ tech.name }}</td>
+                                        <td>
+                                            {% if tech.duration_months >= 12 %}
+                                            {{ tech.duration_months // 12 }} 年 {{ tech.duration_months % 12 }} ヶ月
+                                            {% else %}
+                                            {{ tech.duration_months }} ヶ月
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+
         <div class="hero-button-container">
             <a href="{{ url_for('download_pdf', link_code=link_code) }}" class="button is-primary"
                 style="margin-top: 2rem;">PDFダウンロード</a>
@@ -184,6 +275,20 @@
         });
     });
 
+    document.querySelectorAll('.development-title').forEach(title => {
+        title.addEventListener('click', function () {
+            const index = this.getAttribute('data-index');
+            const details = document.querySelector(`.individual-development-card:nth-of-type(${index}) .development-details`);
+
+            // Toggle visibility
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        });
+    });
+
 
     document.addEventListener('DOMContentLoaded', function () {
 
@@ -191,14 +296,33 @@
         const clickableElements = document.querySelectorAll('.hg');
 
         clickableElements.forEach(el => {
-            el.addEventListener('click', function () {
+        el.addEventListener('click', function (event) {
+            // すでにハイライトされている場合は、ハイライトを解除
+            if (el.classList.contains('highlighted')) {
+                el.classList.remove('highlighted');
+            } else {
+                // 他のすべてのハイライトを解除
                 document.querySelectorAll('.highlighted').forEach(highlightedEl => {
                     highlightedEl.classList.remove('highlighted');
                 });
+                // 新たにクリックされた要素をハイライト
                 el.classList.add('highlighted');
-            });
-        });
+            }
 
+            // クリックイベントのバブルを防止
+            event.stopPropagation();
+        });
+    });
+
+    // ページ全体をクリックしたときの処理
+    document.addEventListener('click', function (event) {
+        // `clickableElements` 以外がクリックされた場合、すべてのハイライトを解除
+        if (![...clickableElements].includes(event.target)) {
+            document.querySelectorAll('.highlighted').forEach(highlightedEl => {
+                highlightedEl.classList.remove('highlighted');
+            });
+        }
+    });
 
 
 
@@ -240,7 +364,7 @@
                 fetch(`/api/tech_projects/${techName}`)
                     .then(response => response.json())
                     .then(data => {
-                        const content = getTooltipContent(data.projects);
+                        const content = getTooltipContent(data.projects, data.developments);
                         tooltip.innerHTML = content;
                     })
                     .catch(error => {
@@ -253,15 +377,33 @@
             });
         });
 
-        function getTooltipContent(projects) {
-            if (!projects || projects.length === 0) {
-                return 'この技術は使用されていません。';
+        function getTooltipContent(projects, developments) {
+            let content = '';
+
+            if (projects && projects.length > 0) {
+                content += '<strong style="color: #fff">[プロジェクト]</strong><ul>';
+                projects.forEach(project => {
+                    content += `<li>${project.number}. ${project.name}</li>`;
+                });
+                content += '</ul>';
             }
-            let content = '<strong style="color: #fff" >利用されているプロジェクト</strong><ul>';
-            projects.forEach(project => {
-                content += `<li>${project.number}.  ${project.name}</li>`;
-            });
-            content += '</ul>';
+
+            if (projects && projects.length > 0 && developments && developments.length > 0) {
+                content += '<br>';
+            }
+
+            if (developments && developments.length > 0) {
+                content += '<strong style="color: #fff">[個人開発]</strong><ul>';
+                developments.forEach(development => {
+                    content += `<li>${development.number}. ${development.name}</li>`;
+                });
+                content += '</ul>';
+            }
+
+            if (!content) {
+                content = 'この技術は使用されていません。';
+            }
+
             return content;
         }
     });
